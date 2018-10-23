@@ -58,7 +58,7 @@ void ASCharacter::EndCrouch()
 void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+    
 }
 
 // Called to bind functionality to input

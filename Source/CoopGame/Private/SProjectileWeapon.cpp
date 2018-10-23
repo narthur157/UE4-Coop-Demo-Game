@@ -18,7 +18,9 @@ void ASProjectileWeapon::Fire()
         GetOwner()->GetActorEyesViewPoint(OutViewPointLocation, ProjectileSpawnRotation);
 
         ProjectileSpawnRotation = ProjectileSpawnRotation;
-        ASProjectile* NewProjectile = GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, ProjectileSpawnLocation, ProjectileSpawnRotation);
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.Instigator = Cast<APawn>(GetOwner());
+        ASProjectile* NewProjectile = GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, ProjectileSpawnLocation, ProjectileSpawnRotation, SpawnParams);
         NewProjectile->Launch(LaunchVelocity);
     }
 

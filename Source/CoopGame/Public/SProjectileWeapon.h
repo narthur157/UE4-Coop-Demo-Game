@@ -27,9 +27,6 @@ protected:
     float LaunchVelocity = 0.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    bool bExplodeOnContact;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     float DurationTillExplode = 0.0f;
 
 };
