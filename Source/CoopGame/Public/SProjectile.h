@@ -7,6 +7,7 @@
 #include "SProjectile.generated.h"
 
 class UProjectileMovementComponent;
+class USphereComponent;
 
 UCLASS()
 class COOPGAME_API ASProjectile : public AActor
@@ -18,16 +19,17 @@ public:
 	ASProjectile();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+
+    UPROPERTY(VisibleAnywhere, Category = "Components")
+    USphereComponent* CollisionComp = nullptr;
 
     UPROPERTY(VisibleAnywhere, Category = "Components")
     UProjectileMovementComponent* MovementComp = nullptr;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+    UPROPERTY(VisibleAnywhere, Category = "Components")
+    UStaticMeshComponent* MeshComp = nullptr;
 
+public:	
     virtual void Launch(float LaunchSpeed);
 	
 };

@@ -24,6 +24,8 @@ public:
 protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-        TSubclassOf<ASProjectile> ProjectileClass;
+    TSubclassOf<ASProjectile> ProjectileClass;
 	
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    float LaunchVelocity = 0.0f;
 };

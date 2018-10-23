@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SProjectile.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 
@@ -8,29 +10,23 @@
 ASProjectile::ASProjectile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
+   
+    CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
+    SetRootComponent(CollisionComp);
+
+    MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+    MeshComp->SetNotifyRigidBodyCollision(true);
+    MeshComp->SetVisibility(true);
+    MeshComp->SetupAttachment(CollisionComp);
+  
     MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
-    MovementComp->SetAutoActivate(false);
-    MovementComp->bAutoActivate = false;
-
-}
-
-// Called when the game starts or when spawned
-void ASProjectile::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void ASProjectile::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
+    MovementComp->bAutoActivate = true;
+    MovementComp->SetUpdatedComponent(RootComponent);
 }
 
 void ASProjectile::Launch(float LaunchSpeed)
 {
-    MovementComp->InitialSpeed = LaunchSpeed;
+    MovementComp->SetVelocityInLocalSpace(FVector::ForwardVector * LaunchSpeed);
     MovementComp->Activate();
 }
