@@ -19,6 +19,7 @@ void ASProjectileWeapon::Fire()
 
         ProjectileSpawnRotation = ProjectileSpawnRotation;
         ASProjectile* NewProjectile = GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, ProjectileSpawnLocation, ProjectileSpawnRotation);
+        NewProjectile->Launch(LaunchVelocity);
     }
 
 
