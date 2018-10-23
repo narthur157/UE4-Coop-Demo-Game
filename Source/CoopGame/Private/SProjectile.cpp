@@ -15,14 +15,17 @@ ASProjectile::ASProjectile()
     CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
     SetRootComponent(CollisionComp);
 
+
     MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
     MeshComp->SetNotifyRigidBodyCollision(true);
     MeshComp->SetVisibility(true);
     MeshComp->SetupAttachment(CollisionComp);
-  
+
     MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
     MovementComp->bAutoActivate = true;
     MovementComp->SetUpdatedComponent(RootComponent);
+    MovementComp->bShouldBounce = true;
+    MovementComp->Bounciness = 0.6f;
 }
 
 void ASProjectile::Launch(float LaunchSpeed)
