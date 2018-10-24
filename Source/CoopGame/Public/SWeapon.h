@@ -7,6 +7,7 @@
 #include "SWeapon.generated.h"
 
 class UDamageType;
+class UCameraShake;
 class UParticleSystem;
 
 UCLASS()
@@ -19,9 +20,8 @@ public:
 	ASWeapon();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
+    virtual void BeginPlay() override;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     USkeletalMeshComponent* MeshComp = nullptr;
@@ -39,17 +39,41 @@ protected:
     UParticleSystem* MuzzleEffect = nullptr;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-    UParticleSystem* ImpactEffect = nullptr;
+    UParticleSystem* DefaultImpactEffect = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+    UParticleSystem* FleshImpactEffect;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
     UParticleSystem* TracerEffect = nullptr;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    TSubclassOf<UCameraShake> FireCamShake;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    float BaseDamage = 20.0f;
+
+    virtual void Fire();
+
+    FTimerHandle TimerHandle_TimeBetweenShots;
+
+    float LastFireTime;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    float TimeBetweenShots = 0.0f;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+
+   
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
-    virtual void Fire();
+    void StartFire();
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    void StopFire();
+
+
+
+    void DrawTracerEffect(const FVector &TraceEndPoint);
 	
 };
