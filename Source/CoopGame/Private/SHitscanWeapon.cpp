@@ -28,7 +28,6 @@ void ASHitscanWeapon::Fire()
         QueryParams.bTraceComplex = true;
         QueryParams.bReturnPhysicalMaterial = true;
 
-
         // The value of the end point of the trace. If hit, hit location. Else, max trace range location
         FVector TraceEndPoint = TraceEnd;
 
@@ -46,7 +45,6 @@ void ASHitscanWeapon::Fire()
             {
                 ActualDamage *= 4.0f;
             }
-
             UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, Owner->GetInstigatorController(), this, DamageType);
 
             UParticleSystem* SelectedEffect = nullptr;
@@ -67,9 +65,7 @@ void ASHitscanWeapon::Fire()
             }
             TraceEndPoint = Hit.ImpactPoint;
         }
-
         DrawTracerEffect(TraceEndPoint);
-
         LastFireTime = GetWorld()->TimeSeconds;
     }
 }

@@ -3,13 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/World.h"
 #include "GameFramework/Actor.h"
+// TODO: Why wont it let me forward declare the FProjectileWeaponData struct?
+#include "SProjectileWeapon.h"
 #include "SProjectile.generated.h"
 
 class UProjectileMovementComponent;
 class USphereComponent;
-class UDamageType;
+class UStaticMeshComponent;
+
 
 UCLASS()
 class COOPGAME_API ASProjectile : public AActor
@@ -32,35 +34,24 @@ protected:
     UStaticMeshComponent* MeshComp = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TArray< AActor* > IgnoredActors;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TSubclassOf<UDamageType> DamageType;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     UParticleSystem* ExplosionEffect = nullptr;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Components")
-    float FuseDuration = 0.0f;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Components")
-    float DamageRadius = 0.0f;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    float Damage = 0.0f;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    bool bExplodeOnContact;
-
     UFUNCTION(BlueprintCallable, Category = "Weapon")
-    void Explode();
+    virtual void Explode();
 
-    void OnFuseExpire();
     UFUNCTION()
-    void OnProjectileHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+    virtual void OnProjectileHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
 
+    UFUNCTION()
+    virtual void OnProjectileExpire();
+
+    FProjectileWeaponData WeaponData;
+
+    bool bWasInitialized = false;
 
 public:	
-    virtual void Launch(float LaunchSpeed);
+
+    virtual void Launch();
 	
+    virtual void Initialize(const FProjectileWeaponData& Data);
 };

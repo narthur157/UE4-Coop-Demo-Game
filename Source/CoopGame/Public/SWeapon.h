@@ -22,11 +22,12 @@ public:
 
 protected:
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    USkeletalMeshComponent* MeshComp = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     TSubclassOf<UDamageType> DamageType;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    USkeletalMeshComponent* MeshComp = nullptr;
 
     UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
     FName MuzzleSocketName = "MuzzleSocket";

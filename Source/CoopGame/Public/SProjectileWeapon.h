@@ -7,6 +7,33 @@
 #include "SProjectileWeapon.generated.h"
 
 class ASProjectile;
+
+USTRUCT()
+struct FProjectileWeaponData
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditDefaultsOnly)
+    TSubclassOf<UDamageType> ProjectileDamageType;
+
+    UPROPERTY(EditDefaultsOnly)
+    float ProjectileLifeTime = -1.0f;
+
+    UPROPERTY(EditDefaultsOnly)
+    float ProjectileDamage = 0.0f;
+
+    UPROPERTY(EditDefaultsOnly)
+    float ProjectileRadius = 0.0f;
+
+    UPROPERTY(EditDefaultsOnly)
+    float LaunchSpeed = 0.0f;
+
+    bool DoesExpire()
+    {
+        return ProjectileLifeTime > 0 ? true : false;
+    }
+};
+
 /**
  * 
  */
@@ -16,17 +43,16 @@ class COOPGAME_API ASProjectileWeapon : public ASWeapon
 	GENERATED_BODY()
 	
 public:
-    virtual void Fire() override;
 
 protected:
 
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    UPROPERTY(EditDefaultsOnly)
     TSubclassOf<ASProjectile> ProjectileClass;
-	
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    float LaunchVelocity = 0.0f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    float DurationTillExplode = 0.0f;
+    UPROPERTY(EditAnywhere, Category = "Projectile_Weapon")
+    FProjectileWeaponData ProjectileWeaponConfigData;
+
+
+    virtual void Fire() override;
 
 };

@@ -118,7 +118,6 @@ void ASCharacter::StopFire()
     if (CurrentWeapon)
     {
         CurrentWeapon->StopFire();
-
     }
 }
 

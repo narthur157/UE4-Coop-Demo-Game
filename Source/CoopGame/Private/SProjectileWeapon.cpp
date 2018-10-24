@@ -6,7 +6,6 @@
 #include "Components/SkeletalMeshComponent.h"
 
 
-
 void ASProjectileWeapon::Fire()
 {
     if (ProjectileClass && GetOwner())
@@ -21,9 +20,7 @@ void ASProjectileWeapon::Fire()
         FActorSpawnParameters SpawnParams;
         SpawnParams.Instigator = Cast<APawn>(GetOwner());
         ASProjectile* NewProjectile = GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, ProjectileSpawnLocation, ProjectileSpawnRotation, SpawnParams);
-        NewProjectile->Launch(LaunchVelocity);
+        NewProjectile->Initialize(ProjectileWeaponConfigData);
+        NewProjectile->Launch();
     }
-
-
-
 }
