@@ -46,12 +46,11 @@ public:
 
 protected:
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     TSubclassOf<ASProjectile> ProjectileClass;
 
-    UPROPERTY(EditAnywhere, Category = "Projectile_Weapon")
+    UPROPERTY(EditAnywhere, Category = "Weapon")
     FProjectileWeaponData ProjectileWeaponConfigData;
-
 
     virtual void Fire() override;
 
