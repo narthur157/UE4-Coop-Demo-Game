@@ -9,8 +9,8 @@
 class UCameraComponent;
 class USpringArmComponent;
 class ASWeapon;
-UCLASS()
 
+UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter
 {
 	GENERATED_BODY()
@@ -49,8 +49,6 @@ protected:
 
     float DefaultFOV;
 
-    ASWeapon* CurrentWeapon;
-
     void StartFire();
 
     void StopFire();
@@ -59,9 +57,15 @@ protected:
     FName WeaponSocket = "WeaponSocket";
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TSubclassOf<ASWeapon> DefaultWeapon;
+    TArray<TSubclassOf<ASWeapon>> DefaultWeapons;
    
+    ASWeapon* CurrentWeapon;
 
+    int32 CurrentWeaponIndex = 0;
+
+    void EquipWeapon(int32 Index);
+
+    //TArray<ASWeapon*> WeaponInventory;
 
 public:	
 	// Called every frame
@@ -71,5 +75,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     virtual FVector GetPawnViewLocation() const override;
+
+    void ChangeWeapon();
 	
 };

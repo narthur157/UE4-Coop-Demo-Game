@@ -36,13 +36,9 @@ void ASCharacter::BeginPlay()
     DefaultFOV = CameraComp->FieldOfView;
 
     // Spawn a default weapon
-    FActorSpawnParameters SpawnParams;
-    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-    CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(DefaultWeapon, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-    if (CurrentWeapon)
+    if (DefaultWeapons.Num() > 0)
     {
-        CurrentWeapon->SetOwner(this);
-        CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
+        EquipWeapon(0);
     }
 }
 
@@ -111,6 +107,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
     PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASCharacter::StartFire);
     PlayerInputComponent->BindAction("Fire", IE_Released, this, &ASCharacter::StopFire);
 
+    PlayerInputComponent->BindAction("WeaponSwap", IE_Pressed, this, &ASCharacter::ChangeWeapon);
+
 }
 
 void ASCharacter::StopFire()
@@ -130,3 +128,42 @@ FVector ASCharacter::GetPawnViewLocation() const
     return Super::GetPawnViewLocation();
 }
 
+// TODO: Let this thing go backwards as well, scroll wheel stuff
+void ASCharacter::ChangeWeapon()
+{
+    if (DefaultWeapons.Num() <= 0) { return;  }
+
+    if (DefaultWeapons.Num() <=  CurrentWeaponIndex + 1)
+    {
+        CurrentWeaponIndex = 0;
+    }
+    else
+    {
+        CurrentWeaponIndex++;
+    }
+
+    EquipWeapon(CurrentWeaponIndex);
+}
+
+void ASCharacter::EquipWeapon(int32 Index)
+{
+    if (Index < 0 || Index > DefaultWeapons.Num() - 1) { return; }
+
+    if (DefaultWeapons[Index])
+    {
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        ASWeapon* Weapon = GetWorld()->SpawnActor<ASWeapon>(DefaultWeapons[Index], FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+        if (Weapon)
+        {
+            if (CurrentWeapon)
+            {
+                CurrentWeapon->Destroy();
+            }
+            Weapon->SetOwner(this);
+            CurrentWeapon = Weapon;
+            CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
+            CurrentWeaponIndex = Index;
+        }
+    }
+}
