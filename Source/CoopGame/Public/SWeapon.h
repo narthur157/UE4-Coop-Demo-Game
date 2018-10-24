@@ -10,6 +10,7 @@ class UDamageType;
 class UCameraShake;
 class UParticleSystem;
 
+
 UCLASS()
 class COOPGAME_API ASWeapon : public AActor
 {
@@ -20,8 +21,6 @@ public:
 	ASWeapon();
 
 protected:
-
-    virtual void BeginPlay() override;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     USkeletalMeshComponent* MeshComp = nullptr;
@@ -53,27 +52,20 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     float BaseDamage = 20.0f;
 
-    virtual void Fire();
-
-    FTimerHandle TimerHandle_TimeBetweenShots;
-
-    float LastFireTime;
-
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     float TimeBetweenShots = 0.0f;
 
+    FTimerHandle TimerHandle_TimeBetweenShots;
+
+    float LastFireTime = -9999999;
+
+    virtual void Fire() {}
+
 public:	
 
-   
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    virtual void StartFire();
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
-    void StartFire();
-
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    void StopFire();
-
-
-
-    void DrawTracerEffect(const FVector &TraceEndPoint);
-	
+    virtual void StopFire();	
 };
