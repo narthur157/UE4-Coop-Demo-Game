@@ -19,9 +19,23 @@ public:
 
 protected:
 
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    TSubclassOf<UDamageType> DamageType;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    float BaseDamage = 20.0f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+    UParticleSystem* DefaultImpactEffect = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+    UParticleSystem* FleshImpactEffect = nullptr;
+
     virtual void Fire() override;
 
     void DrawTracerEffect(const FVector &TraceEndPoint);
+
+    void PlayImpactEffect(const FHitResult& Hit);
 
 public:
 

@@ -8,6 +8,7 @@
 
 void ASProjectileWeapon::Fire()
 {
+
     if (ProjectileClass && GetOwner())
     {
         FVector ProjectileSpawnLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
@@ -20,6 +21,7 @@ void ASProjectileWeapon::Fire()
         FActorSpawnParameters SpawnParams;
         SpawnParams.Instigator = Cast<APawn>(GetOwner());
         ASProjectile* NewProjectile = GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, ProjectileSpawnLocation, ProjectileSpawnRotation, SpawnParams);
+        UE_LOG(LogTemp, Warning, TEXT("MadeIt"));
         NewProjectile->Initialize(ProjectileWeaponConfigData);
         NewProjectile->Launch();
     }

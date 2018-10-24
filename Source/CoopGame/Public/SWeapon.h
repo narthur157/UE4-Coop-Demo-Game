@@ -22,10 +22,6 @@ public:
 
 protected:
 
-
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TSubclassOf<UDamageType> DamageType;
-
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     USkeletalMeshComponent* MeshComp = nullptr;
 
@@ -39,19 +35,10 @@ protected:
     UParticleSystem* MuzzleEffect = nullptr;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-    UParticleSystem* DefaultImpactEffect = nullptr;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-    UParticleSystem* FleshImpactEffect;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
     UParticleSystem* TracerEffect = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     TSubclassOf<UCameraShake> FireCamShake;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    float BaseDamage = 20.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     float TimeBetweenShots = 0.0f;
