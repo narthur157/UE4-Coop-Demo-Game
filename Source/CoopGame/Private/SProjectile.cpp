@@ -3,19 +3,18 @@
 #include "SProjectile.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SphereComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
+#include "SProjectileWeapon.h"
 
 
 // Sets default values
 ASProjectile::ASProjectile()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
-   
+
     CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
     SetRootComponent(CollisionComp);
-
 
     MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
     MeshComp->SetNotifyRigidBodyCollision(true);
@@ -25,33 +24,44 @@ ASProjectile::ASProjectile()
     MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
     MovementComp->bAutoActivate = true;
     MovementComp->SetUpdatedComponent(RootComponent);
-    MovementComp->bShouldBounce = true;
-    MovementComp->Bounciness = 0.6f;
-
- 
 
 }
 
-void ASProjectile::Launch(float LaunchSpeed)
+void ASProjectile::Initialize(const FProjectileWeaponData & Data)
 {
-    MovementComp->SetVelocityInLocalSpace(FVector::ForwardVector * LaunchSpeed);
-    MovementComp->Activate();
-    FTimerHandle FuseTimerHandle;
-    GetWorld()->GetTimerManager().SetTimer(FuseTimerHandle, this, &ASProjectile::OnFuseExpire, FuseDuration, false);
-    OnActorHit.AddDynamic(this, &ASProjectile::OnProjectileHit);
+    WeaponData = Data;
+    bWasInitialized = true;
 }
 
-void ASProjectile::OnFuseExpire()
+void ASProjectile::Launch()
+{
+    if (!bWasInitialized)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Projectile fired despite not being Initialized. Please Initialze projectile. Undefined behavior incomming."))
+    }
+    // Fire projectile
+    MovementComp->SetVelocityInLocalSpace(FVector::ForwardVector * WeaponData.LaunchSpeed);
+    MovementComp->Activate();
+
+    // Register projectile to recieve hit events
+    OnActorHit.AddDynamic(this, &ASProjectile::OnProjectileHit);
+
+    // if the weapon has designated this projectile to expire, set a timer to do so
+    if (WeaponData.DoesExpire())
+    {
+        FTimerHandle FuseTimerHandle;
+        GetWorld()->GetTimerManager().SetTimer(FuseTimerHandle, this, &ASProjectile::OnProjectileExpire, WeaponData.ProjectileLifeTime, false);
+    }
+}
+
+void ASProjectile::OnProjectileExpire()
 {
     Explode();
 }
 
 void ASProjectile::OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVector NormalImpulse, const FHitResult & Hit)
 {
-    if (bExplodeOnContact && Cast<APawn>(OtherActor) && Cast<APawn>(OtherActor) != Instigator)
-    {
-        Explode();
-    }
+    Explode();
 }
 
 void ASProjectile::Explode()
@@ -60,7 +70,9 @@ void ASProjectile::Explode()
     {
         UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation(), FVector::ZeroVector.Rotation());
     }
-    
-    UGameplayStatics::ApplyRadialDamage(GetWorld(), Damage, GetActorLocation(), DamageRadius, DamageType, IgnoredActors);
+
+    // TODO: Find a way to remove this, calculate ignored actors in projectileweapondata?
+    TArray<AActor*> IgnoredActors;
+    UGameplayStatics::ApplyRadialDamage(GetWorld(), WeaponData.ProjectileDamage, GetActorLocation(), WeaponData.ProjectileRadius, WeaponData.ProjectileDamageType, IgnoredActors);
     Destroy();
 }
