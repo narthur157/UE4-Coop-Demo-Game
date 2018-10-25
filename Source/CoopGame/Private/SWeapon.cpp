@@ -11,6 +11,20 @@ ASWeapon::ASWeapon()
 {
     MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComponent"));
     RootComponent = MeshComp;
+    SetReplicates(true);
+
+    NetUpdateFrequency = 66.0f;
+    MinNetUpdateFrequency = 33.0f;
+}
+
+void ASWeapon::ServerFire_Implementation()
+{
+    Fire();
+}
+
+bool ASWeapon::ServerFire_Validate()
+{
+    return true;
 }
 
 void ASWeapon::StartFire()
