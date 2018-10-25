@@ -21,10 +21,13 @@ ASProjectile::ASProjectile()
     MeshComp->SetVisibility(true);
     MeshComp->SetupAttachment(CollisionComp);
 
+
     MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
     MovementComp->bAutoActivate = true;
-    MovementComp->SetUpdatedComponent(RootComponent);
+    MovementComp->SetUpdatedComponent(CollisionComp);
 
+    SetReplicates(true);
+    SetReplicateMovement(true);
 }
 
 void ASProjectile::Initialize(const FProjectileWeaponData & Data)
@@ -39,7 +42,7 @@ void ASProjectile::Launch()
     {
         UE_LOG(LogTemp, Warning, TEXT("Projectile fired despite not being Initialized. Please Initialze projectile. Undefined behavior incoming."))
     }
-
+    UE_LOG(LogTemp, Warning, TEXT("Projectile spawned: %s"), *GetActorLocation().ToString())
     // Fire projectile
     MovementComp->SetVelocityInLocalSpace(FVector::ForwardVector * WeaponData.LaunchSpeed);
     MovementComp->Activate();
