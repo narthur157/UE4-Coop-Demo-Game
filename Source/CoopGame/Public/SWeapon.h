@@ -49,6 +49,9 @@ protected:
 
     virtual void Fire() {}
 
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerFire();
+
 public:	
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -56,4 +59,5 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     virtual void StopFire();	
+   
 };

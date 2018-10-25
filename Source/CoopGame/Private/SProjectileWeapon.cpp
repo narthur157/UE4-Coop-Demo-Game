@@ -8,21 +8,17 @@
 
 void ASProjectileWeapon::Fire()
 {
-
     if (ProjectileClass && GetOwner())
     {
         FVector ProjectileSpawnLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
         FRotator ProjectileSpawnRotation;
-
         FVector OutViewPointLocation;
         GetOwner()->GetActorEyesViewPoint(OutViewPointLocation, ProjectileSpawnRotation);
 
-        ProjectileSpawnRotation = ProjectileSpawnRotation;
         FActorSpawnParameters SpawnParams;
         SpawnParams.Instigator = Cast<APawn>(GetOwner());
         ASProjectile* NewProjectile = GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, ProjectileSpawnLocation, ProjectileSpawnRotation, SpawnParams);
-        UE_LOG(LogTemp, Warning, TEXT("MadeIt"));
         NewProjectile->Initialize(ProjectileWeaponConfigData);
-        NewProjectile->Launch();
+        NewProjectile->Launch();    
     }
 }

@@ -6,6 +6,22 @@
 #include "SWeapon.h"
 #include "SHitscanWeapon.generated.h"
 
+// Information for a sngle hitscan lnne trace
+USTRUCT()
+struct FHitScanTrace
+{
+    GENERATED_BODY()
+
+public:
+
+    UPROPERTY()
+    TEnumAsByte<EPhysicalSurface> SurfaceType;
+
+    UPROPERTY()
+    FVector_NetQuantize TraceTo;
+
+};
+
 /**
  * 
  */
@@ -31,11 +47,17 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
     UParticleSystem* FleshImpactEffect = nullptr;
 
+    UPROPERTY(ReplicatedUsing = OnRep_HitScanTrace)
+    FHitScanTrace HitScanTrace;
+
+    UFUNCTION()
+    void OnRep_HitScanTrace();
+
     virtual void Fire() override;
 
     void DrawTracerEffect(const FVector &TraceEndPoint);
 
-    void PlayImpactEffect(const FHitResult& Hit);
+    void PlayImpactEffect(EPhysicalSurface SurfaceType, FVector ImpactPoint);
 
 public:
 

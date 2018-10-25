@@ -37,8 +37,9 @@ void ASProjectile::Launch()
 {
     if (!bWasInitialized)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Projectile fired despite not being Initialized. Please Initialze projectile. Undefined behavior incomming."))
+        UE_LOG(LogTemp, Warning, TEXT("Projectile fired despite not being Initialized. Please Initialze projectile. Undefined behavior incoming."))
     }
+
     // Fire projectile
     MovementComp->SetVelocityInLocalSpace(FVector::ForwardVector * WeaponData.LaunchSpeed);
     MovementComp->Activate();
@@ -70,9 +71,8 @@ void ASProjectile::Explode()
     {
         UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation(), FVector::ZeroVector.Rotation());
     }
-
     // TODO: Find a way to remove this, calculate ignored actors in projectileweapondata?
-    TArray<AActor*> IgnoredActors;
-    UGameplayStatics::ApplyRadialDamage(GetWorld(), WeaponData.ProjectileDamage, GetActorLocation(), WeaponData.ProjectileRadius, WeaponData.ProjectileDamageType, IgnoredActors);
+    TArray<AActor*> IgnoredActors = { this, GetOwner(), Instigator };
+    UGameplayStatics::ApplyRadialDamage(GetWorld(), WeaponData.ProjectileDamage, GetActorLocation(), WeaponData.ProjectileRadius, WeaponData.ProjectileDamageType, IgnoredActors, Instigator,Instigator->GetController(),true);
     Destroy();
 }

@@ -9,6 +9,7 @@
 class UCameraComponent;
 class USpringArmComponent;
 class ASWeapon;
+class UHealthComponent;
 
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter
@@ -20,7 +21,7 @@ public:
 	ASCharacter();
 
 protected:
-	// Called when the game starts or when spawned
+    // Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
     void MoveForward(float RelativeSpeed);
@@ -44,7 +45,6 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Player", meta = (ClampMin = 0.0, ClampMax = 100))
     float ZoomInterpSpeed;
 
-
     bool bWantsToZoom;
 
     float DefaultFOV;
@@ -59,11 +59,36 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     TArray<TSubclassOf<ASWeapon>> DefaultWeapons;
    
+    UPROPERTY(Replicated)
+    TArray<ASWeapon*> WeaponInventory;
+
+    UPROPERTY(ReplicatedUsing=OnRep_CurrentWeapon)
     ASWeapon* CurrentWeapon;
 
-    int32 CurrentWeaponIndex = 0;
+    UFUNCTION()
+    void OnRep_CurrentWeapon();
 
-    void EquipWeapon(int32 Index);
+    // Server only
+    void EquipWeapon(ASWeapon* Weapon);
+
+    UFUNCTION()
+    void SetCurrentWeapon(ASWeapon* NewWeapon);
+
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerEquipWeapon(ASWeapon* Weapon);
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly,  Category = "Health")
+    USHealthComponent* HealthComp = nullptr;
+
+    UFUNCTION()
+    void OnHealthChanged(USHealthComponent* ChangedHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
+    UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
+    bool bDied = false;
+
+    // Server only function
+    void SpawnDefaultWeaponInventory();
 
     //TArray<ASWeapon*> WeaponInventory;
 
