@@ -15,6 +15,8 @@ void ASProjectile_Bounce::OnProjectileHit(AActor * SelfActor, AActor * OtherActo
 {
     if (Cast<APawn>(OtherActor))
     {
+        bExploded = true;
         Explode();
     }
+    
 }

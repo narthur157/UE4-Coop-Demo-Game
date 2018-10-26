@@ -35,11 +35,8 @@ void USHealthComponent::BeginPlay()
         {
             Owner->OnTakeAnyDamage.AddDynamic(this, &USHealthComponent::HandleTakeDamage);
         }
-
         Health = MaxHealth;
     }
-
-    
 }
 
 void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
