@@ -8,6 +8,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "SHealthComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "UnrealNetwork.h"
 
 
@@ -43,6 +44,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
     PlayerInputComponent->BindAxis("LookUp", this, &ASCharacter::AddControllerPitchInput);
     PlayerInputComponent->BindAxis("Turn", this, &ASCharacter::AddControllerYawInput);
 
+    PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ASCharacter::BeginSprint);
+    PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ASCharacter::EndSprint);
     PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ASCharacter::BeginCrouch);
     PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ASCharacter::EndCrouch);
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::Jump);
@@ -117,12 +120,24 @@ void ASCharacter::EndZoom()
     bWantsToZoom = false;
 }
 
+void ASCharacter::BeginSprint()
+{
+    bWantsToSprint = true;
+    GetCharacterMovement()->MaxWalkSpeed += SprintSpeed;
+
+}
+
+void ASCharacter::EndSprint()
+{
+    bWantsToSprint = false;
+    GetCharacterMovement()->MaxWalkSpeed -= SprintSpeed;
+}
+
 void ASCharacter::StartFire()
 {
     if (CurrentWeapon)
     {
         CurrentWeapon->StartFire();
-
     }
 }
 
