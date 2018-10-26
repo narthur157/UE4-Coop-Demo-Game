@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "SProjectileWeapon.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -30,6 +31,14 @@ ASProjectile::ASProjectile()
     SetReplicateMovement(true);
 }
 
+void ASProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ASProjectile, bExploded);
+
+}
+
 void ASProjectile::Initialize(const FProjectileWeaponData & Data)
 {
     WeaponData = Data;
@@ -38,11 +47,12 @@ void ASProjectile::Initialize(const FProjectileWeaponData & Data)
 
 void ASProjectile::Launch()
 {
+    
     if (!bWasInitialized)
     {
         UE_LOG(LogTemp, Warning, TEXT("Projectile fired despite not being Initialized. Please Initialze projectile. Undefined behavior incoming."))
     }
-    UE_LOG(LogTemp, Warning, TEXT("Projectile spawned: %s"), *GetActorLocation().ToString())
+  
     // Fire projectile
     MovementComp->SetVelocityInLocalSpace(FVector::ForwardVector * WeaponData.LaunchSpeed);
     MovementComp->Activate();
@@ -58,14 +68,26 @@ void ASProjectile::Launch()
     }
 }
 
+void ASProjectile::ServerLaunch_Implementation()
+{
+    Launch();
+}
+
+bool ASProjectile::ServerLaunch_Validate()
+{
+    return true;
+}
+
 void ASProjectile::OnProjectileExpire()
 {
-    Explode();
+    bExploded = true;
+    OnRep_Exploded();
 }
 
 void ASProjectile::OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVector NormalImpulse, const FHitResult & Hit)
 {
-    Explode();
+    bExploded = true;
+    OnRep_Exploded();
 }
 
 void ASProjectile::Explode()
@@ -76,6 +98,20 @@ void ASProjectile::Explode()
     }
     // TODO: Find a way to remove this, calculate ignored actors in projectileweapondata?
     TArray<AActor*> IgnoredActors = { this, GetOwner(), Instigator };
-    UGameplayStatics::ApplyRadialDamage(GetWorld(), WeaponData.ProjectileDamage, GetActorLocation(), WeaponData.ProjectileRadius, WeaponData.ProjectileDamageType, IgnoredActors, Instigator,Instigator->GetController(),true);
-    Destroy();
+    if (Role == ROLE_Authority)
+    {
+        UGameplayStatics::ApplyRadialDamage(GetWorld(), WeaponData.ProjectileDamage, GetActorLocation(), WeaponData.ProjectileRadius, WeaponData.ProjectileDamageType, IgnoredActors, Instigator, Instigator->GetController(), true);
+    }
+
+    SetActorHiddenInGame(true);
+    if (Role == ROLE_Authority)
+    {
+        SetLifeSpan(5.0f);
+    }
+}
+
+void ASProjectile::OnRep_Exploded()
+{
+    Explode();
+    
 }

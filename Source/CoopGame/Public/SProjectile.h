@@ -45,13 +45,22 @@ protected:
     UFUNCTION()
     virtual void OnProjectileExpire();
 
+    UPROPERTY(ReplicatedUsing = OnRep_Exploded)
+    bool bExploded = false;
+
+    UFUNCTION()
+    void OnRep_Exploded();
+
     FProjectileWeaponData WeaponData;
 
     bool bWasInitialized = false;
 
 public:	
-
+    
     virtual void Launch();
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerLaunch();
 	
     virtual void Initialize(const FProjectileWeaponData& Data);
 };
