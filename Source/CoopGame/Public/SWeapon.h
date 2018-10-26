@@ -9,6 +9,7 @@
 class UDamageType;
 class UCameraShake;
 class UParticleSystem;
+class USoundCue;
 
 
 UCLASS()
@@ -39,6 +40,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     TSubclassOf<UCameraShake> FireCamShake;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+        USoundCue* FireSound = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     float TimeBetweenShots = 0.0f;

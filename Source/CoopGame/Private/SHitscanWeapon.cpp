@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
+#include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/World.h"
@@ -29,6 +30,8 @@ void ASHitscanWeapon::Fire()
     AActor* Owner = GetOwner();
     if (Owner)
     {
+        UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+
         // Perform line trace
         FVector EyeLocation;
         FRotator EyeRotation;
@@ -71,7 +74,6 @@ void ASHitscanWeapon::Fire()
 
             // Set Trace endpoint to the hit impact point
             TraceEndPoint = Hit.ImpactPoint;
-
         }
 
         // If we are the server, replicate the hitscan information out so other clients know where/how to play their effects
@@ -87,6 +89,7 @@ void ASHitscanWeapon::Fire()
         // Set last fire time
         LastFireTime = GetWorld()->TimeSeconds;
     }
+
 }
 
 void ASHitscanWeapon::OnRep_HitScanTrace()

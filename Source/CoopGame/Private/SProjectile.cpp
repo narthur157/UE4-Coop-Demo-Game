@@ -63,7 +63,6 @@ void ASProjectile::Launch()
     // if the weapon has designated this projectile to expire, set a timer to do so
     if (WeaponData.DoesExpire())
     {
-        FTimerHandle FuseTimerHandle;
         GetWorld()->GetTimerManager().SetTimer(FuseTimerHandle, this, &ASProjectile::OnProjectileExpire, WeaponData.ProjectileLifeTime, false);
     }
 }
@@ -87,6 +86,7 @@ void ASProjectile::OnProjectileExpire()
 void ASProjectile::OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVector NormalImpulse, const FHitResult & Hit)
 {
     bExploded = true;
+    GetWorld()->GetTimerManager().ClearTimer(FuseTimerHandle);
     OnRep_Exploded();
 }
 

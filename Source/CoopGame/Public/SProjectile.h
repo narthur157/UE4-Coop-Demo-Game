@@ -51,6 +51,7 @@ protected:
     UFUNCTION()
     void OnRep_Exploded();
 
+    FTimerHandle FuseTimerHandle;
     FProjectileWeaponData WeaponData;
 
     bool bWasInitialized = false;
