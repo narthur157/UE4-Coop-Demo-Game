@@ -24,6 +24,11 @@ protected:
     // Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+    UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
+    bool bWantsToSprint = false;
+
+    float SprintSpeed = 200.0f;
+
     void MoveForward(float RelativeSpeed);
     void MoveRight(float RelativeSpeed);
 
@@ -32,6 +37,9 @@ protected:
 
     void BeginZoom();
     void EndZoom();
+
+    void BeginSprint();
+    void EndSprint();
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
     UCameraComponent* CameraComp = nullptr;
