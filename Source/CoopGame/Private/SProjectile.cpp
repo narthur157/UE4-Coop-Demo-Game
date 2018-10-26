@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "SProjectileWeapon.h"
+#include "Sound/SoundCue.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -95,6 +96,11 @@ void ASProjectile::Explode()
     if (ExplosionEffect)
     {
         UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation(), FVector::ZeroVector.Rotation());
+    }
+    if (ExplosionSoundEffect)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, ExplosionSoundEffect, GetActorLocation());
+
     }
     // TODO: Find a way to remove this, calculate ignored actors in projectileweapondata?
     TArray<AActor*> IgnoredActors = { this, GetOwner(), Instigator };

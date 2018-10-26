@@ -11,7 +11,7 @@
 class UProjectileMovementComponent;
 class USphereComponent;
 class UStaticMeshComponent;
-
+class USoundCue;
 
 UCLASS()
 class COOPGAME_API ASProjectile : public AActor
@@ -35,6 +35,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     UParticleSystem* ExplosionEffect = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    USoundCue* ExplosionSoundEffect = nullptr;
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     virtual void Explode();

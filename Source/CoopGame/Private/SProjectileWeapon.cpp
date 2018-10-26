@@ -2,7 +2,9 @@
 
 #include "SProjectileWeapon.h"
 #include "SProjectile.h"
-#include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
+#include "Engine/World.h"   
 #include "Components/SkeletalMeshComponent.h"
 
 
@@ -13,6 +15,7 @@ void ASProjectileWeapon::Fire()
         ServerFire();
         return;
     }
+    UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 
     if (ProjectileClass && GetOwner())
     {
@@ -28,6 +31,7 @@ void ASProjectileWeapon::Fire()
 
         NewProjectile->Initialize(ProjectileWeaponConfigData);
         NewProjectile->Launch();    
+        LastFireTime = GetWorld()->TimeSeconds;
 
     }
 }
