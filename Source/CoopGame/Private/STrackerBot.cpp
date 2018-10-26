@@ -137,6 +137,8 @@ void ASTrackerBot::NotifyActorBeginOverlap(AActor * OtherActor)
         USkeletalMeshComponent* OtherMesh = OtherActorPawn->FindComponentByClass<USkeletalMeshComponent>();
         if (OtherMesh)
         {
+            // TODO: Add function on actor (maybe even an interface) to add other actors like this one to sockets
+            // As of right now multiple trigger bots can attach to the back slod and that's bad
             MeshComp->SetSimulatePhysics(false);
             MeshComp->SetCollisionResponseToAllChannels(ECR_Ignore);
             MeshComp->SetCollisionResponseToChannel(COLLISION_PROJECTILE, ECR_Block);
