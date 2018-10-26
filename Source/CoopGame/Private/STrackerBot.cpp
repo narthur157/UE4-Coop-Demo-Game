@@ -9,8 +9,9 @@
 #include "DrawDebugHelpers.h"
 #include "SHealthComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "CoopGame.h"
 #include "Components/SphereComponent.h"
-
+#include "Sound/SoundCue.h"
 // Sets default values
 ASTrackerBot::ASTrackerBot()
 {
@@ -30,7 +31,6 @@ ASTrackerBot::ASTrackerBot()
     ProximityExplosionRadius->SetCollisionResponseToAllChannels(ECR_Ignore);
     ProximityExplosionRadius->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
-
 }
 
 // Called when the game starts or when spawned
@@ -39,8 +39,6 @@ void ASTrackerBot::BeginPlay()
 	Super::BeginPlay();
 
     FVector NextPathPoint = GetNextPathPoint();
-
-	
 }
 
 FVector ASTrackerBot::GetNextPathPoint()
@@ -66,9 +64,7 @@ FVector ASTrackerBot::GetNextPathPoint()
 void ASTrackerBot::OnTakeDamage(USHealthComponent * ChangedHealthComp, float Health, float HealthDelta, 
     const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
-    //BOOM!!!!
 
-    UE_LOG(LogTemp, Log, TEXT("Bot %s, Health: %f"), *GetName(), Health);
     if (Health <= 0)
     {
         SelfDestruct();
@@ -91,13 +87,11 @@ void ASTrackerBot::SelfDestruct()
     {
         return;
     }
-    UE_LOG(LogTemp, Warning, TEXT("Exploding!!!"));
+    bExploded = true;
+    UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation());
     UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
     TArray<AActor*> IgnoredActors = { this };
     UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), true);
-    DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Red, false, 2.0f, 0, 1.0f);
-
-    bExploded = true;
     Destroy();
 }
 
@@ -105,8 +99,15 @@ void ASTrackerBot::SelfDestruct()
 void ASTrackerBot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-    float DistanceToTarget = (GetActorLocation() - NextPathPoint).Size();
+    if (!bSelfDestructionAttached && !bExploded)
+    {
+        MoveTowardsTarget();
+    }
+}
 
+void ASTrackerBot::MoveTowardsTarget()
+{
+    float DistanceToTarget = (GetActorLocation() - NextPathPoint).Size();
 
     if (DistanceToTarget <= RequiredDistanceToTarget)
     {
@@ -130,9 +131,30 @@ void ASTrackerBot::Tick(float DeltaTime)
 
 void ASTrackerBot::NotifyActorBeginOverlap(AActor * OtherActor)
 {
-    if (OtherActor && Cast<APawn>(OtherActor))
+    APawn* OtherActorPawn = Cast<APawn>(OtherActor);
+    if (OtherActorPawn && !bSelfDestructionAttached)
     {
-        SelfDestruct();
+        USkeletalMeshComponent* OtherMesh = OtherActorPawn->FindComponentByClass<USkeletalMeshComponent>();
+        if (OtherMesh)
+        {
+            MeshComp->SetSimulatePhysics(false);
+            MeshComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+            MeshComp->SetCollisionResponseToChannel(COLLISION_PROJECTILE, ECR_Block);
+            MeshComp->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Block);
+
+            bSelfDestructionAttached = true;
+            AttachToComponent(OtherMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Back");
+        }
+        UGameplayStatics::SpawnSoundAttached(TriggeredSound, RootComponent);
+        GetWorldTimerManager().SetTimer(SelfDestructCountdownTimer, this, &ASTrackerBot::SelfDestruct, SelfDestructTime, false);
+        GetWorldTimerManager().SetTimer(SelfDestructionTickTimer, this, &ASTrackerBot::SelfDestructTick, SelfDestructTime/4, false);
     }
 }
 
+void ASTrackerBot::SelfDestructTick()
+{
+    UGameplayStatics::SpawnSoundAttached(SelfDestructTickSound, RootComponent);
+    float TimeRemainingUntilDestruction = GetWorldTimerManager().GetTimerRemaining(SelfDestructCountdownTimer);
+    GetWorldTimerManager().SetTimer(SelfDestructionTickTimer, this, &ASTrackerBot::SelfDestructTick, TimeRemainingUntilDestruction/4, false);
+
+}

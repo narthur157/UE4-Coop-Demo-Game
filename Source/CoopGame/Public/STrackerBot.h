@@ -9,6 +9,7 @@
 class USHealthComponent;
 class UMaterialInstanceDynamic;
 class USphereComponent;
+class USoundCue;
 
 UCLASS()
 class COOPGAME_API ASTrackerBot : public APawn
@@ -24,39 +25,60 @@ protected:
 	virtual void BeginPlay() override;
 
     UPROPERTY(VisibleDefaultsOnly, Category = "Components")
-        UStaticMeshComponent* MeshComp = nullptr;
+    UStaticMeshComponent* MeshComp = nullptr;
 
     UPROPERTY(VisibleDefaultsOnly, Category = "Components")
-     USHealthComponent* HealthComp = nullptr;
+    USHealthComponent* HealthComp = nullptr;
 
     UPROPERTY(VisibleAnywhere, Category = "Components")
-        USphereComponent* ProximityExplosionRadius = nullptr;
+    USphereComponent* ProximityExplosionRadius = nullptr;
 
     // Pulse material
     UMaterialInstanceDynamic* MatInstance = nullptr;
-
-    FVector GetNextPathPoint();
-    FVector NextPathPoint;
-
-    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
-    float MovementForce = 1000;
-    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
-    bool bUseVelocityChange = false;
-    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
-    float RequiredDistanceToTarget = 100;
 
     UFUNCTION()
     void OnTakeDamage(USHealthComponent * ChangedHealthComp, float Health, float HealthDelta, 
         const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser);
 
     UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    float ExplosionRadius = 200;
+    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    float ProximityRadius = 150;
+    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    float ExplosionDamage = 100;
+    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    float SelfDestructTime = 5.0f;
+    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    float MovementForce = 1000;
+    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    bool bUseVelocityChange = false;
+    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    float RequiredDistanceToTarget = 100;
+    
+    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    USoundCue* SelfDestructTickSound = nullptr;
+    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    USoundCue* ExplodeSound = nullptr;
+    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    USoundCue* TriggeredSound = nullptr;
+    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
     UParticleSystem* ExplosionEffect = nullptr;
 
-    float ExplosionRadius = 200;
-    float ProximityRadius = 150;
-    float ExplosionDamage = 100;
-    void SelfDestruct();
+    FVector GetNextPathPoint();
+    FVector NextPathPoint;
+    void MoveTowardsTarget();
+
     bool bExploded = false;
+    bool bSelfDestructionAttached = false;
+
+    FTimerHandle SelfDestructCountdownTimer;
+    FTimerHandle SelfDestructionTickTimer;
+    
+    UFUNCTION()
+    void SelfDestruct();
+    UFUNCTION()
+    void SelfDestructTick();
+
 public:	
 
 	// Called every frame
