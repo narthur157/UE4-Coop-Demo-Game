@@ -15,6 +15,7 @@ void ASProjectileWeapon::Fire()
         ServerFire();
         return;
     }
+
     UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 
     if (ProjectileClass && GetOwner())
@@ -30,8 +31,7 @@ void ASProjectileWeapon::Fire()
         ASProjectile* NewProjectile = GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, ProjectileSpawnLocation, ProjectileSpawnRotation, SpawnParams);
 
         NewProjectile->Initialize(ProjectileWeaponConfigData);
-        NewProjectile->Launch();    
+        NewProjectile->Launch();
         LastFireTime = GetWorld()->TimeSeconds;
-
     }
 }

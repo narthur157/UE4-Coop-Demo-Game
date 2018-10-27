@@ -89,7 +89,6 @@ void ASHitscanWeapon::Fire()
         // Set last fire time
         LastFireTime = GetWorld()->TimeSeconds;
     }
-
 }
 
 void ASHitscanWeapon::OnRep_HitScanTrace()

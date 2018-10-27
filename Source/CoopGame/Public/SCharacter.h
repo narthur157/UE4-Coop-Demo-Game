@@ -41,6 +41,9 @@ protected:
     void BeginSprint();
     void EndSprint();
 
+    
+
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
     UCameraComponent* CameraComp = nullptr;
 
