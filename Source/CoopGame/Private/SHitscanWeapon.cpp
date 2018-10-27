@@ -10,6 +10,7 @@
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "DamageDealer.h"
 #include "Engine/World.h"
 
 
@@ -59,8 +60,14 @@ void ASHitscanWeapon::Fire()
             // Get surface type to use to calculate damage multipler/impact effects
             SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
 
+            // Better way of doing this in the future, maybe enure that owners are damage dealers
+            IDamageDealer* DamageDealer = Cast<IDamageDealer>(GetOwner());
             // Calculate damage multiplier
             float ActualDamage = BaseDamage;
+            if (DamageDealer)
+            {
+                ActualDamage += (DamageDealer->GetDamageModifier() / 100) * BaseDamage;
+            }
             if (SurfaceType == SURFACE_FLESHVULNERABLE)
             {
                 ActualDamage *= 4.0f;

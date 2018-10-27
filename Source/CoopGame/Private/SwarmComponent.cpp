@@ -15,16 +15,44 @@ void USwarmComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+    ProximitySphere->OnComponentBeginOverlap.AddDynamic(this, &USwarmComponent::OnProximityOverlap);
+    ProximitySphere->OnComponentEndOverlap.AddDynamic(this, &USwarmComponent::OnProximityEndOverlap);
     ProximitySphere->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
     ProximitySphere->SetSphereRadius(ProximityRadius, true);
     ProximitySphere->SetCollisionResponseToChannel(COLLISION_WEAPON, ECollisionResponse::ECR_Ignore);
     ProximitySphere->SetCollisionResponseToChannel(COLLISION_PROJECTILE, ECollisionResponse::ECR_Ignore);
-    ProximitySphere->OnComponentBeginOverlap.AddDynamic(this, &USwarmComponent::OnProximityOverlap);
-    ProximitySphere->OnComponentEndOverlap.AddDynamic(this, &USwarmComponent::OnProximityEndOverlap);
+    
+
+    //TODO: Find better name than stuff
+    //InitializeOverlappingStuff();
+}
+
+//TODO: Find a  way to avoid ever calling this
+void USwarmComponent::InitializeOverlappingStuff()
+{
+    TArray<UPrimitiveComponent*> OverlappingComponents;
+    ProximitySphere->GetOverlappingComponents(OverlappingComponents);
+
+    for (int32 i = 0; i < OverlappingComponents.Num(); i++)
+    {
+        if (OverlappingComponents[i]->GetOwner()->GetRootComponent() == OverlappingComponents[i])
+        {
+            for (int32 i = 0; i < PowerUpActors.Num(); i++)
+            {
+                if (OverlappingComponents[i]->GetOwner()->IsA(PowerUpActors[i]))
+                {
+                    NumOverlappingActors++;
+                    PowerLevel = NumOverlappingActors * PowerGainedPerActor;
+                    OnPowerLevelChanged.Broadcast(NumOverlappingActors, PowerLevel);
+                }
+            }
+        }
+    }
 }
 
 void USwarmComponent::OnProximityOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
+    if (!OtherActor) { return; }
     // TODO: Figure out a way to ignore components that arent the root component, this feels hacky?
     if (OtherActor->GetRootComponent() == OtherComp &&  OtherActor != GetOwner())
     {
@@ -32,6 +60,7 @@ void USwarmComponent::OnProximityOverlap(UPrimitiveComponent * OverlappedCompone
         {
             if (OtherActor->IsA(PowerUpActors[i]))
             {
+                UE_LOG(LogTemp, Warning, TEXT("Found Actor On Init: %s"), *OtherActor->GetName())
                 NumOverlappingActors++;
                 PowerLevel = NumOverlappingActors * PowerGainedPerActor;
                 OnPowerLevelChanged.Broadcast(NumOverlappingActors, PowerLevel);
@@ -42,6 +71,8 @@ void USwarmComponent::OnProximityOverlap(UPrimitiveComponent * OverlappedCompone
 
 void USwarmComponent::OnProximityEndOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex)
 {
+    if (!OtherActor) { return; }
+
     if (OtherActor->GetRootComponent() == OtherComp && Cast<APawn>(OtherActor) && OtherActor != GetOwner())
     {
         for (int32 i = 0; i < PowerUpActors.Num(); i++)
@@ -60,5 +91,7 @@ void USwarmComponent::OnProximityEndOverlap(UPrimitiveComponent * OverlappedComp
         }
     }
 }   
+
+
 
 

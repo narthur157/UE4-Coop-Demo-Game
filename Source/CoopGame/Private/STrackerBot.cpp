@@ -29,7 +29,6 @@ ASTrackerBot::ASTrackerBot()
     HealthComp->OnHealthChanged.AddDynamic(this, &ASTrackerBot::OnTakeDamage);
     
     ProximityExplosionRadius = CreateDefaultSubobject<USphereComponent>(TEXT("ProximityRadius"));
-    ProximityExplosionRadius->SetSphereRadius(ProximityRadius);
     ProximityExplosionRadius->SetupAttachment(RootComponent);
     ProximityExplosionRadius->SetCollisionResponseToAllChannels(ECR_Ignore);
     ProximityExplosionRadius->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
@@ -53,8 +52,10 @@ void ASTrackerBot::BeginPlay()
     if (Role == ROLE_Authority)
     {
         FVector NextPathPoint = GetNextPathPoint();
-
     }
+    ProximityExplosionRadius->OnComponentBeginOverlap.AddDynamic(this, &ASTrackerBot::OnProximityRadiusOverlap);
+    ProximityExplosionRadius->SetSphereRadius(ProximityRadius, true);
+   
 }
 
 FVector ASTrackerBot::GetNextPathPoint()
@@ -63,7 +64,7 @@ FVector ASTrackerBot::GetNextPathPoint()
     ACharacter* PlayerPawn = UGameplayStatics::GetPlayerCharacter(this, 0);
     if (!PlayerPawn)
     {
-        return FVector::ZeroVector;
+        return GetActorLocation();
     }
 
     UNavigationPath* NavPath = UNavigationSystem::FindPathToActorSynchronously(this, GetActorLocation(), PlayerPawn);
@@ -85,17 +86,16 @@ void ASTrackerBot::OnTakeDamage(USHealthComponent * ChangedHealthComp, float Hea
     {
         SelfDestruct();
     }
-
-    if (!MatInstance)
+    if (!MatInstance && MeshComp)
     {
         MatInstance = MeshComp->CreateAndSetMaterialInstanceDynamicFromMaterial(0, MeshComp->GetMaterial(0));
     }
-    if (MatInstance)
+    if (MatInstance->IsValidLowLevel())
     {
         MatInstance->SetScalarParameterValue("LastTimeDamageTaken", GetWorld()->TimeSeconds);
     }
-
 }
+
 
 void ASTrackerBot::SelfDestruct()
 {
@@ -107,6 +107,9 @@ void ASTrackerBot::SelfDestruct()
     bExploded = true;
     UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation());
     UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
+    GetWorldTimerManager().ClearTimer(SelfDestructCountdownTimer);
+    GetWorldTimerManager().ClearTimer(SelfDestructionTickTimer);
+
     MeshComp->SetVisibility(false);
     MeshComp->SetSimulatePhysics(false);
     MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -114,7 +117,8 @@ void ASTrackerBot::SelfDestruct()
     if (Role == ROLE_Authority)
     {
         TArray<AActor*> IgnoredActors = { this };
-        UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), true);
+        float ActualDamage = ExplosionDamage * GetDamageModifier();
+        UGameplayStatics::ApplyRadialDamage(this, ActualDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), true);
         // Give clients a chance to play effects
         SetLifeSpan(4.0);
     }
@@ -152,10 +156,13 @@ void ASTrackerBot::MoveTowardsTarget()
     DrawDebugSphere(GetWorld(), NextPathPoint, 20, 12, FColor::Yellow, false, 4.0, 1.0);
 }
 
-void ASTrackerBot::NotifyActorBeginOverlap(AActor * OtherActor)
+void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
+    if (OtherComp != OtherActor->GetRootComponent())
+    {
+        return;
+    }
     APawn* OtherActorPawn = Cast<APawn>(OtherActor);
-
     if (OtherActorPawn && !bSelfDestructionAttached && !bExploded)
     {
         if (Role == ROLE_Authority)
@@ -163,7 +170,7 @@ void ASTrackerBot::NotifyActorBeginOverlap(AActor * OtherActor)
             USkeletalMeshComponent* OtherMesh = OtherActorPawn->FindComponentByClass<USkeletalMeshComponent>();
             if (OtherMesh)
             {
-                // TODO: Add function on actor (maybe even an interface) to add other actors like this one to sockets
+                // TODO: Add function on actor (maybe even an interface) to add other actors like this one to sockets 
                 // As of right now multiple trigger bots can attach to the back slod and that's bad
                 bSelfDestructionAttached = true;
                 OnRep_TrackerBotAttached();
@@ -198,3 +205,4 @@ void ASTrackerBot::OnRep_TrackerBotAttached()
     MeshComp->SetCollisionResponseToChannel(COLLISION_PROJECTILE, ECR_Block);
     MeshComp->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Block);
 }
+

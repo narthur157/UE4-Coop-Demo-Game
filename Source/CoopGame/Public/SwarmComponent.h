@@ -35,6 +35,9 @@ protected:
     int32 NumOverlappingActors = 0;
     float PowerLevel = 0.0f;
 
+
+    void InitializeOverlappingStuff();
+
 public:	
 
     UFUNCTION()
@@ -45,8 +48,10 @@ public:
     UPROPERTY(BlueprintAssignable)
     FPowerLevelChanged OnPowerLevelChanged;
 
-    UFUNCTION(BlueprintCallable, Category = "SwarmComponent")
+    UFUNCTION(BlueprintPure, Category = "SwarmComponent")
     float GetPowerLevel() { return PowerLevel; }
-		
+    UFUNCTION(BlueprintPure, Category = "SwarmComponent")
+    float GetNumberOverlappingActors() { return NumOverlappingActors; }
+
 	
 };

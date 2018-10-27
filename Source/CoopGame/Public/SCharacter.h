@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "DamageDealer.h"
 #include "SCharacter.generated.h"
 
 class UCameraComponent;
@@ -12,7 +13,7 @@ class ASWeapon;
 class UHealthComponent;
 
 UCLASS()
-class COOPGAME_API ASCharacter : public ACharacter
+class COOPGAME_API ASCharacter : public ACharacter, public IDamageDealer
 {
 	GENERATED_BODY()
 
@@ -40,9 +41,6 @@ protected:
 
     void BeginSprint();
     void EndSprint();
-
-    
-
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
     UCameraComponent* CameraComp = nullptr;
@@ -101,9 +99,12 @@ protected:
     // Server only function
     void SpawnDefaultWeaponInventory();
 
-    //TArray<ASWeapon*> WeaponInventory;
+    UPROPERTY(BlueprintReadWrite, Category = "Power")
+    float DamageModifier = 1.0f;
+
 
 public:	
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -114,4 +115,6 @@ public:
 
     void ChangeWeapon();
 	
+    // IDamageDealer
+    virtual float GetDamageModifier() override { return DamageModifier; }
 };
