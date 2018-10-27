@@ -120,17 +120,18 @@ void ASCharacter::EndZoom()
     bWantsToZoom = false;
 }
 
+// TODO: Server functionsn so this works in multiplayer
 void ASCharacter::BeginSprint()
 {
-    bWantsToSprint = true;
-    GetCharacterMovement()->MaxWalkSpeed += SprintSpeed;
+   // bWantsToSprint = true;
+    //GetCharacterMovement()->MaxWalkSpeed += SprintSpeed;
 
 }
 
 void ASCharacter::EndSprint()
 {
-    bWantsToSprint = false;
-    GetCharacterMovement()->MaxWalkSpeed -= SprintSpeed;
+    //bWantsToSprint = false;
+    //GetCharacterMovement()->MaxWalkSpeed -= SprintSpeed;
 }
 
 void ASCharacter::StartFire()

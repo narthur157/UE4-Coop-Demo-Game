@@ -69,7 +69,19 @@ protected:
     void MoveTowardsTarget();
 
     bool bExploded = false;
+
+    UPROPERTY(ReplicatedUsing=OnRep_TrackerBotAttached)
     bool bSelfDestructionAttached = false;
+
+    UFUNCTION()
+    void OnRep_TrackerBotAttached();
+
+    UPROPERTY(ReplicatedUsing=OnRep_ExplodeTime)
+    float ExplodeTime;
+
+    UFUNCTION()
+    void OnRep_ExplodeTime();
+
 
     FTimerHandle SelfDestructCountdownTimer;
     FTimerHandle SelfDestructionTickTimer;
