@@ -83,7 +83,6 @@ protected:
     UFUNCTION()
     void SetCurrentWeapon(ASWeapon* NewWeapon);
 
-
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerEquipWeapon(ASWeapon* Weapon);
 

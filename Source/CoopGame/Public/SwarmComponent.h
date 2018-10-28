@@ -23,6 +23,7 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+    UPROPERTY()
     USphereComponent* ProximitySphere = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "SwarmComponent")
@@ -53,5 +54,9 @@ public:
     UFUNCTION(BlueprintPure, Category = "SwarmComponent")
     float GetNumberOverlappingActors() { return NumOverlappingActors; }
 
-	
+
+#if WITH_EDITOR
+    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+
 };
