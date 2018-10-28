@@ -8,6 +8,7 @@
 #include "Engine/World.h"
 #include "SProjectileWeapon.h"
 #include "Sound/SoundCue.h"
+#include "DamageDealer.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -106,6 +107,13 @@ void ASProjectile::Explode()
     TArray<AActor*> IgnoredActors = { this, GetOwner(), Instigator };
     if (Role == ROLE_Authority)
     {
+
+        IDamageDealer* DamageDealer = Cast<IDamageDealer>(GetInstigator());
+        float ActualDamage = WeaponData.ProjectileDamage;
+        if (DamageDealer)
+        {
+            ActualDamage += (DamageDealer->GetDamageModifier() / 100) * ActualDamage;
+        }
         UGameplayStatics::ApplyRadialDamage(GetWorld(), WeaponData.ProjectileDamage, GetActorLocation(), WeaponData.ProjectileRadius, WeaponData.ProjectileDamageType, IgnoredActors, Instigator, Instigator->GetController(), true);
     }
 

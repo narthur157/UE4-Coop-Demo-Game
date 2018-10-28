@@ -66,7 +66,7 @@ void ASHitscanWeapon::Fire()
             float ActualDamage = BaseDamage;
             if (DamageDealer)
             {
-                ActualDamage += (DamageDealer->GetDamageModifier() / 100) * BaseDamage;
+                ActualDamage += (DamageDealer->GetDamageModifier() / 100) * ActualDamage;
             }
             if (SurfaceType == SURFACE_FLESHVULNERABLE)
             {

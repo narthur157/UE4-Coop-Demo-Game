@@ -103,8 +103,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-    
-
     // IDamageDealer
     virtual float GetDamageModifier() override { return DamageModifier; }
 
