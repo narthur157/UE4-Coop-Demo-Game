@@ -12,7 +12,8 @@ APickupActor::APickupActor()
 {
 
     SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
-    SphereComp->SetSphereRadius(75);
+    SphereComp->SetSphereRadius(70);
+    SphereComp->SetCollisionProfileName("Sensor");
     RootComponent = SphereComp;
 
     DecalComp = CreateDefaultSubobject<UDecalComponent>(TEXT("DecalComponent"));
