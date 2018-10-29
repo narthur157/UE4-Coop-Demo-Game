@@ -12,14 +12,16 @@ APickupActor::APickupActor()
 {
 
     SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
-    SphereComp->SetSphereRadius(70);
     SphereComp->SetCollisionProfileName("Sensor");
+    SphereComp->SetSphereRadius(70.0f);
     RootComponent = SphereComp;
+
 
     DecalComp = CreateDefaultSubobject<UDecalComponent>(TEXT("DecalComponent"));
     DecalComp->SetRelativeRotation(FRotator(90, 0, 0));
-    DecalComp->DecalSize = FVector(64, 75, 75);
+    DecalComp->DecalSize = FVector(64, 70.0f, 70.0f);
     DecalComp->SetupAttachment(RootComponent);
+
 }
 
 // Called when the game starts or when spawned
@@ -40,7 +42,6 @@ void APickupActor::Respawn()
     FActorSpawnParameters SpawnParams;
     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
     PowerupInstance = GetWorld()->SpawnActor<ASPowerupActor>(PowerupClass, GetTransform(), SpawnParams);
-
 }
 
 void APickupActor::NotifyActorBeginOverlap(AActor * OtherActor)
@@ -55,6 +56,19 @@ void APickupActor::NotifyActorBeginOverlap(AActor * OtherActor)
         // Respawn timer
         GetWorld()->GetTimerManager().SetTimer(TimerHandle_RespawnTimer, this, &APickupActor::Respawn, CooldownDuration);
     }
-
 }
+
+#if WITH_EDITOR
+void APickupActor::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+
+    FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
+
+    if ((PropertyName == FName(TEXT("SphereComp"))))
+    {
+        DecalComp->DecalSize = FVector(64, SphereComp->GetUnscaledSphereRadius(), SphereComp->GetUnscaledSphereRadius());
+    }
+}
+#endif
 

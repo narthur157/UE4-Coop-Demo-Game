@@ -53,7 +53,8 @@ public:
     UFUNCTION(BlueprintPure, Category = "SwarmComponent")
     float GetNumberOverlappingActors() { return NumOverlappingActors; }
 
-    // TODO: Currently this is not attached to the owning actor and instead spawns at 0,0,0. Find workaround
+    // TODO: Currently this is not attached to the owning actor and instead spawns at 0,0,0. 
+    // Find workaround (just draw a circle instead?)
 #if WITH_EDITOR
     virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif

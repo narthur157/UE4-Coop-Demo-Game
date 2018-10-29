@@ -32,7 +32,6 @@ protected:
     float CooldownDuration = 0.0f;
     FTimerHandle TimerHandle_RespawnTimer;
 
-
     UPROPERTY(EditDefaultsOnly, Category = "Powerup")
     TSubclassOf<ASPowerupActor> PowerupClass = nullptr;
 
@@ -44,4 +43,8 @@ public:
 
     virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	
+#if WITH_EDITOR
+    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+
 };
