@@ -47,5 +47,7 @@ protected:
     void PrepareForNextWave();
 
     void CheckWaveState();
+    void CheckPlayerState();
 
+    void GameOver();
 };

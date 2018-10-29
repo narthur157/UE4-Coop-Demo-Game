@@ -117,7 +117,7 @@ void ASTrackerBot::SelfDestruct()
     if (Role == ROLE_Authority)
     {
         TArray<AActor*> IgnoredActors = { this };
-        float ActualDamage = ExplosionDamage * GetDamageModifier();
+        float ActualDamage = ((GetDamageModifier() / 100) * ExplosionDamage) + ExplosionDamage;
         UGameplayStatics::ApplyRadialDamage(this, ActualDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), true);
         // Give clients a chance to play effects
         SetLifeSpan(4.0);
