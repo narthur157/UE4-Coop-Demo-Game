@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SHealthComponent.h"
+#include "SGameMode.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -39,15 +40,26 @@ void USHealthComponent::BeginPlay()
     }
 }
 
+// This only runs onn server because we are only binding to this delegate onn server
 void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
-    if (Damage <= 0)
+    if (Damage <= 0 || bIsDead)
     {
         return;
     }
 
     Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
     OnHealthChanged.Broadcast(this, Health, Damage, DamageType, InstigatedBy, DamageCauser);
+
+    if (Health <= 0 && !bIsDead)
+    {
+        bIsDead = true;
+        ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
+        if (GM)
+        {
+            GM->OnActorKilled.Broadcast(GetOwner(), DamageCauser, InstigatedBy);
+        }
+    }
 }
 
 void USHealthComponent::OnRep_Health(float OldHealth)

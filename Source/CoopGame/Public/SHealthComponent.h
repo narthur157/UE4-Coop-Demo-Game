@@ -34,6 +34,8 @@ protected:
     UFUNCTION()
     void OnRep_Health(float OldHealth);
 
+    bool bIsDead = false;
+
 public:	
 
     UPROPERTY(BlueprintAssignable, Category = "HealthComponentEvents")
