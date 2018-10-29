@@ -38,5 +38,8 @@ public:
 
     UPROPERTY(BlueprintAssignable, Category = "HealthComponentEvents")
     FOnHealthChangedSignature OnHealthChanged;
+
+    UFUNCTION(BlueprintCallable, Category = "HealthComponent")
+    void Heal(float HealAmount);
 	
 };

@@ -28,11 +28,11 @@ protected:
     UPROPERTY(VisibleAnywhere, Category = "Components")
     UDecalComponent* DecalComp = nullptr;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Powerup")
-    float CooldownDuration = 0.0f;
+    UPROPERTY(EditInstanceOnly, Category = "Powerup")
+    float CooldownDuration = 10.0f;
     FTimerHandle TimerHandle_RespawnTimer;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Powerup")
+    UPROPERTY(EditInstanceOnly, Category = "Powerup")
     TSubclassOf<ASPowerupActor> PowerupClass = nullptr;
 
     ASPowerupActor* PowerupInstance = nullptr;
@@ -48,3 +48,4 @@ public:
 #endif
 
 };
+
