@@ -2,6 +2,7 @@
 
 #include "SHealthComponent.h"
 #include "SGameMode.h"
+#include "CoopGame.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -18,7 +19,6 @@ USHealthComponent::USHealthComponent()
 void USHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
     DOREPLIFETIME(USHealthComponent, Health);
 
 }
@@ -49,10 +49,22 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
     }
 
     Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
+
+    
+    FString InstigatedByS = InstigatedBy && InstigatedBy->GetPawn() ? *InstigatedBy->GetPawn()->GetName() : NULLSTRING;
+    FString DamageCauserS = DamageCauser ? *DamageCauser->GetName() : NULLSTRING;
+    TRACE("%s inflicts %f damage on %s using %s . Current Health: %f",
+        *InstigatedByS, 
+        Damage, 
+        *GetOwner()->GetName(), 
+        *DamageCauserS,
+        Health);
+
     OnHealthChanged.Broadcast(this, Health, Damage, DamageType, InstigatedBy, DamageCauser);
 
     if (Health <= 0 && !bIsDead)
     {
+        TRACE("%s has died.", *GetOwner()->GetName());
         bIsDead = true;
         ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
         if (GM)
@@ -65,9 +77,9 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
 void USHealthComponent::OnRep_Health(float OldHealth)
 {
     float Damage = Health - OldHealth;
+    TRACE("%s Health changed. Current Health: %f", *GetOwner()->GetName(), Health);
     OnHealthChanged.Broadcast(this, Health, Damage, nullptr, nullptr, nullptr);
 }
-
 
 void USHealthComponent::Heal(float HealAmount)
 {
@@ -76,8 +88,8 @@ void USHealthComponent::Heal(float HealAmount)
         return;
     }
 
+    TRACE("%s healed for %f hp.", *GetOwner()->GetName(), HealAmount);
     Health = FMath::Clamp(Health + HealAmount, 0.0f, MaxHealth);
-
     OnHealthChanged.Broadcast(this, Health, -HealAmount, nullptr, nullptr, nullptr);
 
 }

@@ -4,6 +4,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/DecalComponent.h"
 #include "Engine/World.h"
+#include "CoopGame.h"
 #include "TimerManager.h"
 #include "SPowerupActor.h"
 
@@ -42,10 +43,11 @@ void APickupActor::Respawn()
         UE_LOG(LogTemp, Error, TEXT("Powerup Class is null. %s"), *GetName());
         return;
     }
-
+   
     FActorSpawnParameters SpawnParams;
     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
     PowerupInstance = GetWorld()->SpawnActor<ASPowerupActor>(PowerupClass, GetTransform(), SpawnParams);
+    TRACE("%s spawned. Powerup: %s", *GetName(), *PowerupInstance->GetName());
 }
 
 void APickupActor::NotifyActorBeginOverlap(AActor * OtherActor)
@@ -54,9 +56,9 @@ void APickupActor::NotifyActorBeginOverlap(AActor * OtherActor)
 
     if (Role == ROLE_Authority && PowerupInstance)
     {
+        TRACE("%s overlapped. Applying powerup: %s", *GetName(), *PowerupInstance->GetName());
         PowerupInstance->ActivatePowerup(OtherActor);
         PowerupInstance = nullptr;
-
         // Respawn timer
         GetWorld()->GetTimerManager().SetTimer(TimerHandle_RespawnTimer, this, &APickupActor::Respawn, CooldownDuration);
     }

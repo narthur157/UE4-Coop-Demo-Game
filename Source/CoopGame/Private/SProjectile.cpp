@@ -114,7 +114,7 @@ void ASProjectile::Explode()
         {
             ActualDamage += (DamageDealer->GetDamageModifier() / 100) * ActualDamage;
         }
-        UGameplayStatics::ApplyRadialDamage(GetWorld(), WeaponData.ProjectileDamage, GetActorLocation(), WeaponData.ProjectileRadius, WeaponData.ProjectileDamageType, IgnoredActors, Instigator, Instigator->GetController(), true);
+        UGameplayStatics::ApplyRadialDamage(GetWorld(), WeaponData.ProjectileDamage, GetActorLocation(), WeaponData.ProjectileRadius, WeaponData.ProjectileDamageType, IgnoredActors, GetOwner(), Instigator->GetController(), true);
     }
 
     SetActorHiddenInGame(true);
