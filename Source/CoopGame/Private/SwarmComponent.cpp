@@ -101,26 +101,3 @@ void USwarmComponent::PostEditChangeProperty(FPropertyChangedEvent & PropertyCha
 }
 #endif
 
-//// Sets default values for this component's properties
-//USwarmComponent::USwarmComponent()
-//{
-//    ProximitySphere = CreateDefaultSubobject<USphereComponent>(TEXT("ProximitySphere"));
-//    if (ProximitySphere)
-//    {
-//        ProximitySphere->OnComponentBeginOverlap.AddDynamic(this, &USwarmComponent::OnProximityOverlap);
-//        ProximitySphere->OnComponentEndOverlap.AddDynamic(this, &USwarmComponent::OnProximityEndOverlap);
-//        ProximitySphere->SetSphereRadius(ProximityRadius, true);
-//        ProximitySphere->SetCollisionResponseToChannel(COLLISION_WEAPON, ECollisionResponse::ECR_Ignore);
-//        ProximitySphere->SetCollisionResponseToChannel(COLLISION_PROJECTILE, ECollisionResponse::ECR_Ignore);
-//    }
-//}
-//
-//// Called when the game starts
-//void USwarmComponent::BeginPlay()
-//{
-//    Super::BeginPlay();
-//    ProximitySphere->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-//
-//    //TODO: Find better name than stuff
-//    //InitializeOverlappingStuff();
-//}
