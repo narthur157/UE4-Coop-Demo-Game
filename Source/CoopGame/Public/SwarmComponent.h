@@ -36,7 +36,6 @@ protected:
     int32 NumOverlappingActors = 0;
     float PowerLevel = 0.0f;
 
-
     void InitializeOverlappingStuff();
 
 public:	
@@ -54,7 +53,7 @@ public:
     UFUNCTION(BlueprintPure, Category = "SwarmComponent")
     float GetNumberOverlappingActors() { return NumOverlappingActors; }
 
-
+    // TODO: Currently this is not attached to the owning actor and instead spawns at 0,0,0. Find workaround
 #if WITH_EDITOR
     virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
