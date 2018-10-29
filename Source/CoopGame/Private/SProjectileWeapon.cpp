@@ -28,6 +28,7 @@ void ASProjectileWeapon::Fire()
         FActorSpawnParameters SpawnParams;
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
         SpawnParams.Instigator = Cast<APawn>(GetOwner());
+        SpawnParams.Owner = this;
         ASProjectile* NewProjectile = GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, ProjectileSpawnLocation, ProjectileSpawnRotation, SpawnParams);
 
         NewProjectile->Initialize(ProjectileWeaponConfigData);

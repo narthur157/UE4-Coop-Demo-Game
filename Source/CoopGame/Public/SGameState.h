@@ -17,7 +17,6 @@ enum class EWaveState : uint8
 
 };
 
-
 /**
  * 
  */
