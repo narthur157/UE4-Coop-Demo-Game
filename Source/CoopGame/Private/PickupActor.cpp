@@ -12,15 +12,16 @@ APickupActor::APickupActor()
 {
 
     SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
-    SphereComp->SetCollisionProfileName("Sensor");
     SphereComp->SetSphereRadius(70.0f);
+    SphereComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+    SphereComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Overlap);
     RootComponent = SphereComp;
-
 
     DecalComp = CreateDefaultSubobject<UDecalComponent>(TEXT("DecalComponent"));
     DecalComp->SetRelativeRotation(FRotator(90, 0, 0));
     DecalComp->DecalSize = FVector(64, 70.0f, 70.0f);
     DecalComp->SetupAttachment(RootComponent);
+    SetReplicates(true);
 
 }
 
@@ -28,7 +29,10 @@ APickupActor::APickupActor()
 void APickupActor::BeginPlay()
 {
 	Super::BeginPlay();
-    Respawn();
+    if (Role == ROLE_Authority)
+    {
+        Respawn();
+    }
 }
 
 void APickupActor::Respawn()
@@ -48,9 +52,9 @@ void APickupActor::NotifyActorBeginOverlap(AActor * OtherActor)
 {
     Super::NotifyActorBeginOverlap(OtherActor);
 
-    if (PowerupInstance)
+    if (Role == ROLE_Authority && PowerupInstance)
     {
-        PowerupInstance->ActivatePowerup();
+        PowerupInstance->ActivatePowerup(OtherActor);
         PowerupInstance = nullptr;
 
         // Respawn timer

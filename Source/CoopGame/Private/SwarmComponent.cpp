@@ -12,10 +12,10 @@ USwarmComponent::USwarmComponent()
         ProximitySphere->OnComponentBeginOverlap.AddDynamic(this, &USwarmComponent::OnProximityOverlap);
         ProximitySphere->OnComponentEndOverlap.AddDynamic(this, &USwarmComponent::OnProximityEndOverlap);
         ProximitySphere->SetSphereRadius(ProximityRadius, true);
-        ProximitySphere->SetCollisionProfileName("Sensor");
-        ProximitySphere->SetCollisionObjectType(COLLISION_SENSOR);
-        ProximitySphere->SetCollisionResponseToChannel(COLLISION_WEAPON, ECollisionResponse::ECR_Ignore);
-        ProximitySphere->SetCollisionResponseToChannel(COLLISION_PROJECTILE, ECollisionResponse::ECR_Ignore);
+        //ProximitySphere->SetCollisionProfileName("Sensor");
+        //ProximitySphere->SetCollisionObjectType(COLLISION_SENSOR);
+        ProximitySphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+        ProximitySphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Overlap);
     }
 }
 
@@ -84,20 +84,20 @@ void USwarmComponent::OnProximityEndOverlap(UPrimitiveComponent * OverlappedComp
 }   
 
 
-#if WITH_EDITOR
-void USwarmComponent::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
-{
-    UE_LOG(LogTemp, Warning, TEXT("Changed"))
-    Super::PostEditChangeProperty(PropertyChangedEvent);
-
-    FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
-
-    if ((PropertyName == GET_MEMBER_NAME_CHECKED(USwarmComponent, ProximityRadius)))
-    {
-        UFloatProperty* property = static_cast<UFloatProperty*>(PropertyChangedEvent.Property);
-        ProximityRadius = property->GetPropertyValue(&ProximityRadius);
-        ProximitySphere->SetSphereRadius(ProximityRadius);
-    }
-}
-#endif
+//#if WITH_EDITOR
+//void USwarmComponent::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
+//{
+//    UE_LOG(LogTemp, Warning, TEXT("Changed"))
+//    Super::PostEditChangeProperty(PropertyChangedEvent);
+//
+//    FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
+//
+//    if ((PropertyName == GET_MEMBER_NAME_CHECKED(USwarmComponent, ProximityRadius)))
+//    {
+//        UFloatProperty* property = static_cast<UFloatProperty*>(PropertyChangedEvent.Property);
+//        ProximityRadius = property->GetPropertyValue(&ProximityRadius);
+//        ProximitySphere->SetSphereRadius(ProximityRadius);
+//    }
+//}
+//#endif
 

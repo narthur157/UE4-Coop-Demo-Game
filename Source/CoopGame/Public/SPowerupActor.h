@@ -35,13 +35,21 @@ protected:
     UFUNCTION()
     void OnTickPowerup();
 
+    UPROPERTY(ReplicatedUsing=OnRep_PowerupActive)
+    bool bIsPowerupActive = false;
+
+    UFUNCTION()
+    void OnRep_PowerupActive();
+
+    UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
+    void OnPowerupStateChanged(bool bNewIsActive);
 
 public:	
 
-    void ActivatePowerup();
+    void ActivatePowerup(AActor* InstigatorActor);
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
-    void OnActivated();
+    void OnActivated(AActor* InstigatorActor);
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
     void OnPowerupTicked();
