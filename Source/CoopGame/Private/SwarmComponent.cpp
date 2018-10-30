@@ -86,23 +86,3 @@ void USwarmComponent::OnProximityEndOverlap(UPrimitiveComponent * OverlappedComp
         }
     }
 }   
-
-// broken
-
-//#if WITH_EDITOR
-//void USwarmComponent::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
-//{
-//    UE_LOG(LogTemp, Warning, TEXT("Changed"))
-//    Super::PostEditChangeProperty(PropertyChangedEvent);
-//
-//    FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
-//
-//    if ((PropertyName == GET_MEMBER_NAME_CHECKED(USwarmComponent, ProximityRadius)))
-//    {
-//        UFloatProperty* property = static_cast<UFloatProperty*>(PropertyChangedEvent.Property);
-//        ProximityRadius = property->GetPropertyValue(&ProximityRadius);
-//        ProximitySphere->SetSphereRadius(ProximityRadius);
-//    }
-//}
-//#endif
-
