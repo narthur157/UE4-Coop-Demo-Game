@@ -83,7 +83,6 @@ FVector ASTrackerBot::GetNextPathPoint()
 void ASTrackerBot::OnTakeDamage(USHealthComponent * ChangedHealthComp, float Health, float HealthDelta, 
     const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
-
     if (Health <= 0)
     {
         SelfDestruct();
@@ -101,6 +100,7 @@ void ASTrackerBot::OnTakeDamage(USHealthComponent * ChangedHealthComp, float Hea
 
 void ASTrackerBot::SelfDestruct()
 {
+    if (bExploded) { return; }
 
     bExploded = true;
     OnRep_Exploded();
@@ -146,17 +146,26 @@ void ASTrackerBot::MoveTowardsTarget()
 
 void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-    if (!OtherActor)
-    {
-        return;
-    }
     APawn* OtherActorPawn = Cast<APawn>(OtherActor);
     if (OtherActorPawn && !bSelfDestructionAttached && !bExploded)
     {
         if (Role == ROLE_Authority)
         {
             USkeletalMeshComponent* OtherMesh = OtherActorPawn->FindComponentByClass<USkeletalMeshComponent>();
-            if (OtherMesh)
+
+            bool ActorHasTrackerBot = false;
+            TArray<AActor*> AttachedActors;
+            OtherActorPawn->GetAttachedActors(AttachedActors);
+            for (AActor* Actor : AttachedActors)
+            {
+                if (Actor->IsA<ASTrackerBot>())
+                {
+                    ActorHasTrackerBot = true;
+                    break;
+                }
+            }
+
+            if (OtherMesh && !ActorHasTrackerBot)
             {
                 // TODO: Add function on actor (maybe even an interface) to add other actors like this one to sockets 
                 // As of right now multiple trigger bots can attach to the back slod and that's bad
@@ -167,10 +176,13 @@ void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComp
 
             GetWorldTimerManager().SetTimer(SelfDestructCountdownTimer, this, &ASTrackerBot::SelfDestruct, SelfDestructTime, false);
             ExplodeTime = GetWorld()->TimeSeconds + SelfDestructTime;
-
             OnRep_ExplodeTime();
         }
-        UGameplayStatics::SpawnSoundAttached(TriggeredSound, RootComponent);
+        if (!bTriggered)
+        {
+            UGameplayStatics::SpawnSoundAttached(TriggeredSound, RootComponent);
+            bTriggered = true;
+        }
     }
 }
 

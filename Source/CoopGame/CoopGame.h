@@ -4,17 +4,18 @@
 
 #include "CoreMinimal.h"
 
-#define NULLSTRING FString(TEXT("<<Unknown>>"));
+
 
 #define SURFACE_FLESHDEFAULT        SurfaceType1
 #define SURFACE_FLESHVULNERABLE     SurfaceType2
-
 
 #define COLLISION_PROJECTILE        ECC_GameTraceChannel1
 #define COLLISION_WEAPON            ECC_GameTraceChannel2
 #define COLLISION_SENSOR            ECC_GameTraceChannel3
 
 
+
+#define NULLSTRING FString(TEXT("<<Unknown>>"));
 
 // Logs
 DECLARE_LOG_CATEGORY_EXTERN(CATSpawning, All, All);
@@ -23,9 +24,7 @@ DECLARE_LOG_CATEGORY_EXTERN(CATGeneralActions, All, All);
 DECLARE_LOG_CATEGORY_EXTERN(CATDamage, All, All);
 
 
-
 // Net logging macro
-
 #define NETMODE_WORLD (((GEngine == nullptr) || (GetWorld() == nullptr)) ? TEXT("") \
         : (GEngine->GetNetMode(GetWorld()) == NM_Client) ? TEXT("[Client] ") \
         : (GEngine->GetNetMode(GetWorld()) == NM_ListenServer) ? TEXT("[ListenServer] ") \

@@ -10,13 +10,14 @@
 
 void ASProjectileWeapon::Fire()
 {
+    LastFireTime = GetWorld()->TimeSeconds;
+    UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+
     if (Role < ROLE_Authority)
     {
         ServerFire();
         return;
     }
-
-    UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 
     if (ProjectileClass && GetOwner())
     {
@@ -33,6 +34,5 @@ void ASProjectileWeapon::Fire()
 
         NewProjectile->Initialize(ProjectileWeaponConfigData);
         NewProjectile->Launch();
-        LastFireTime = GetWorld()->TimeSeconds;
     }
 }
