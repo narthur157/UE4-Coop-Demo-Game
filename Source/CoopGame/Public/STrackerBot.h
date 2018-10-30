@@ -69,6 +69,7 @@ protected:
     FVector NextPathPoint;
     void MoveTowardsTarget();
 
+    UPROPERTY(ReplicatedUsing=OnRep_Exploded)
     bool bExploded = false;
 
     UPROPERTY(ReplicatedUsing=OnRep_TrackerBotAttached)
@@ -83,6 +84,8 @@ protected:
     UFUNCTION()
     void OnRep_ExplodeTime();
 
+    UFUNCTION()
+    void OnRep_Exploded();
 
     FTimerHandle SelfDestructCountdownTimer;
     FTimerHandle SelfDestructionTickTimer;

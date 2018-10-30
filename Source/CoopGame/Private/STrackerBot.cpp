@@ -6,13 +6,13 @@
 #include "AI/Navigation/NavigationSystem.h"
 #include "GameFramework/Character.h"
 #include "AI/Navigation/NavigationPath.h"
-#include "DrawDebugHelpers.h"
 #include "SHealthComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "CoopGame.h"
+#include "GameFramework/GameState.h"
 #include "Components/SphereComponent.h"
 #include "Sound/SoundCue.h"
-#include "Particles/ParticleEmitter.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -40,6 +40,7 @@ void ASTrackerBot::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+    DOREPLIFETIME(ASTrackerBot, bExploded);
     DOREPLIFETIME(ASTrackerBot, ExplodeTime);
     DOREPLIFETIME(ASTrackerBot, bSelfDestructionAttached);
 
@@ -100,19 +101,9 @@ void ASTrackerBot::OnTakeDamage(USHealthComponent * ChangedHealthComp, float Hea
 
 void ASTrackerBot::SelfDestruct()
 {
-    if (bExploded)
-    {
-        return;
-    }
 
-    UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation());
-    UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
-    GetWorldTimerManager().ClearTimer(SelfDestructCountdownTimer);
-    GetWorldTimerManager().ClearTimer(SelfDestructionTickTimer);
     bExploded = true;
-    MeshComp->SetVisibility(false);
-    MeshComp->SetSimulatePhysics(false);
-    MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    OnRep_Exploded();
 
     if (Role == ROLE_Authority)
     {
@@ -155,7 +146,7 @@ void ASTrackerBot::MoveTowardsTarget()
 
 void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-    if (OtherComp != OtherActor->GetRootComponent())
+    if (!OtherActor)
     {
         return;
     }
@@ -169,13 +160,15 @@ void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComp
             {
                 // TODO: Add function on actor (maybe even an interface) to add other actors like this one to sockets 
                 // As of right now multiple trigger bots can attach to the back slod and that's bad
-                bSelfDestructionAttached = true;
                 OnRep_TrackerBotAttached();
                 AttachToComponent(OtherMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Back");
+                bSelfDestructionAttached = true;
             }
+
+            GetWorldTimerManager().SetTimer(SelfDestructCountdownTimer, this, &ASTrackerBot::SelfDestruct, SelfDestructTime, false);
             ExplodeTime = GetWorld()->TimeSeconds + SelfDestructTime;
-            GetWorldTimerManager().SetTimer(SelfDestructCountdownTimer, this, &ASTrackerBot::SelfDestruct, ExplodeTime - GetWorld()->TimeSeconds, false);
-            GetWorldTimerManager().SetTimer(SelfDestructionTickTimer, this, &ASTrackerBot::SelfDestructTick, (ExplodeTime - GetWorld()->TimeSeconds) / 4, false);
+
+            OnRep_ExplodeTime();
         }
         UGameplayStatics::SpawnSoundAttached(TriggeredSound, RootComponent);
     }
@@ -184,7 +177,7 @@ void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComp
 void ASTrackerBot::SelfDestructTick()
 {
     UGameplayStatics::SpawnSoundAttached(SelfDestructTickSound, RootComponent);
-    float TimeRemainingUntilDestruction = GetWorldTimerManager().GetTimerRemaining(SelfDestructCountdownTimer);
+    float TimeRemainingUntilDestruction = ExplodeTime - GetWorld()->TimeSeconds;
     GetWorldTimerManager().SetTimer(SelfDestructionTickTimer, this, &ASTrackerBot::SelfDestructTick, TimeRemainingUntilDestruction/4, false);
 
 }
@@ -192,16 +185,26 @@ void ASTrackerBot::SelfDestructTick()
 void ASTrackerBot::OnRep_ExplodeTime()
 {
     TRACE("%s started self destruct. Destruct time : %f", *GetName(), ExplodeTime);
-    GetWorldTimerManager().SetTimer(SelfDestructCountdownTimer, this, &ASTrackerBot::SelfDestruct, (ExplodeTime - GetWorld()->TimeSeconds), false);
     GetWorldTimerManager().SetTimer(SelfDestructionTickTimer, this, &ASTrackerBot::SelfDestructTick, (ExplodeTime - GetWorld()->TimeSeconds) / 4, false);
 }
 
 void ASTrackerBot::OnRep_TrackerBotAttached()
 {
-   
     MeshComp->SetSimulatePhysics(false);
     MeshComp->SetCollisionResponseToAllChannels(ECR_Ignore);
     MeshComp->SetCollisionResponseToChannel(COLLISION_PROJECTILE, ECR_Block);
     MeshComp->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Block);
 }
 
+void ASTrackerBot::OnRep_Exploded()
+{
+    TRACE("%s self destructed, time: %f", *GetName(), GetWorld()->TimeSeconds)
+    UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation());
+    UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
+    GetWorldTimerManager().ClearTimer(SelfDestructCountdownTimer);
+    GetWorldTimerManager().ClearTimer(SelfDestructionTickTimer);
+
+    MeshComp->SetVisibility(false);
+    MeshComp->SetSimulatePhysics(false);
+    MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
