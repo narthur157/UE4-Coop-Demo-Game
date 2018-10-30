@@ -57,7 +57,7 @@ void ASTrackerBot::BeginPlay()
     }
     ProximityExplosionRadius->OnComponentBeginOverlap.AddDynamic(this, &ASTrackerBot::OnProximityRadiusOverlap);
     ProximityExplosionRadius->SetSphereRadius(ProximityRadius, true);
-   
+    
 }
 
 FVector ASTrackerBot::GetNextPathPoint()
@@ -146,8 +146,10 @@ void ASTrackerBot::MoveTowardsTarget()
 
 void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
+
+    // TODO Implement team logic
     APawn* OtherActorPawn = Cast<APawn>(OtherActor);
-    if (OtherActorPawn && !bSelfDestructionAttached && !bExploded)
+    if (OtherActorPawn && !OtherActorPawn->IsA<ASTrackerBot>() && !bSelfDestructionAttached && !bExploded)
     {
         if (Role == ROLE_Authority)
         {
