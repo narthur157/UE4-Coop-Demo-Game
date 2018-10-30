@@ -43,7 +43,6 @@ void ASTrackerBot::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
     DOREPLIFETIME(ASTrackerBot, bExploded);
     DOREPLIFETIME(ASTrackerBot, ExplodeTime);
     DOREPLIFETIME(ASTrackerBot, bSelfDestructionAttached);
-
 }
 
 // Called when the game starts or when spawned

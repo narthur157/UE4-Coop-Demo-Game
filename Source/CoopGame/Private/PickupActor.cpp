@@ -23,7 +23,6 @@ APickupActor::APickupActor()
     DecalComp->DecalSize = FVector(64, 70.0f, 70.0f);
     DecalComp->SetupAttachment(RootComponent);
     SetReplicates(true);
-
 }
 
 // Called when the game starts or when spawned
