@@ -11,7 +11,6 @@ USwarmComponent::USwarmComponent()
     {
         ProximitySphere->OnComponentBeginOverlap.AddDynamic(this, &USwarmComponent::OnProximityOverlap);
         ProximitySphere->OnComponentEndOverlap.AddDynamic(this, &USwarmComponent::OnProximityEndOverlap);
-        ProximitySphere->SetSphereRadius(ProximityRadius, true);
         //ProximitySphere->SetCollisionProfileName("Sensor");
         //ProximitySphere->SetCollisionObjectType(COLLISION_SENSOR);
         ProximitySphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
@@ -23,6 +22,7 @@ USwarmComponent::USwarmComponent()
 void USwarmComponent::BeginPlay()
 {
     Super::BeginPlay();
+    ProximitySphere->SetSphereRadius(ProximityRadius, true);
     ProximitySphere->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 
 }
@@ -49,10 +49,12 @@ void USwarmComponent::InitializeOverlappingStuff()
 
 void USwarmComponent::OnProximityOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
+        
     if (!OtherActor || OtherActor == GetOwner()) { return; }
-    
+
     for (int32 i = 0; i < PowerUpActors.Num(); i++)
     {
+
         if (OtherActor->IsA(PowerUpActors[i]))
         {
             NumOverlappingActors++;
