@@ -57,6 +57,7 @@ void USwarmComponent::OnProximityOverlap(UPrimitiveComponent * OverlappedCompone
         {
             NumOverlappingActors++;
             PowerLevel = NumOverlappingActors * PowerGainedPerActor;
+            TRACE("SwarmIncrease. Actor: %s, Overlapped: %s, PowerLevel: %f", *GetOwner()->GetName(), *OtherActor->GetName(), PowerLevel)
             OnPowerLevelChanged.Broadcast(NumOverlappingActors, PowerLevel);
         }
     }
@@ -78,11 +79,13 @@ void USwarmComponent::OnProximityEndOverlap(UPrimitiveComponent * OverlappedComp
                 NumOverlappingActors = 0;
             }
             PowerLevel = NumOverlappingActors * PowerGainedPerActor;
+            TRACE("SwarmDecrease. Actor: %s, Overlapped: %s, PowerLevel: %f", *GetOwner()->GetName(), *OtherActor->GetName(), PowerLevel);
             OnPowerLevelChanged.Broadcast(NumOverlappingActors, PowerLevel);
         }
     }
 }   
 
+// broken
 
 //#if WITH_EDITOR
 //void USwarmComponent::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)

@@ -69,17 +69,19 @@ protected:
     FVector NextPathPoint;
     void MoveTowardsTarget();
 
+    bool bTriggered = false;
+
     UPROPERTY(ReplicatedUsing=OnRep_Exploded)
     bool bExploded = false;
 
     UPROPERTY(ReplicatedUsing=OnRep_TrackerBotAttached)
     bool bSelfDestructionAttached = false;
 
+    UPROPERTY(ReplicatedUsing = OnRep_ExplodeTime)
+    float ExplodeTime = 0.0f;
+
     UFUNCTION()
     void OnRep_TrackerBotAttached();
-
-    UPROPERTY(ReplicatedUsing=OnRep_ExplodeTime)
-    float ExplodeTime;
 
     UFUNCTION()
     void OnRep_ExplodeTime();
