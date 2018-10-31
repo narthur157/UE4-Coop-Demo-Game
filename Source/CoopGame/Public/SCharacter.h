@@ -58,10 +58,6 @@ protected:
 
     float DefaultFOV;
 
-    void StartFire();
-
-    void StopFire();
-
     UPROPERTY(VisibleDefaultsOnly, Category = "Player")
     FName WeaponSocket = "WeaponSocket";
 
@@ -116,4 +112,10 @@ public:
 	
     // IDamageDealer
     virtual float GetDamageModifier() override { return DamageModifier; }
+
+    UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
+        void StartFire();
+
+    UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
+        void StopFire();
 };

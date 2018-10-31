@@ -30,8 +30,6 @@ class COOPGAME_API ASHitscanWeapon : public ASWeapon
 {
 	GENERATED_BODY()
 	
-	
-public:
 
 protected:
 
@@ -40,6 +38,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     float BaseDamage = 20.0f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (ClampMin=0.0f))
+    float BulletSpread = 0.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
     UParticleSystem* DefaultImpactEffect = nullptr;

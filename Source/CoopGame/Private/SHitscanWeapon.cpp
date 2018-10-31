@@ -28,6 +28,7 @@ void ASHitscanWeapon::Fire()
        ServerFire();
    }
 
+
     AActor* Owner = GetOwner();
     if (Owner)
     {
@@ -37,7 +38,7 @@ void ASHitscanWeapon::Fire()
         FVector EyeLocation;
         FRotator EyeRotation;
         Owner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
-        FVector TraceEnd = EyeLocation + (EyeRotation.Vector() * 1000000);
+        
 
         FCollisionQueryParams QueryParams;
         QueryParams.AddIgnoredActor(Owner);
@@ -46,16 +47,22 @@ void ASHitscanWeapon::Fire()
         QueryParams.bReturnPhysicalMaterial = true;
 
         // The value of the end point of the trace. If hit, hit location. Else, max trace range location
-        FVector TraceEndPoint = TraceEnd;
+       
+
+        // Bullet Spread
+        float HalfRad = FMath::DegreesToRadians(BulletSpread);
+        FVector ShotDirection = FMath::VRandCone(EyeRotation.Vector(), HalfRad, HalfRad);
 
         EPhysicalSurface SurfaceType = SurfaceType_Default;
+
+        FVector TraceEnd = EyeLocation + (ShotDirection * 1000000);
+        FVector TraceEndPoint = TraceEnd;
 
         FHitResult Hit;
         if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd, COLLISION_WEAPON, QueryParams))
         {
             // On Hit
             AActor* HitActor = Hit.GetActor();
-            FVector ShotDirection = EyeRotation.Vector();
 
             // Get surface type to use to calculate damage multipler/impact effects
             SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
