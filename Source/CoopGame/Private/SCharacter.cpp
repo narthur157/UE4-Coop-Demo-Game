@@ -266,6 +266,7 @@ void ASCharacter::OnHealthChanged(USHealthComponent * ChangedHealthComp, float H
     if (Health <= 0.0f && !bDied)
     {
         bDied = true;
+        StopFire();
         // Die
 
         GetMovementComponent()->StopMovementImmediately();
