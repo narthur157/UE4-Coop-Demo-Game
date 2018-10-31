@@ -33,6 +33,7 @@ ASTrackerBot::ASTrackerBot()
     ProximityExplosionRadius->SetupAttachment(RootComponent);
     ProximityExplosionRadius->SetCollisionResponseToAllChannels(ECR_Ignore);
     ProximityExplosionRadius->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+    //.
 
 }
 
@@ -50,30 +51,57 @@ void ASTrackerBot::BeginPlay()
 {
 	Super::BeginPlay();
 
-    if (Role == ROLE_Authority)
-    {
-        FVector NextPathPoint = GetNextPathPoint();
-    }
     ProximityExplosionRadius->OnComponentBeginOverlap.AddDynamic(this, &ASTrackerBot::OnProximityRadiusOverlap);
     ProximityExplosionRadius->SetSphereRadius(ProximityRadius, true);
+
+    if (Role == ROLE_Authority)
+    {
+        NextPathPoint = GetNextPathPoint();
+    }
     
+    if (!MatInstance && MeshComp)
+    {
+        MatInstance = MeshComp->CreateAndSetMaterialInstanceDynamicFromMaterial(0, MeshComp->GetMaterial(0));
+    }
 }
 
 FVector ASTrackerBot::GetNextPathPoint()
 {
-    // HAck
-    ACharacter* PlayerPawn = UGameplayStatics::GetPlayerCharacter(this, 0);
-    if (!PlayerPawn)
+    AActor* BestTarget = nullptr;
+    float NearestTargetDistance = FLT_MAX;
+
+    for (FConstPawnIterator It = GetWorld()->GetPawnIterator(); It; ++It)
     {
-        return GetActorLocation();
+        APawn* TestPawn = It->Get();
+        if (!TestPawn || TestPawn == this || USHealthComponent::IsFriendly(TestPawn, this))
+        {
+            continue;
+        }
+        USHealthComponent* HealthComp = TestPawn->FindComponentByClass<USHealthComponent>();
+        if (HealthComp && HealthComp->GetHealth() > 0)
+        {
+            // Bot is still alive, check and store nearest target if this target is closer than the previous nearest
+            float Distance = (TestPawn->GetActorLocation() - GetActorLocation()).Size();
+            if (NearestTargetDistance > Distance)
+            {
+                BestTarget = TestPawn;
+                NearestTargetDistance = Distance;
+            }
+        }
     }
 
-    UNavigationPath* NavPath = UNavigationSystem::FindPathToActorSynchronously(this, GetActorLocation(), PlayerPawn);
-
-    if (NavPath && NavPath->PathPoints.Num() > 1)
+    if (BestTarget)
     {
-        // Next point
-        return NavPath->PathPoints[1];
+        UNavigationPath* NavPath = UNavigationSystem::FindPathToActorSynchronously(this, GetActorLocation(), BestTarget);
+
+        GetWorldTimerManager().ClearTimer(TimerHandle_RefreshPath);
+        GetWorldTimerManager().SetTimer(TimerHandle_RefreshPath, this, &ASTrackerBot::RefreshPath, 5.0f, false);
+
+        if (NavPath && NavPath->PathPoints.Num() > 1)
+        {
+            // Next point
+            return NavPath->PathPoints[1];
+        }
     }
 
     return GetActorLocation();
@@ -85,10 +113,6 @@ void ASTrackerBot::OnTakeDamage(USHealthComponent * ChangedHealthComp, float Hea
     if (Health <= 0)
     {
         SelfDestruct();
-    }
-    if (!MatInstance && MeshComp)
-    {
-        MatInstance = MeshComp->CreateAndSetMaterialInstanceDynamicFromMaterial(0, MeshComp->GetMaterial(0));
     }
     if (MatInstance->IsValidLowLevel())
     {
@@ -134,11 +158,10 @@ void ASTrackerBot::MoveTowardsTarget()
     }
     else
     {
+        // Need to move towards the current NextPathPoint
         FVector ForceDirection = NextPathPoint - GetActorLocation();
         ForceDirection.Normalize();
         ForceDirection *= MovementForce;
-
-        // Keep moving on
         MeshComp->AddForce(ForceDirection, NAME_None, bUseVelocityChange);
     }
 }
@@ -146,35 +169,38 @@ void ASTrackerBot::MoveTowardsTarget()
 void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
 
-    // TODO Implement team logic
     APawn* OtherActorPawn = Cast<APawn>(OtherActor);
-    if (OtherActorPawn && !OtherActorPawn->IsA<ASTrackerBot>() && !bSelfDestructionAttached && !bExploded)
+    // If the other actor 
+    if (OtherActorPawn && OtherActorPawn != this && !USHealthComponent::IsFriendly(OtherActorPawn, this))
     {
         if (Role == ROLE_Authority)
         {
             USkeletalMeshComponent* OtherMesh = OtherActorPawn->FindComponentByClass<USkeletalMeshComponent>();
 
-            bool ActorHasTrackerBot = false;
-            TArray<AActor*> AttachedActors;
-            OtherActorPawn->GetAttachedActors(AttachedActors);
-            for (AActor* Actor : AttachedActors)
+            if (OtherMesh)
             {
-                if (Actor->IsA<ASTrackerBot>())
+                bool ActorHasTrackerBot = false;
+                TArray<AActor*> AttachedActors;
+                OtherActorPawn->GetAttachedActors(AttachedActors);
+                for (AActor* Actor : AttachedActors)
                 {
-                    ActorHasTrackerBot = true;
-                    break;
+                    if (Actor->IsA<ASTrackerBot>())
+                    {
+                        ActorHasTrackerBot = true;
+                        break;
+                    }
+                }
+
+                if (!ActorHasTrackerBot)
+                {
+                    // TODO: Add function on actor (maybe even an interface) to add other actors like this one to sockets 
+                    // As of right now multiple trigger bots can attach to the back slod and that's bad
+                    OnRep_TrackerBotAttached();
+                    AttachToComponent(OtherMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Back");
+                    bSelfDestructionAttached = true;
                 }
             }
-
-            if (OtherMesh && !ActorHasTrackerBot)
-            {
-                // TODO: Add function on actor (maybe even an interface) to add other actors like this one to sockets 
-                // As of right now multiple trigger bots can attach to the back slod and that's bad
-                OnRep_TrackerBotAttached();
-                AttachToComponent(OtherMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Back");
-                bSelfDestructionAttached = true;
-            }
-
+            
             GetWorldTimerManager().SetTimer(SelfDestructCountdownTimer, this, &ASTrackerBot::SelfDestruct, SelfDestructTime, false);
             ExplodeTime = GetWorld()->TimeSeconds + SelfDestructTime;
             OnRep_ExplodeTime();
@@ -185,6 +211,11 @@ void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComp
             bTriggered = true;
         }
     }
+}
+
+void ASTrackerBot::RefreshPath()
+{
+   NextPathPoint = GetNextPathPoint();
 }
 
 void ASTrackerBot::SelfDestructTick()
