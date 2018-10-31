@@ -18,7 +18,6 @@ ASCharacter::ASCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-
     SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
     SpringArmComp->SetupAttachment(RootComponent);
     SpringArmComp->bUsePawnControlRotation = true;
@@ -230,7 +229,6 @@ bool ASCharacter::ServerEquipWeapon_Validate(ASWeapon* Weapon)
     return true;
 }
 
-
 void ASCharacter::ChangeWeapon()
 {
     if (WeaponInventory.Num() == 0)
@@ -247,6 +245,7 @@ void ASCharacter::ChangeWeapon()
     else
     {
         UE_LOG(LogTemp, Warning, TEXT("WeaponSwap Success"));
+        StopFire();
         int32 CurrentWeaponIndex = WeaponInventory.Find(CurrentWeapon);
         if (CurrentWeaponIndex == WeaponInventory.Num() - 1)
         {

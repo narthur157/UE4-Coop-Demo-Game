@@ -43,14 +43,13 @@ void USHealthComponent::BeginPlay()
 // This only runs onn server because we are only binding to this delegate onn server
 void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
-    if (Damage <= 0 || bIsDead)
+    if (Damage <= 0 || bIsDead || (InstigatedBy && IsFriendly(DamagedActor, InstigatedBy->GetPawn())))
     {
         return;
     }
 
     Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
 
-    
     FString InstigatedByS = InstigatedBy && InstigatedBy->GetPawn() ? *InstigatedBy->GetPawn()->GetName() : NULLSTRING;
     FString DamageCauserS = DamageCauser ? *DamageCauser->GetName() : NULLSTRING;
     TRACE("%s inflicts %f damage on %s using %s . Current Health: %f",
@@ -92,4 +91,24 @@ void USHealthComponent::Heal(float HealAmount)
     Health = FMath::Clamp(Health + HealAmount, 0.0f, MaxHealth);
     OnHealthChanged.Broadcast(this, Health, -HealAmount, nullptr, nullptr, nullptr);
 
+}
+
+bool USHealthComponent::IsFriendly(AActor * ActorOne, AActor * ActorTwo)
+{
+    if (!ActorOne || !ActorTwo) { return true; }
+
+    USHealthComponent* HealthCompOne = ActorOne->FindComponentByClass<USHealthComponent>();
+    USHealthComponent* HealthCompTwo = ActorTwo->FindComponentByClass<USHealthComponent>();
+
+    if (HealthCompOne && HealthCompTwo)
+    {
+        if (ActorOne == ActorTwo && HealthCompOne->bDamageSelf)
+        {
+            return false;
+        }
+
+        return HealthCompOne->TeamNum == HealthCompTwo->TeamNum;
+    }
+
+    return true;
 }
