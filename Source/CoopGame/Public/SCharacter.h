@@ -56,8 +56,6 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Player", meta = (ClampMin = 0.0, ClampMax = 100))
     float ZoomInterpSpeed;
 
-    bool bWantsToZoom;
-
     float DefaultFOV;
 
     UPROPERTY(VisibleDefaultsOnly, Category = "Player")
@@ -100,7 +98,9 @@ protected:
     float DamageModifier = 1.0f;
 
 
-public:	
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PlayerWeapon")
+	bool bWantsToZoom;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

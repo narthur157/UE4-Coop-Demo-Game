@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "SCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "SWeapon.h"
@@ -11,12 +9,11 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "UnrealNetwork.h"
+#include "Components/SkeletalMeshComponent.h"
 
 
-// Sets default values
 ASCharacter::ASCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
     SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
@@ -28,13 +25,13 @@ ASCharacter::ASCharacter()
     CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
     CameraComp->SetupAttachment(SpringArmComp);
 
+
     GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
     ZoomedFOV = 65.0;
     ZoomInterpSpeed = 20.0f;
 }
 
-// Called to bind functionality to input
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -67,7 +64,6 @@ void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
     DOREPLIFETIME(ASCharacter, bDied);
 }
 
-// Called when the game starts or when spawned
 void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -78,7 +74,6 @@ void ASCharacter::BeginPlay()
     SpawnDefaultWeaponInventory();
 }
 
-// Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
