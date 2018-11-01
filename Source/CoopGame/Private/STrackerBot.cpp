@@ -33,8 +33,6 @@ ASTrackerBot::ASTrackerBot()
     ProximityExplosionRadius->SetupAttachment(RootComponent);
     ProximityExplosionRadius->SetCollisionResponseToAllChannels(ECR_Ignore);
     ProximityExplosionRadius->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-    //.
-
 }
 
 void ASTrackerBot::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -251,4 +249,9 @@ void ASTrackerBot::OnRep_Exploded()
     MeshComp->SetVisibility(false);
     MeshComp->SetSimulatePhysics(false);
     MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+uint8 ASTrackerBot::GetTeamID()
+{
+    return HealthComp->TeamNum;
 }

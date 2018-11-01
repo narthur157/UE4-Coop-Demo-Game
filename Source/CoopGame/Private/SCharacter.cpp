@@ -9,6 +9,7 @@
 #include "Components/CapsuleComponent.h"
 #include "SHealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "UnrealNetwork.h"
 
 
@@ -55,7 +56,6 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
     PlayerInputComponent->BindAction("Fire", IE_Released, this, &ASCharacter::StopFire);
 
     PlayerInputComponent->BindAction("WeaponSwap", IE_Pressed, this, &ASCharacter::ChangeWeapon);
-
 }
 
 void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -131,6 +131,11 @@ void ASCharacter::EndSprint()
 {
     //bWantsToSprint = false;
     //GetCharacterMovement()->MaxWalkSpeed -= SprintSpeed;
+}
+
+uint8 ASCharacter::GetTeamID()
+{
+    return HealthComp->TeamNum;
 }
 
 void ASCharacter::StartFire()
@@ -275,4 +280,3 @@ void ASCharacter::OnHealthChanged(USHealthComponent * ChangedHealthComp, float H
 
     }
 }
-
