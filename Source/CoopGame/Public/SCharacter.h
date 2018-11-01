@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "DamageDealer.h"
+#include "ITeamMember.h"
 #include "SCharacter.generated.h"
 
 class UCameraComponent;
@@ -12,8 +13,9 @@ class USpringArmComponent;
 class ASWeapon;
 class UHealthComponent;
 
+
 UCLASS()
-class COOPGAME_API ASCharacter : public ACharacter, public IDamageDealer
+class COOPGAME_API ASCharacter : public ACharacter, public IDamageDealer, public ITeamMember
 {
 	GENERATED_BODY()
 
@@ -113,9 +115,13 @@ public:
     // IDamageDealer
     virtual float GetDamageModifier() override { return DamageModifier; }
 
-    UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
-        void StartFire();
+    // ITeamMember 
+    virtual uint8 GetTeamID() override;
 
     UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
-        void StopFire();
+    void StartFire();
+
+    UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
+    void StopFire();
+
 };
