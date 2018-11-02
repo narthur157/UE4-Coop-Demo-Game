@@ -82,7 +82,7 @@ protected:
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerEquipWeapon(ASWeapon* Weapon);
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly,  Category = "Health")
+    UPROPERTY(EditAnywhere, BlueprintReadOnly,  Category = "Health")
     USHealthComponent* HealthComp = nullptr;
 
     UFUNCTION()
