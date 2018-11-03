@@ -68,7 +68,7 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
         ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
         if (GM)
         {
-            GM->OnActorKilled.Broadcast(GetOwner(), DamageCauser, InstigatedBy);
+            GM->ActorKilled.Broadcast(GetOwner(), DamageCauser, InstigatedBy);
         }
     }
 }

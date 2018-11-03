@@ -29,13 +29,18 @@ public:
     UFUNCTION(BlueprintCallable, Category = "WaveState")
     void SetWaveState(EWaveState NewState);
 
+    UFUNCTION(NetMulticast, Reliable)
+    void MulticastGameOver(bool bWasSuccessful);
+
 protected:
     UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_WaveStateChanged, Category = "WaveState")
-        EWaveState WaveState = EWaveState::WaitingToStart;
+    EWaveState WaveState = EWaveState::WaitingToStart;
 
     UFUNCTION()
     void OnRep_WaveStateChanged(EWaveState OldState);
 	
     UFUNCTION(BlueprintImplementableEvent, Category = "WaveState")
     void WaveStateChanged(EWaveState NewState, EWaveState OldState);
+
+    
 };

@@ -16,6 +16,11 @@ void ASPlayerController::SetupInputComponent()
 
 }
 
+void ASPlayerController::RecieveGameOver(bool bWasSuccessful)
+{
+    OnRecieveGameOver(bWasSuccessful);
+}
+
 void ASPlayerController::ToggleMenu()
 {
     if (!MenuRef)
@@ -37,16 +42,12 @@ void ASPlayerController::ToggleMenu()
             MenuRef->SetVisibility(ESlateVisibility::Hidden);
             GEngine->GameViewport->Viewport->LockMouseToViewport(true);
             bShowMouseCursor = false;
-
         }
         else
         {
             MenuRef->SetVisibility(ESlateVisibility::Visible);
             GEngine->GameViewport->Viewport->LockMouseToViewport(false);
             bShowMouseCursor = true;
-            
-
-
         }
     }
 }

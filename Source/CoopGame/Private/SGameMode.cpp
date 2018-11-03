@@ -3,36 +3,42 @@
 #include "SGameMode.h"
 #include "SHealthComponent.h"
 #include "SGameState.h"
+#include "CoopGame.h"
+#include "SPlayerController.h"
 #include "SPlayerState.h"
 
 ASGameMode::ASGameMode()
 {
     GameStateClass = ASGameState::StaticClass();
     PlayerStateClass = ASPlayerState::StaticClass();
-    PrimaryActorTick.bCanEverTick = true;
-    PrimaryActorTick.TickInterval = 1.0f;
-
+    ActorKilled.AddDynamic(this, &ASGameMode::OnActorKilled);
 }
+
+void ASGameMode::StartPlay()
+{
+    Super::StartPlay();
+
+    PrepareForNextWave();
+}
+
 
 void ASGameMode::StartWave()
 {
     SetWaveState(EWaveState::WaitingToComplete);
-    WaveCount++;
-    NumberBotsToSpawn = 2 * WaveCount;
+    CurrentWaveCount++;
+    NumberBotsToSpawn = 2 * CurrentWaveCount;
     GetWorldTimerManager().SetTimer(TimerHandle_BotSpawner, this, &ASGameMode::SpawnBotTimerElapsed, 1.0f, true, 0.0f);
 }
 
 void ASGameMode::SpawnBotTimerElapsed()
 {
     SpawnNewBot();
-
     NumberBotsToSpawn--;
     if (NumberBotsToSpawn <= 0)
     {
         EndWave();
     }
 }
-
 
 void ASGameMode::EndWave()
 {
@@ -42,12 +48,21 @@ void ASGameMode::EndWave()
 
 void ASGameMode::PrepareForNextWave()
 {
-    GetWorldTimerManager().SetTimer(TimerHandle_NextWaveStart, this, &ASGameMode::StartWave, TimeBetweenWaves, false);
     RestartDeadPlayers();
+    // Game is finished, players win on waves
+    if (CurrentWaveCount == NumberWaves)
+    {
+        GameOver(true);
+        return;
+    }
+    // Work on spawning the next wave
+    GetWorldTimerManager().SetTimer(TimerHandle_NextWaveStart, this, &ASGameMode::StartWave, TimeBetweenWaves, false);
     SetWaveState(EWaveState::WaitingToStart);
-
+    
 }
 
+// Iterate over all of the pawns, if we find a bot and its still alive then carry on
+// This should really be generalized more into a team format somehow? broadcast win/lose conditions based on teamID
 void ASGameMode::CheckWaveState()
 {
     if (NumberBotsToSpawn > 0 || GetWorldTimerManager().IsTimerActive(TimerHandle_NextWaveStart))
@@ -74,11 +89,13 @@ void ASGameMode::CheckWaveState()
     }
     if (!bIsAnyBotAlive)
     {
+        TRACE("Bots have all died");
         SetWaveState(EWaveState::WaveComplete);
         PrepareForNextWave();
     }
 }
 
+// Iterate over all the players, if none are alive then its a loss
 void ASGameMode::CheckPlayerState()
 {
     bool bIsPlayerAlive = false;
@@ -98,18 +115,27 @@ void ASGameMode::CheckPlayerState()
 
     if (!bIsPlayerAlive)
     {
-        GameOver();
+        TRACE("Bots have all died");
+        GameOver(false);
     }
 
 }
 
-void ASGameMode::GameOver()
+// Called when the game has ended
+void ASGameMode::GameOver(bool bWasSuccessful)
 {
     EndWave();
     SetWaveState(EWaveState::GameOver);
-    UE_LOG(LogTemp, Warning, TEXT("Gameover, Players died."));
+  
+    ASGameState* GS = GetGameState<ASGameState>();
+    if (ensureAlways(GS))
+    {
+        GS->MulticastGameOver(bWasSuccessful);
+    }
+    OnGameOver(bWasSuccessful);
 }
 
+// Changes the state of the wave spawner
 void ASGameMode::SetWaveState(EWaveState State)
 {
     ASGameState* GS = GetGameState<ASGameState>();
@@ -117,9 +143,9 @@ void ASGameMode::SetWaveState(EWaveState State)
     {
         GS->SetWaveState(State);
     }
-
 }
 
+// Respawns dead players
 void ASGameMode::RestartDeadPlayers()
 {
     for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
@@ -129,23 +155,14 @@ void ASGameMode::RestartDeadPlayers()
         {
             RestartPlayer(It->Get());
         }
-
     }
 }
 
-void ASGameMode::Tick(float Deltatime)
+// Called when a player has died, used in order to avoid using tick to check player/wave state
+void ASGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AController* KillerController)
 {
-    Super::Tick(Deltatime);
-
-    CheckWaveState();
+    APawn* KilledPawn = Cast<APawn>(KilledActor);
+    // TODO: We only really need to check one or the other based on whether or not the killed actor is a player
     CheckPlayerState();
-
-}
-
-void ASGameMode::StartPlay()
-{
-    Super::StartPlay();
-
-    PrepareForNextWave();
-
+    CheckWaveState();
 }
