@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SGameState.h"
+#include "SPlayerController.h"
+#include "CoopGame.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -23,5 +25,21 @@ void ASGameState::SetWaveState(EWaveState NewState)
         EWaveState OldState = WaveState;
         WaveState = NewState;
         OnRep_WaveStateChanged(OldState);
+    }
+}
+
+void ASGameState::MulticastGameOver_Implementation(bool bWasSuccessful)
+{
+    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    {
+        ASPlayerController* PC = Cast<ASPlayerController>(It->Get());
+        if (PC && PC->IsLocalController())
+        {
+            if (PC->GetPawn())
+            {
+                PC->GetPawn()->DisableInput(PC);
+            }
+            PC->RecieveGameOver(bWasSuccessful);
+        }
     }
 }

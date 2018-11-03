@@ -33,5 +33,9 @@ public:
 
     virtual void SetupInputComponent() override;
 
+    UFUNCTION(BlueprintCallable, Category = "GameOver")
+    void RecieveGameOver(bool bWasSuccessful);
 	
+    UFUNCTION(BlueprintImplementableEvent, Category = "GameOver")
+    void OnRecieveGameOver(bool bWasSuccessful);
 };
