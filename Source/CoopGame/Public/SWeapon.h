@@ -10,7 +10,15 @@ class UDamageType;
 class UCameraShake;
 class UParticleSystem;
 class USoundCue;
+class UImage;
 
+UENUM(BlueprintType)
+enum class EAmmoType : uint8
+{
+    Bullet,
+    Grenade, 
+    NONE
+};
 
 UCLASS()
 class COOPGAME_API ASWeapon : public AActor
@@ -23,6 +31,7 @@ public:
 
 protected:
 
+    // Weapon Data
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     USkeletalMeshComponent* MeshComp = nullptr;
 
@@ -42,19 +51,30 @@ protected:
     TSubclassOf<UCameraShake> FireCamShake;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-        USoundCue* FireSound = nullptr;
+    USoundCue* FireSound = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    UImage* WeaponIcon = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     float TimeBetweenShots = 0.0f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponData")
+    EAmmoType AmmoType = EAmmoType::NONE;
+
+    // Instance variables
     FTimerHandle TimerHandle_TimeBetweenShots;
 
     float LastFireTime = -9999999;
 
+    // Functionality
     virtual void Fire() {}
 
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerFire();
+
+ 
+
 
 public:	
 

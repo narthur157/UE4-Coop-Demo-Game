@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "UnrealNetwork.h"
+#include "SWeaponComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 
 
@@ -21,9 +22,12 @@ ASCharacter::ASCharacter()
     SpringArmComp->bUsePawnControlRotation = true;
 
     HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComponent"));
+    WeaponComp = CreateDefaultSubobject<USWeaponComponent>(TEXT("WeaponComponent"));
+
 
     CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
     CameraComp->SetupAttachment(SpringArmComp);
+
 
 
     GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
@@ -59,8 +63,6 @@ void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-    DOREPLIFETIME(ASCharacter, CurrentWeapon);
-    DOREPLIFETIME(ASCharacter, WeaponInventory);
     DOREPLIFETIME(ASCharacter, bDied);
 }
 
@@ -68,10 +70,8 @@ void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
     DefaultFOV = CameraComp->FieldOfView;
-
     HealthComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
 
-    SpawnDefaultWeaponInventory();
 }
 
 void ASCharacter::Tick(float DeltaTime)
@@ -135,17 +135,17 @@ uint8 ASCharacter::GetTeamID()
 
 void ASCharacter::StartFire()
 {
-    if (CurrentWeapon)
+    if (WeaponComp)
     {
-        CurrentWeapon->StartFire();
+        WeaponComp->StartFire();
     }
 }
 
 void ASCharacter::StopFire()
 {
-    if (CurrentWeapon)
+    if (WeaponComp)
     {
-        CurrentWeapon->StopFire();
+        WeaponComp->StopFire();
     }
 }
 
@@ -158,104 +158,11 @@ FVector ASCharacter::GetPawnViewLocation() const
     return Super::GetPawnViewLocation();
 }
 
-void ASCharacter::SpawnDefaultWeaponInventory()
-{
-    // We want the server to own these actors
-    if (Role < ROLE_Authority)
-    {
-        return;
-    }
-    else
-    {
-        FActorSpawnParameters SpawnParams;
-        SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-        SpawnParams.Owner = this;
-
-        for (int i = 0; i < DefaultWeapons.Num(); i++)
-        {
-            ASWeapon* NewWeapon = GetWorld()->SpawnActor<ASWeapon>(DefaultWeapons[i], SpawnParams);
-            WeaponInventory.Add(NewWeapon);
-            NewWeapon->SetActorHiddenInGame(true);
-        }
-
-        if (WeaponInventory.Num() > 0)
-        {
-            EquipWeapon(WeaponInventory[0]);
-        }
-    }
-}
-
-// Only want to setcurrentweapon on the server
-void ASCharacter::EquipWeapon(ASWeapon* Weapon)
-{
-    // Only run on server
-    if (Role < ROLE_Authority)
-    {
-        ServerEquipWeapon(Weapon);
-        return;
-    }
-    
-    if (CurrentWeapon)
-    {
-        CurrentWeapon->SetActorHiddenInGame(true);
-    }
-    SetCurrentWeapon(Weapon);
-}
-
-// Changes weapon
-void ASCharacter::SetCurrentWeapon(ASWeapon* Weapon)
-{
-    if (Weapon)
-    {
-        Weapon->SetActorHiddenInGame(false);
-        CurrentWeapon = Weapon;
-        CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
-    }
-}
-
-
-void ASCharacter::OnRep_CurrentWeapon()
-{
-    SetCurrentWeapon(CurrentWeapon);
-}
-
-void ASCharacter::ServerEquipWeapon_Implementation(ASWeapon* Weapon)
-{
-    EquipWeapon(Weapon);
-}
-
-bool ASCharacter::ServerEquipWeapon_Validate(ASWeapon* Weapon)
-{
-    return true;
-}
-
 void ASCharacter::ChangeWeapon()
 {
-    if (WeaponInventory.Num() == 0)
+    if (WeaponComp)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Failed: WeaponInventoryEmpty"));
-        return;
-    }
-
-    if (!CurrentWeapon)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("No Current Weapon, Equipping First"));
-        EquipWeapon(WeaponInventory[0]);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("WeaponSwap Success"));
-        StopFire();
-        int32 CurrentWeaponIndex = WeaponInventory.Find(CurrentWeapon);
-        if (CurrentWeaponIndex == WeaponInventory.Num() - 1)
-        {
-            EquipWeapon(WeaponInventory[0]);
-        }
-        else if(CurrentWeaponIndex != INDEX_NONE)
-        {
-            CurrentWeaponIndex++;
-            EquipWeapon(WeaponInventory[CurrentWeaponIndex]);
-        }
+        WeaponComp->ChangeWeapon();
     }
 }
 
