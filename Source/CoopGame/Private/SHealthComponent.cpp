@@ -43,7 +43,8 @@ void USHealthComponent::BeginPlay()
 // This only runs onn server because we are only binding to this delegate onn server
 void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
-    if (Damage <= 0 || bIsDead || (InstigatedBy && IsFriendly(DamagedActor, InstigatedBy->GetPawn())))
+    //IsFriendly(DamagedActor, InstigatedBy->GetPawn())
+    if (Damage <= 0 || bIsDead || (!InstigatedBy && false))
     {
         return;
     }
