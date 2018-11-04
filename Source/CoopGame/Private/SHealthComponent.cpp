@@ -64,12 +64,13 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
     if (Health <= 0 && !bIsDead)
     {
         TRACE("%s has died.", *GetOwner()->GetName());
-        bIsDead = true;
         ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
         if (GM)
         {
-            GM->ActorKilled.Broadcast(GetOwner(), DamageCauser, InstigatedBy);
+            TRACE("%s has died. Died to: %s", *GetOwner()->GetName(), *InstigatedBy->GetPawn()->GetName());
+            GM->OnActorKilled(GetOwner(), InstigatedBy->GetPawn(), InstigatedBy);
         }
+        bIsDead = true;
     }
 }
 
@@ -90,7 +91,6 @@ void USHealthComponent::Heal(float HealAmount)
     TRACE("%s healed for %f hp.", *GetOwner()->GetName(), HealAmount);
     Health = FMath::Clamp(Health + HealAmount, 0.0f, MaxHealth);
     OnHealthChanged.Broadcast(this, Health, -HealAmount, nullptr, nullptr, nullptr);
-
 }
 
 bool USHealthComponent::IsFriendly(AActor * ActorOne, AActor * ActorTwo)

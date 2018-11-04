@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 
 
+#define MAX_NAME_LENGTH             15
 
 #define SURFACE_FLESHDEFAULT        SurfaceType1
 #define SURFACE_FLESHVULNERABLE     SurfaceType2

@@ -2,9 +2,33 @@
 
 #include "SPlayerController.h"
 #include "Engine.h"
+#include "SGameState.h"
 #include "Blueprint/UserWidget.h"
+#include "SGameEventWidget.h"
+
+ASPlayerController::ASPlayerController()
+    : APlayerController()
+{
+  
+}
 
 
+void ASPlayerController::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (GameEventWidgetClass && IsLocalController())
+    {
+        GameEventWidget = CreateWidget<USGameEventWidget>(this, GameEventWidgetClass);
+        GameEventWidget->AddToViewport();
+  
+        ASGameState* GS = GetWorld()->GetGameState<ASGameState>();
+        if (ensureAlways(GS) && GameEventWidget)
+        {
+            GS->OnActorKilledGameState.AddDynamic(GameEventWidget, &USGameEventWidget::OnActorKilled);
+        }
+    }
+}
 
 void ASPlayerController::SetupInputComponent()
 {
@@ -23,13 +47,13 @@ void ASPlayerController::RecieveGameOver(bool bWasSuccessful)
 
 void ASPlayerController::ToggleMenu()
 {
-    if (!MenuRef)
+    if (!MenuWidget)
     {
-        MenuRef = CreateWidget<UUserWidget>(this, MenuWidgetClass);
-        if (MenuRef)
+        MenuWidget = CreateWidget<UUserWidget>(this, MenuWidgetClass);
+        if (MenuWidget)
         {
-            MenuRef->AddToViewport();
-            MenuRef->SetVisibility(ESlateVisibility::Visible);
+            MenuWidget->AddToViewport();
+            MenuWidget->SetVisibility(ESlateVisibility::Visible);
             GEngine->GameViewport->Viewport->LockMouseToViewport(false);
             bShowMouseCursor = true;
             
@@ -37,15 +61,15 @@ void ASPlayerController::ToggleMenu()
     }
     else
     {
-        if (MenuRef->IsVisible())
+        if (MenuWidget->IsVisible())
         {
-            MenuRef->SetVisibility(ESlateVisibility::Hidden);
+            MenuWidget->SetVisibility(ESlateVisibility::Hidden);
             GEngine->GameViewport->Viewport->LockMouseToViewport(true);
             bShowMouseCursor = false;
         }
         else
         {
-            MenuRef->SetVisibility(ESlateVisibility::Visible);
+            MenuWidget->SetVisibility(ESlateVisibility::Visible);
             GEngine->GameViewport->Viewport->LockMouseToViewport(false);
             bShowMouseCursor = true;
         }

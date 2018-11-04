@@ -2,7 +2,9 @@
 
 #include "SHordeGameMode.h"
 #include "SGameState.h"
+#include "SGameMode.h"
 #include "CoopGame.h"
+#include "Blueprint/UserWidget.h"
 #include "SHealthComponent.h"
 #include "SPlayerState.h"
 
@@ -12,13 +14,12 @@ ASHordeGameMode::ASHordeGameMode()
 {
     GameStateClass = ASGameState::StaticClass();
     PlayerStateClass = ASPlayerState::StaticClass();
-    ActorKilled.AddDynamic(this, &ASHordeGameMode::OnActorKilled);
+    
 }
 
 void ASHordeGameMode::StartPlay()
 {
     Super::StartPlay();
-
     PrepareForNextWave();
 }
 
@@ -51,13 +52,23 @@ void ASHordeGameMode::PrepareForNextWave()
 {
     RestartDeadPlayers();
     // Game is finished, players win on waves
-    if (CurrentWaveCount == NumberWaves)
+    if (CurrentWaveCount == NumberWaves && NumberWaves > 0)
     {
         GameOver(true);
         return;
     }
-    // Work on spawning the next wave
-    GetWorldTimerManager().SetTimer(TimerHandle_NextWaveStart, this, &ASHordeGameMode::StartWave, TimeBetweenWaves, false);
+
+    // Spawn next wave immediately
+    if (TimeBetweenWaves == 0)
+    {
+        StartWave();
+    }
+    else
+    {
+        // Spawn the next wave on a delay
+        GetWorldTimerManager().SetTimer(TimerHandle_NextWaveStart, this, &ASHordeGameMode::StartWave, TimeBetweenWaves, false);
+    }
+
     SetWaveState(EWaveState::WaitingToStart);
 
 }
@@ -90,7 +101,7 @@ void ASHordeGameMode::CheckWaveState()
     }
     if (!bIsAnyBotAlive)
     {
-        TRACE("Bots have all died");
+        TRACE("Bots have all died.");
         SetWaveState(EWaveState::WaveComplete);
         PrepareForNextWave();
     }
@@ -106,11 +117,28 @@ void ASHordeGameMode::SetWaveState(EWaveState State)
     }
 }
 
-
 // Called when a player has died, used in order to avoid using tick to check player/wave state
 void ASHordeGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AController* KillerController)
 {
     // TODO: We only really need to check one or the other based on whether or not the killed actor is a player
+    ASGameState* GS = GetGameState<ASGameState>();
+    if (KillerActor && KilledActor)
+    {
+        
+        FString KillerName = KillerActor->GetName();
+        FString KilledName = KilledActor->GetName();
+        // TODO: Move this to a globally accessable place, it is a utility function which could be reused
+        if (KillerName.Len() > MAX_NAME_LENGTH)
+        {
+            KillerName = KillerName.Left(MAX_NAME_LENGTH - 3) + "...";
+        }
+        if (KilledName.Len() > MAX_NAME_LENGTH)
+        {
+            KilledName = KilledName.Left(MAX_NAME_LENGTH - 3) + "...";
+        }
+        GS->MulticastActorKilled(KillerName, KilledName);
+    }
+
     CheckPlayerState();
     CheckWaveState();
 }

@@ -7,8 +7,7 @@
 #include "SPlayerController.generated.h"
 
 class UUserWidget;
-
-
+class USGameEventWidget;
 
 /**
  * 
@@ -23,14 +22,19 @@ protected:
     UFUNCTION(BlueprintCallable, Category = "MenuOps")
     void ToggleMenu();
 
-    UUserWidget* MenuRef = nullptr;
-
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget")
     TSubclassOf<UUserWidget> MenuWidgetClass = nullptr;
 
-      
-public:
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget")
+    TSubclassOf<USGameEventWidget> GameEventWidgetClass = nullptr;
 
+    USGameEventWidget* GameEventWidget = nullptr;
+      
+    UUserWidget* MenuWidget = nullptr;
+
+public:
+    virtual void BeginPlay() override;
+    ASPlayerController();
     virtual void SetupInputComponent() override;
 
     UFUNCTION(BlueprintCallable, Category = "GameOver")

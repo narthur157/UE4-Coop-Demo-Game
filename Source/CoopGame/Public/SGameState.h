@@ -17,6 +17,8 @@ enum class EWaveState : uint8
 
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGameStateActorKilled, const FString&, KillerName, const FString&, KilledName);
+
 /**
  * 
  */
@@ -32,6 +34,12 @@ public:
     UFUNCTION(NetMulticast, Reliable)
     void MulticastGameOver(bool bWasSuccessful);
 
+    UFUNCTION(NetMulticast, Reliable)
+    void MulticastActorKilled(const FString& KillerName, const FString& KilledName);
+
+    UPROPERTY(BlueprintAssignable, Category = "GameEvent")
+    FGameStateActorKilled OnActorKilledGameState;
+
 protected:
     UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_WaveStateChanged, Category = "WaveState")
     EWaveState WaveState = EWaveState::WaitingToStart;
@@ -42,5 +50,5 @@ protected:
     UFUNCTION(BlueprintImplementableEvent, Category = "WaveState")
     void WaveStateChanged(EWaveState NewState, EWaveState OldState);
 
-    
+   
 };

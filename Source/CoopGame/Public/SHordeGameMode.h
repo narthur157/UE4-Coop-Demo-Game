@@ -8,9 +8,10 @@
 
 
 enum class EWaveState : uint8;
+class UUserWidget;
 
 /**
- * 
+ *  Base wave gamemode, win condition = WaveCount == NumberWaves, lose condition = players dead
  */
 UCLASS()
 class COOPGAME_API ASHordeGameMode : public ASGameMode
@@ -26,11 +27,11 @@ public:
 protected:
 
     // Wave spawning
-    UPROPERTY(EditDefaultsOnly, Category = "WaveMode")
+    UPROPERTY(EditDefaultsOnly, Category = "GameMode")
     int32 NumberWaves = 1;
 
     // Preparation time between waves
-    UPROPERTY(EditDefaultsOnly, Category = "WaveMode")
+    UPROPERTY(EditDefaultsOnly, Category = "GameMode")
     float TimeBetweenWaves = 0.0f;
 
     int32 CurrentWaveCount = 0;
@@ -56,9 +57,7 @@ protected:
     void SetWaveState(EWaveState State);
 
     void CheckWaveState();
-	
-    //UFUNCTION(BlueprintNativeEvent, Category = "GameMode")
-    //void OnActorKilled(AActor* KilledActor, AActor* KillerActor, AController* KillerController);
+
     virtual void OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AController* KillerController) override;
 	
 };

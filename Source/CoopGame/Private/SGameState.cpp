@@ -43,3 +43,9 @@ void ASGameState::MulticastGameOver_Implementation(bool bWasSuccessful)
         }
     }
 }
+
+void ASGameState::MulticastActorKilled_Implementation(const FString& KillerName, const FString& KilledName)
+{
+    OnActorKilledGameState.Broadcast(KillerName, KilledName);
+}
+
