@@ -10,7 +10,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
-class ASWeapon;
+class USWeaponComponent;
 class UHealthComponent;
 
 
@@ -27,6 +27,7 @@ protected:
     // Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+    // Movement functions
     UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
     bool bWantsToSprint = false;
 
@@ -48,7 +49,13 @@ protected:
     UCameraComponent* CameraComp = nullptr;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpringArmComponent")
-    USpringArmComponent* SpringArmComp;
+    USpringArmComponent* SpringArmComp = nullptr;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons")
+    USWeaponComponent* WeaponComp = nullptr;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
+    USHealthComponent* HealthComp = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "Player")
     float ZoomedFOV;
@@ -58,45 +65,15 @@ protected:
 
     float DefaultFOV;
 
-    UPROPERTY(VisibleDefaultsOnly, Category = "Player")
-    FName WeaponSocket = "WeaponSocket";
+    UPROPERTY(BlueprintReadWrite, Category = "Power")
+    float DamageModifier = 1.0f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TArray<TSubclassOf<ASWeapon>> DefaultWeapons;
-   
-    UPROPERTY(Replicated)
-    TArray<ASWeapon*> WeaponInventory;
-
-    UPROPERTY(ReplicatedUsing=OnRep_CurrentWeapon)
-    ASWeapon* CurrentWeapon;
-
-    UFUNCTION()
-    void OnRep_CurrentWeapon();
-
-    // Server only
-    void EquipWeapon(ASWeapon* Weapon);
-
-    UFUNCTION()
-    void SetCurrentWeapon(ASWeapon* NewWeapon);
-
-    UFUNCTION(Server, Reliable, WithValidation)
-    void ServerEquipWeapon(ASWeapon* Weapon);
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly,  Category = "Health")
-    USHealthComponent* HealthComp = nullptr;
-
+    // React to healcomponent changes
     UFUNCTION()
     void OnHealthChanged(USHealthComponent* ChangedHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
     UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
     bool bDied = false;
-
-    // Server only function
-    void SpawnDefaultWeaponInventory();
-
-    UPROPERTY(BlueprintReadWrite, Category = "Power")
-    float DamageModifier = 1.0f;
-
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PlayerWeapon")
@@ -110,18 +87,19 @@ public:
 
     virtual FVector GetPawnViewLocation() const override;
 
-    void ChangeWeapon();
-	
     // IDamageDealer
     virtual float GetDamageModifier() override { return DamageModifier; }
 
     // ITeamMember 
     virtual uint8 GetTeamID() override;
 
+    // Weapon operations, calling these from character for now because we might want to play animations/whatever
+    // before firing/on changing weapons
     UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
     void StartFire();
 
     UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
     void StopFire();
 
+    void ChangeWeapon();
 };
