@@ -124,7 +124,6 @@ void ASHordeGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* 
     ASGameState* GS = GetGameState<ASGameState>();
     if (KillerActor && KilledActor)
     {
-        
         FString KillerName = KillerActor->GetName();
         FString KilledName = KilledActor->GetName();
         // TODO: Move this to a globally accessable place, it is a utility function which could be reused
