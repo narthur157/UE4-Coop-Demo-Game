@@ -259,7 +259,6 @@ void ASCharacter::ChangeWeapon()
     }
 }
 
-
 void ASCharacter::OnHealthChanged(USHealthComponent * ChangedHealthComp, float Health, float HealthDelta, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
     if (Health <= 0.0f && !bDied)

@@ -11,7 +11,6 @@ ASGameMode::ASGameMode()
 {
     GameStateClass = ASGameState::StaticClass();
     PlayerStateClass = ASPlayerState::StaticClass();
-    ActorKilled.AddDynamic(this, &ASGameMode::OnActorKilled);
 }
 
 void ASGameMode::StartPlay()
@@ -39,7 +38,7 @@ void ASGameMode::CheckPlayerState()
 
     if (!bIsPlayerAlive)
     {
-        TRACE("Bots have all died");
+        TRACE("All payers have died.");
         GameOver(false);
     }
 
