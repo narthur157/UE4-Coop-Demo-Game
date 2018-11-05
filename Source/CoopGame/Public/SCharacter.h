@@ -68,15 +68,17 @@ protected:
     UPROPERTY(BlueprintReadWrite, Category = "Power")
     float DamageModifier = 1.0f;
 
-    // React to healcomponent changes
     UFUNCTION()
     void OnHealthChanged(USHealthComponent* ChangedHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
     UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
     bool bDied = false;
 
+	UFUNCTION(Server, Unreliable, WithValidation)
+	void ServerSetZoom(bool bZoom);
+
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PlayerWeapon")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "PlayerWeapon")
 	bool bWantsToZoom;
 
 	// Called every frame
