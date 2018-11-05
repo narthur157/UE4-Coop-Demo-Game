@@ -72,8 +72,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, Replicated, Category = "Weapon")
     TArray<FWeaponAmmoInventoryItem> AmmoInventory;
 
-    UPROPERTY(ReplicatedUsing = OnRep_CurrentWeapon)
-    ASWeapon* CurrentWeapon;
+    UPROPERTY(BlueprintReadonly, ReplicatedUsing = OnRep_CurrentWeapon)
+     ASWeapon* CurrentWeapon;
+
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     TSubclassOf<USWeaponWidget> WeaponsWidgetClass = nullptr;

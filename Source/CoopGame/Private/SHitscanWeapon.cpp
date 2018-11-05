@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "SHitscanWeapon.h"
 #include "DrawDebugHelpers.h"
 #include "Particles/ParticleSystem.h"
@@ -12,7 +10,6 @@
 #include "Net/UnrealNetwork.h"
 #include "DamageDealer.h"
 #include "Engine/World.h"
-
 
 void ASHitscanWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -33,6 +30,7 @@ void ASHitscanWeapon::Fire()
     AActor* Owner = GetOwner();
     if (Owner)
     {
+
         UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 
         // Perform line trace
@@ -61,7 +59,7 @@ void ASHitscanWeapon::Fire()
 
         FHitResult Hit;
         if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd, COLLISION_WEAPON, QueryParams))
-        {
+		{
             // On Hit
             AActor* HitActor = Hit.GetActor();
 
@@ -79,7 +77,9 @@ void ASHitscanWeapon::Fire()
             if (SurfaceType == SURFACE_FLESHVULNERABLE)
             {
                 ActualDamage *= 4.0f;
-            }
+			}
+
+			OnHit(HitActor);
 
             // Do Damage
             UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, Owner->GetInstigatorController(), this, DamageType);
@@ -89,6 +89,7 @@ void ASHitscanWeapon::Fire()
 
             // Set Trace endpoint to the hit impact point
             TraceEndPoint = Hit.ImpactPoint;
+
         }
 
         // If we are the server, replicate the hitscan information out so other clients know where/how to play their effects
@@ -126,16 +127,6 @@ void ASHitscanWeapon::DrawTracerEffect(const FVector &TraceEndPoint)
         if (TracerComp)
         {
             TracerComp->SetVectorParameter(TracerTargetName, TraceEndPoint);
-        }
-    }
-
-    APawn* Owner = Cast<APawn>(GetOwner());
-    if (Owner)
-    {
-        APlayerController* OwnerController = Cast<APlayerController>(Owner->GetController());
-        if (OwnerController)
-        {
-            OwnerController->ClientPlayCameraShake(FireCamShake);
         }
     }
 }
