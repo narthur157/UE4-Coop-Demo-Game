@@ -4,9 +4,10 @@
 #include "DrawDebugHelpers.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
+#include "SHealthComponent.h"
+#include "UserWidget.h"
+#include "SHitIndicatorWidget.h"
 
-
-// Sets default values
 ASWeapon::ASWeapon()
 {
     MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComponent"));
@@ -16,6 +17,16 @@ ASWeapon::ASWeapon()
     NetUpdateFrequency = 66.0f;
     MinNetUpdateFrequency = 33.0f;
 }
+
+void ASWeapon::BeginPlay()
+{
+	if (HitIndicatorWidgetClass)
+	{
+		HitIndicatorWidget = CreateWidget<USHitIndicatorWidget>(GetWorld(), HitIndicatorWidgetClass);
+		HitIndicatorWidget->AddToViewport();
+	}
+}
+
 
 void ASWeapon::ServerFire_Implementation()
 {
@@ -27,8 +38,36 @@ bool ASWeapon::ServerFire_Validate()
     return true;
 }
 
+/**
+ * @Param HitActor If this actor is on the other team the weapon hit will be broadcast
+ * @param bSkipCheck If true, broadcast weapon hit regardless
+ */
+void ASWeapon::OnHit(AActor* HitActor, bool bSkipCheck)
+{
+	if (bSkipCheck)
+	{
+		HitIndicatorWidget->PlayHitAnimation();
+		return;
+	}
+
+	if (!HitActor)
+	{
+		return;
+	}
+
+	USHealthComponent* HitHealth = Cast<USHealthComponent>(HitActor->GetComponentByClass(USHealthComponent::StaticClass()));
+	if (HitHealth && GetOwner())
+	{
+		if (!USHealthComponent::IsFriendly(HitActor, GetOwner()))
+		{
+			HitIndicatorWidget->PlayHitAnimation();
+		}
+	}
+}
+
 void ASWeapon::StartFire()
 {
+
     float FirstDelay = FMath::Max(LastFireTime + TimeBetweenShots - GetWorld()->TimeSeconds, 0.0f);
     GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShots, this, &ASWeapon::Fire, TimeBetweenShots, true, FirstDelay);
 }
