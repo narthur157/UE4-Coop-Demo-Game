@@ -128,9 +128,9 @@ void ASTrackerBot::SelfDestruct()
 
     if (Role == ROLE_Authority)
     {
-        TArray<AActor*> IgnoredActors = { this };
+        TArray<AActor*> IgnoredActors = { };
         float ActualDamage = ((GetDamageModifier() / 100) * ExplosionDamage) + ExplosionDamage;
-        UGameplayStatics::ApplyRadialDamage(this, ActualDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), true);
+        UGameplayStatics::ApplyRadialDamage(this, ActualDamage, GetActorLocation(), ExplosionRadius,nullptr, IgnoredActors, this, GetController(), true);
         // Give clients a chance to play effects
         SetLifeSpan(4.0);
     }
@@ -140,6 +140,12 @@ void ASTrackerBot::SelfDestruct()
 void ASTrackerBot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+    if (GetController())
+    {
+        TRACE("ValidController!");
+    }
+    //TRACE("InvalidController");
+
     if (!bSelfDestructionAttached && !bExploded && Role == ROLE_Authority)
     {
         MoveTowardsTarget();

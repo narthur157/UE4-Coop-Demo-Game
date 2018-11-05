@@ -3,6 +3,7 @@
 #include "SWeapon.h"
 #include "DrawDebugHelpers.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Engine/World.h"
 
 
@@ -16,6 +17,15 @@ ASWeapon::ASWeapon()
     NetUpdateFrequency = 66.0f;
     MinNetUpdateFrequency = 33.0f;
 }
+
+void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ASWeapon, AmmoInClip);
+    
+}
+
 
 void ASWeapon::ServerFire_Implementation()
 {
