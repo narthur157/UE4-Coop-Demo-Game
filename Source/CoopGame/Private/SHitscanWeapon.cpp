@@ -18,6 +18,7 @@ void ASHitscanWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+    DOREPLIFETIME(ASHitscanWeapon, AmmoInClip);
     DOREPLIFETIME_CONDITION(ASHitscanWeapon, HitScanTrace, COND_SkipOwner);
 }
 
@@ -28,7 +29,7 @@ void ASHitscanWeapon::Fire()
        ServerFire();
    }
 
-
+    AmmoInClip--;
     AActor* Owner = GetOwner();
     if (Owner)
     {

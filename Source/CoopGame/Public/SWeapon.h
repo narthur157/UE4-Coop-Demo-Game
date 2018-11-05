@@ -10,7 +10,7 @@ class UDamageType;
 class UCameraShake;
 class UParticleSystem;
 class USoundCue;
-class UImage;
+class UTexture2D;
 
 UENUM(BlueprintType)
 enum class EAmmoType : uint8
@@ -28,6 +28,15 @@ class COOPGAME_API ASWeapon : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ASWeapon();
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    EAmmoType GetAmmoType() { return AmmoType; }
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    UTexture2D* GetWeaponIcon() { return WeaponIcon; }
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    float GetAmmoInClip() { return AmmoInClip; }
 
 protected:
 
@@ -54,13 +63,16 @@ protected:
     USoundCue* FireSound = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    UImage* WeaponIcon = nullptr;
+    UTexture2D* WeaponIcon = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     float TimeBetweenShots = 0.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "WeaponData")
     EAmmoType AmmoType = EAmmoType::NONE;
+
+    UPROPERTY(EditDefaultsOnly, Replicated, Category = "WeaponData")
+    float AmmoInClip = 20.0f;
 
     // Instance variables
     FTimerHandle TimerHandle_TimeBetweenShots;
@@ -72,9 +84,6 @@ protected:
 
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerFire();
-
- 
-
 
 public:	
 

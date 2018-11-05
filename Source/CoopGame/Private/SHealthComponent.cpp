@@ -61,11 +61,9 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
 
     if (Health <= 0 && !bIsDead)
     {
-        TRACE("%s has died.", *GetOwner()->GetName());
         ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
         if (GM)
         {
-            TRACE("%s has died. Died to: %s", *GetOwner()->GetName(), *InstigatedBy->GetPawn()->GetName());
             GM->OnActorKilled(GetOwner(), InstigatedBy->GetPawn(), InstigatedBy);
         }
         bIsDead = true;
@@ -107,6 +105,5 @@ bool USHealthComponent::IsFriendly(AActor * ActorOne, AActor * ActorTwo)
 
         return HealthCompOne->TeamNum == HealthCompTwo->TeamNum;
     }
-
     return true;
 }

@@ -3,6 +3,9 @@
 #include "SWeaponComponent.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
+#include "Blueprint/UserWidget.h"
+#include "CoopGame.h"
+#include "SWeaponWidget.h"
 #include "SWeapon.h"
 
 // Sets default values for this component's properties
@@ -27,6 +30,7 @@ void USWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+    DOREPLIFETIME(USWeaponComponent, AmmoInventory);
     DOREPLIFETIME(USWeaponComponent, CurrentWeapon);
     DOREPLIFETIME(USWeaponComponent, WeaponInventory);
 }
@@ -55,7 +59,12 @@ void USWeaponComponent::SpawnDefaultWeaponInventory()
         {
             EquipWeapon(WeaponInventory[0]);
         }
-    }
+        
+        if (!IsRunningDedicatedServer())
+        {
+            OnRep_WeaponInventory();
+        }
+    }   
 }
 
 // Only want to setcurrentweapon on the server
@@ -88,10 +97,28 @@ void USWeaponComponent::SetCurrentWeapon(ASWeapon* Weapon)
     }
 }
 
-
 void USWeaponComponent::OnRep_CurrentWeapon()
 {
     SetCurrentWeapon(CurrentWeapon);
+}
+
+void USWeaponComponent::OnRep_WeaponInventory()
+{
+    APawn* Owner = Cast<APawn>(GetOwner());
+    APlayerController* OwnerController = Cast<APlayerController>(Owner->GetController());
+    if (Owner && OwnerController)
+    {
+        TRACE("WeaponInventoryReplicated: %d / %d", WeaponInventory.Num(), DefaultWeapons.Num());
+
+        if (!WeaponsWidget)
+        {
+            WeaponsWidget = CreateWidget<USWeaponWidget>(OwnerController, WeaponsWidgetClass);
+            WeaponsWidget->InitializeWeaponWidget(this);
+            WeaponsWidget->AddToViewport();
+        }
+        WeaponsWidget->RefreshAmmo();
+        WeaponsWidget->RefreshWeapons();
+    }
 }
 
 void USWeaponComponent::ServerEquipWeapon_Implementation(ASWeapon* Weapon)
