@@ -65,7 +65,7 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
         ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
         if (GM)
         {
-            TRACE("%s has died. Died to: %s", *GetOwner()->GetName(), *InstigatedBy->GetPawn()->GetName());
+            // TRACE("%s has died. Died to: %s", *GetOwner()->GetName(), *InstigatedBy->GetPawn()->GetName());
             GM->OnActorKilled(GetOwner(), InstigatedBy->GetPawn(), InstigatedBy);
         }
         bIsDead = true;
