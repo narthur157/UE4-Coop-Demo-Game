@@ -10,9 +10,8 @@
 #include "Sound/SoundCue.h"
 #include "DamageDealer.h"
 #include "Net/UnrealNetwork.h"
+#include "SWeapon.h"
 
-
-// Sets default values
 ASProjectile::ASProjectile()
 {
 
@@ -103,6 +102,7 @@ void ASProjectile::Explode()
         UGameplayStatics::PlaySoundAtLocation(this, ExplosionSoundEffect, GetActorLocation());
 
     }
+
     // TODO: Find a way to remove this, calculate ignored actors in projectileweapondata?
     TArray<AActor*> IgnoredActors = { this, GetOwner(), Instigator };
     if (Role == ROLE_Authority)
@@ -110,11 +110,20 @@ void ASProjectile::Explode()
 
         IDamageDealer* DamageDealer = Cast<IDamageDealer>(GetInstigator());
         float ActualDamage = WeaponData.ProjectileDamage;
-        if (DamageDealer)
+        
+		if (DamageDealer)
         {
             ActualDamage += (DamageDealer->GetDamageModifier() / 100) * ActualDamage;
         }
-        UGameplayStatics::ApplyRadialDamage(GetWorld(), WeaponData.ProjectileDamage, GetActorLocation(), WeaponData.ProjectileRadius, WeaponData.ProjectileDamageType, IgnoredActors, GetOwner(), Instigator->GetController(), true);
+
+		if (UGameplayStatics::ApplyRadialDamage(GetWorld(), WeaponData.ProjectileDamage, GetActorLocation(), WeaponData.ProjectileRadius, WeaponData.ProjectileDamageType, IgnoredActors, GetOwner(), Instigator->GetController(), true))
+		{
+			ASWeapon* MyOwner = Cast<ASWeapon>(GetOwner());
+			if (MyOwner)
+			{
+				MyOwner->OnHit(nullptr, true);
+			}
+		}
     }
 
     SetActorHiddenInGame(true);

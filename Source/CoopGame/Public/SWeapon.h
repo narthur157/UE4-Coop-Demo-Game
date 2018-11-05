@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -11,6 +9,7 @@ class UCameraShake;
 class UParticleSystem;
 class USoundCue;
 class UImage;
+class USHitIndicatorWidget;
 
 UENUM(BlueprintType)
 enum class EAmmoType : uint8
@@ -26,7 +25,6 @@ class COOPGAME_API ASWeapon : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	ASWeapon();
 
 protected:
@@ -48,19 +46,21 @@ protected:
     UParticleSystem* TracerEffect = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TSubclassOf<UCameraShake> FireCamShake;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     USoundCue* FireSound = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     UImage* WeaponIcon = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    float TimeBetweenShots = 0.0f;
+    float TimeBetweenShots = 0.5f;
 
     UPROPERTY(EditDefaultsOnly, Category = "WeaponData")
     EAmmoType AmmoType = EAmmoType::NONE;
+
+	USHitIndicatorWidget* HitIndicatorWidget = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<USHitIndicatorWidget> HitIndicatorWidgetClass;
 
     // Instance variables
     FTimerHandle TimerHandle_TimeBetweenShots;
@@ -73,10 +73,10 @@ protected:
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerFire();
 
- 
+	virtual void BeginPlay() override;
 
-
-public:	
+public:
+	virtual void OnHit(AActor* HitActor, bool bSkipCheck = false);
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     virtual void StartFire();

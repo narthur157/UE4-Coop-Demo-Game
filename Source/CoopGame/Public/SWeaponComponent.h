@@ -34,7 +34,7 @@ public:
     UPROPERTY(Replicated)
      TArray<ASWeapon*> WeaponInventory;
 
-    UPROPERTY(ReplicatedUsing = OnRep_CurrentWeapon)
+    UPROPERTY(BlueprintReadonly, ReplicatedUsing = OnRep_CurrentWeapon)
      ASWeapon* CurrentWeapon;
 
     UFUNCTION()
