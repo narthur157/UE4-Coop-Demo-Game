@@ -28,8 +28,6 @@ ASCharacter::ASCharacter()
     CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
     CameraComp->SetupAttachment(SpringArmComp);
 
-
-
     GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
     ZoomedFOV = 65.0;
