@@ -44,18 +44,30 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
     float ExplosionRadius = 200;
-    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
     float ProximityRadius = 150;
-    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
     float ExplosionDamage = 100;
-    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
-    float SelfDestructTime = 5.0f;
-    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
-    float MovementForce = 1000;
-    UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    float SelfDestructTime = 3.0f;
+    
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+    float MovementForce = 5000;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+	float MaxSpeed = 1000;
+
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
     bool bUseVelocityChange = false;
+
     UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
     float RequiredDistanceToTarget = 100;
+	// Recalc the navigation path every x seconds
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+	float RefreshInterval = 0.5f;
     
     UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
     USoundCue* SelfDestructTickSound = nullptr;
@@ -65,6 +77,10 @@ protected:
     USoundCue* TriggeredSound = nullptr;
     UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
     UParticleSystem* ExplosionEffect = nullptr;
+
+	// If true, bot will teleport on to player's back once in range
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+	bool bBotAttachesToPlayer = false;
 
     FVector GetNextPathPoint();
     FVector NextPathPoint;
@@ -89,6 +105,13 @@ protected:
 
     UFUNCTION()
     void OnRep_Exploded();
+
+	/**
+	 * @param Pawn to attach to. Must have a "Back" socket
+	 * @returns False if bot did not attach for any reason
+	 */
+	UFUNCTION()
+	bool AttachBotToActor(APawn* OtherPawn);
 
     FTimerHandle SelfDestructCountdownTimer;
     FTimerHandle SelfDestructionTickTimer;
