@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "SPowerupActor.generated.h"
 
+class USoundBase;
 
 UCLASS()
 class COOPGAME_API ASPowerupActor : public AActor
@@ -27,6 +28,9 @@ protected:
     // Total times this powerup effect is applied
     UPROPERTY(EditDefaultsOnly, Category = "Powerup")
     int32 TotalNumberOfTicks = 0;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Powerup")
+	USoundBase* PowerupSound;
 
     FTimerHandle TimerHandle_PowerupTick;
 
