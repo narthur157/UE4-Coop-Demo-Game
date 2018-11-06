@@ -140,11 +140,7 @@ void ASTrackerBot::SelfDestruct()
 void ASTrackerBot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-    if (GetController())
-    {
-        TRACE("ValidController!");
-    }
-    //TRACE("InvalidController");
+    
 
     if (!bSelfDestructionAttached && !bExploded && Role == ROLE_Authority)
     {
@@ -172,7 +168,7 @@ void ASTrackerBot::MoveTowardsTarget()
 
 void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-
+    
     APawn* OtherActorPawn = Cast<APawn>(OtherActor);
     // If the other actor 
     if (OtherActorPawn && OtherActorPawn != this && !USHealthComponent::IsFriendly(OtherActorPawn, this))
@@ -209,6 +205,7 @@ void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComp
             ExplodeTime = GetWorld()->TimeSeconds + SelfDestructTime;
             OnRep_ExplodeTime();
         }
+
         if (!bTriggered)
         {
             UGameplayStatics::SpawnSoundAttached(TriggeredSound, RootComponent);
