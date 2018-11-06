@@ -78,7 +78,8 @@ protected:
 	void ServerSetZoom(bool bZoom);
 
 public:
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "PlayerWeapon")
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "PlayerWeapon")
 	bool bWantsToZoom;
 
 	virtual void Tick(float DeltaTime) override;

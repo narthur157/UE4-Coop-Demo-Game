@@ -31,6 +31,6 @@ public:
         void RefreshAmmo();
 
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "WeaponHUD")
-        void InitializeWeaponWidget(USWeaponComponent* NewWeaponComponent);
+        void InitializeWeaponWidget(USWeaponComponent* NewWeaponComponent, int32 NumberWeaponSlots);
 
 };

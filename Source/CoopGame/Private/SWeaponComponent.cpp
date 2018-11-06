@@ -104,21 +104,7 @@ void USWeaponComponent::OnRep_CurrentWeapon()
 
 void USWeaponComponent::OnRep_WeaponInventory()
 {
-    APawn* Owner = Cast<APawn>(GetOwner());
-    APlayerController* OwnerController = Cast<APlayerController>(Owner->GetController());
-    if (Owner && OwnerController)
-    {
-        TRACE("WeaponInventoryReplicated: %d / %d", WeaponInventory.Num(), DefaultWeapons.Num());
-
-        if (!WeaponsWidget)
-        {
-            WeaponsWidget = CreateWidget<USWeaponWidget>(OwnerController, WeaponsWidgetClass);
-            WeaponsWidget->InitializeWeaponWidget(this);
-            WeaponsWidget->AddToViewport();
-        }
-        WeaponsWidget->RefreshAmmo();
-        WeaponsWidget->RefreshWeapons();
-    }
+    
 }
 
 void USWeaponComponent::ServerEquipWeapon_Implementation(ASWeapon* Weapon)
@@ -175,4 +161,17 @@ void USWeaponComponent::StopFire()
     {
         CurrentWeapon->StopFire();
     }
+}
+
+USWeaponWidget* USWeaponComponent::DrawWeaponWidget(APlayerController* OwningController, int32 NumberWeaponSlots)
+{
+    USWeaponWidget* NewWidget = nullptr;
+    if (OwningController)
+    {
+        NewWidget = CreateWidget<USWeaponWidget>(OwningController,WeaponsWidgetClass);
+        NewWidget->InitializeWeaponWidget(this, NumberWeaponSlots);
+        NewWidget->RefreshAmmo();
+        NewWidget->RefreshWeapons();
+    }
+    return NewWidget;
 }
