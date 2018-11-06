@@ -51,6 +51,9 @@ protected:
 
     virtual void Fire() override;
 
+	/**
+	 * Also spawns the muzzle effect
+	 */
     void DrawTracerEffect(const FVector &TraceEndPoint);
 
     void PlayImpactEffect(EPhysicalSurface SurfaceType, FVector ImpactPoint);
