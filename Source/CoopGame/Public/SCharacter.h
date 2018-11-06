@@ -78,10 +78,9 @@ protected:
 	void ServerSetZoom(bool bZoom);
 
 public:
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "PlayerWeapon")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "PlayerWeapon")
 	bool bWantsToZoom;
 
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
@@ -96,7 +95,7 @@ public:
     virtual uint8 GetTeamID() override;
 
     /**  Weapon operations, calling these from character for now because we might want to play animations/whatever
-     *before firing/on changing weapons
+     *	 before firing/on changing weapons
 	*/
     UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
     void StartFire();
