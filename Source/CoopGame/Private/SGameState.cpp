@@ -35,9 +35,11 @@ void ASGameState::MulticastGameOver_Implementation(bool bWasSuccessful)
         ASPlayerController* PC = Cast<ASPlayerController>(It->Get());
         if (PC && PC->IsLocalController())
         {
-            if (PC->GetPawn())
+			APawn* MyPawn = Cast<APawn>(PC->GetPawn());
+
+            if (MyPawn)
             {
-                PC->GetPawn()->DisableInput(PC);
+                MyPawn->DisableInput(PC);
             }
             PC->RecieveGameOver(bWasSuccessful);
         }

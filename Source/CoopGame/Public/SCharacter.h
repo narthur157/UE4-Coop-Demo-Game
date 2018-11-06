@@ -89,14 +89,15 @@ public:
 
     virtual FVector GetPawnViewLocation() const override;
 
-    // IDamageDealer
+    /** Implements IDamageDealer */
     virtual float GetDamageModifier() override { return DamageModifier; }
 
-    // ITeamMember 
+    /** Implements ITeamMember */ 
     virtual uint8 GetTeamID() override;
 
-    // Weapon operations, calling these from character for now because we might want to play animations/whatever
-    // before firing/on changing weapons
+    /**  Weapon operations, calling these from character for now because we might want to play animations/whatever
+     *before firing/on changing weapons
+	*/
     UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
     void StartFire();
 
@@ -104,4 +105,7 @@ public:
     void StopFire();
 
     void ChangeWeapon();
+
+	/* Override so that we can stop firing when disabled */
+	virtual void DisableInput(APlayerController* PlayerController) override;
 };

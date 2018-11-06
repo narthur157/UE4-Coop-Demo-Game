@@ -12,7 +12,6 @@
 #include "SWeaponComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 
-
 ASCharacter::ASCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -71,7 +70,6 @@ void ASCharacter::BeginPlay()
 	Super::BeginPlay();
     DefaultFOV = CameraComp->FieldOfView;
     HealthComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
-
 }
 
 void ASCharacter::Tick(float DeltaTime)
@@ -119,7 +117,7 @@ void ASCharacter::EndZoom()
     bWantsToZoom = false;
 }
 
-// TODO: Server functionsn so this works in multiplayer
+// TODO: Server functions so this works in multiplayer
 void ASCharacter::BeginSprint()
 {
    // bWantsToSprint = true;
@@ -156,11 +154,7 @@ void ASCharacter::StopFire()
 
 FVector ASCharacter::GetPawnViewLocation() const
 {
-    if (CameraComp)
-    {
-        return CameraComp->GetComponentLocation();
-    }
-    return Super::GetPawnViewLocation();
+	return CameraComp ? CameraComp->GetComponentLocation() : Super::GetPawnViewLocation();
 }
 
 void ASCharacter::ChangeWeapon()
@@ -171,19 +165,25 @@ void ASCharacter::ChangeWeapon()
     }
 }
 
+void ASCharacter::DisableInput(APlayerController* PlayerController)
+{
+	Super::DisableInput(PlayerController);
+
+	StopFire();
+}
+
 void ASCharacter::OnHealthChanged(USHealthComponent * ChangedHealthComp, float Health, float HealthDelta, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
     if (Health <= 0.0f && !bDied)
     {
         bDied = true;
         StopFire();
-        // Die
 
+        // Die
         GetMovementComponent()->StopMovementImmediately();
         GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         DetachFromControllerPendingDestroy();
         SetLifeSpan(10.0f);
-
     }
 }
 
@@ -196,3 +196,4 @@ bool ASCharacter::ServerSetZoom_Validate(bool bZoom)
 {
 	return true;
 }
+

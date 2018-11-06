@@ -115,14 +115,18 @@ void ASHitscanWeapon::OnRep_HitScanTrace()
 
 void ASHitscanWeapon::DrawTracerEffect(const FVector &TraceEndPoint)
 {
+    FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
     if (MuzzleEffect)
     {
-        UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
+		// TODO: This should work
+		// UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
+		FVector ShotDirection = TraceEndPoint - MuzzleLocation;
+		ShotDirection.Normalize();
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleEffect, MuzzleLocation, ShotDirection.Rotation());
     }
 
     if (TracerEffect)
     {
-        FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
         UParticleSystemComponent* TracerComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TracerEffect, MuzzleLocation);
         if (TracerComp)
         {
@@ -147,7 +151,7 @@ void ASHitscanWeapon::PlayImpactEffect(EPhysicalSurface SurfaceType, FVector Imp
 
     if (SelectedEffect)
     {
-        FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
+		FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
         FVector ShotDirection = ImpactPoint - MuzzleLocation;
         ShotDirection.Normalize();
         UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SelectedEffect, ImpactPoint, ShotDirection.Rotation());
