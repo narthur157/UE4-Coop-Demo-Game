@@ -12,13 +12,12 @@
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "DrawDebugHelpers.h"
 
 ASTrackerBot::ASTrackerBot()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.TickInterval = 0.1f;
+
     MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
     MeshComp->SetCanEverAffectNavigation(false);
     MeshComp->SetSimulatePhysics(true);
@@ -99,7 +98,6 @@ FVector ASTrackerBot::GetNextPathPoint()
 
         if (NavPath && NavPath->PathPoints.Num() > 0)
         {
-			DrawDebugSphere(GetWorld(), BestTarget->GetActorLocation(), 100, 12, FColor::Red);
             return NavPath->PathPoints[1];
         }
     }
