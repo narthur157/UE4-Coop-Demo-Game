@@ -1,16 +1,13 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "SPowerupActor.h"
 #include "CoopGame.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
 
-// Sets default values
 ASPowerupActor::ASPowerupActor()
 {
     SetReplicates(true);
 }
 
-// Called when the game starts or when spawned
 void ASPowerupActor::BeginPlay()
 {
 	Super::BeginPlay();
@@ -23,7 +20,6 @@ void ASPowerupActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
     DOREPLIFETIME(ASPowerupActor, bIsPowerupActive);
 }
-
 
 void ASPowerupActor::OnTickPowerup()
 {
@@ -50,6 +46,11 @@ void ASPowerupActor::OnRep_PowerupActive()
 
 void ASPowerupActor::ActivatePowerup(AActor* InstigatorActor)
 {
+	if (PowerupSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PowerupSound, GetActorLocation());
+	}
+
     TRACE("%s Activated on %s", *GetName(), *InstigatorActor->GetName());
     OnActivated(InstigatorActor);
     bIsPowerupActive = true;
