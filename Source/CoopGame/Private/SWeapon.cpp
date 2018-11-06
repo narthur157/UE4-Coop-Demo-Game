@@ -62,6 +62,7 @@ void ASWeapon::OnHit(AActor* HitActor, bool bSkipCheck)
 	if (bSkipCheck)
 	{
 		HitIndicatorWidget->PlayHitAnimation();
+		return;
 	}
 
 	USHealthComponent* HitHealth = Cast<USHealthComponent>(HitActor->GetComponentByClass(USHealthComponent::StaticClass()));
