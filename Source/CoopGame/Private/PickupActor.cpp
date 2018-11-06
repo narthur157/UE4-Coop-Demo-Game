@@ -53,6 +53,12 @@ void APickupActor::NotifyActorBeginOverlap(AActor * OtherActor)
 {
     Super::NotifyActorBeginOverlap(OtherActor);
 
+	AController* OtherController = OtherActor->GetInstigatorController();
+	if (OtherController && !OtherController->IsPlayerController())
+	{
+		return;
+	}
+
     if (Role == ROLE_Authority && PowerupInstance)
     {
         TRACE("%s overlapped. Applying powerup: %s", *GetName(), *PowerupInstance->GetName());
