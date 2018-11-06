@@ -24,6 +24,7 @@ ASCharacter::ASCharacter()
     HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComponent"));
     WeaponComp = CreateDefaultSubobject<USWeaponComponent>(TEXT("WeaponComponent"));
 
+	SetReplicates(true);
 
     CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
     CameraComp->SetupAttachment(SpringArmComp);
@@ -62,6 +63,7 @@ void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(ASCharacter, bDied);
+	DOREPLIFETIME_CONDITION(ASCharacter, bWantsToZoom, COND_SkipOwner);
 }
 
 void ASCharacter::BeginPlay()
@@ -78,6 +80,11 @@ void ASCharacter::Tick(float DeltaTime)
 
     float TargetFOV = bWantsToZoom ? ZoomedFOV : DefaultFOV;
     float NewFOV = FMath::FInterpTo(CameraComp->FieldOfView, TargetFOV, DeltaTime, ZoomInterpSpeed);
+
+	if (Role < ROLE_Authority)
+	{
+		ServerSetZoom(bWantsToZoom);
+	}
 
     CameraComp->SetFieldOfView(NewFOV);
 }
@@ -178,4 +185,14 @@ void ASCharacter::OnHealthChanged(USHealthComponent * ChangedHealthComp, float H
         SetLifeSpan(10.0f);
 
     }
+}
+
+void ASCharacter::ServerSetZoom_Implementation(bool bZoom)
+{
+	bWantsToZoom = bZoom;
+}
+
+bool ASCharacter::ServerSetZoom_Validate(bool bZoom)
+{
+	return true;
 }
