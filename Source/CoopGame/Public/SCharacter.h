@@ -78,7 +78,7 @@ protected:
 	void ServerSetZoom(bool bZoom);
 
 public:
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "PlayerWeapon")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "PlayerWeapon")
 	bool bWantsToZoom;
 
 	// Called every frame

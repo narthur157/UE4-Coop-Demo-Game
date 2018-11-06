@@ -81,7 +81,7 @@ void ASCharacter::Tick(float DeltaTime)
     float TargetFOV = bWantsToZoom ? ZoomedFOV : DefaultFOV;
     float NewFOV = FMath::FInterpTo(CameraComp->FieldOfView, TargetFOV, DeltaTime, ZoomInterpSpeed);
 
-	if (Role < ROLE_Authority)
+	if (Role == ROLE_AutonomousProxy)
 	{
 		ServerSetZoom(bWantsToZoom);
 	}

@@ -36,17 +36,17 @@ public:
 	// Sets default values for this component's properties
 	USWeaponComponent();
 
-    UFUNCTION(BlueprintCallable, Category = "WeaponData")
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    USWeaponWidget* DrawWeaponWidget(APlayerController* OwningController, int32 NumberWeaponSlots);
+
+    UFUNCTION(BlueprintPure, Category = "WeaponData")
     ASWeapon* GetCurrentWeapon() { return CurrentWeapon; }
 
-    UFUNCTION(BlueprintCallable, Category = "WeaponData")
+    UFUNCTION(BlueprintPure, Category = "WeaponData")
     TArray<ASWeapon*> GetWeaponInventory() { return WeaponInventory; }
 
-    UFUNCTION(BlueprintCallable, Category = "WeaponData")
+    UFUNCTION(BlueprintPure, Category = "WeaponData")
     TArray<FWeaponAmmoInventoryItem> GetAmmoInventory() { return AmmoInventory; }
-
-    UFUNCTION(BlueprintCallable, Category = "WeaponData")
-    float GetAmmoInCurrentWeaponClip() { return CurrentWeapon ? 100.0f : 0.0f; };
 
     UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
     void StartFire();
@@ -73,13 +73,10 @@ protected:
     TArray<FWeaponAmmoInventoryItem> AmmoInventory;
 
     UPROPERTY(BlueprintReadonly, ReplicatedUsing = OnRep_CurrentWeapon)
-     ASWeapon* CurrentWeapon;
-
+    ASWeapon* CurrentWeapon;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     TSubclassOf<USWeaponWidget> WeaponsWidgetClass = nullptr;
-
-    USWeaponWidget* WeaponsWidget = nullptr;
 
     /** [Server] **/
     void SpawnDefaultWeaponInventory();
