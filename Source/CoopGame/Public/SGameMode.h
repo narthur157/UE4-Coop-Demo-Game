@@ -34,6 +34,7 @@ protected:
     // Gamestate handlers 
     void CheckPlayerState();
 
+    UFUNCTION(BlueprintCallable, Category = "GameMode")
     void GameOver(bool bWasSuccessful);
 
     void RestartDeadPlayers();

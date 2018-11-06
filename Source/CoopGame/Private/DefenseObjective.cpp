@@ -25,7 +25,6 @@ void ADefenseObjective::BeginPlay()
 {
 	Super::BeginPlay();
     HealthComp->OnHealthChanged.AddDynamic(this, &ADefenseObjective::OnHealthComponentTakeDamage);
-
 }
 
 uint8 ADefenseObjective::GetTeamID()
