@@ -28,7 +28,9 @@ void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 
 void ASWeapon::BeginPlay()
 {
-	if (HitIndicatorWidgetClass)
+	APawn* MyPawn = Cast<APawn>(GetOwner());
+
+	if (HitIndicatorWidgetClass && MyPawn && MyPawn->IsPlayerControlled())
 	{
 		HitIndicatorWidget = CreateWidget<USHitIndicatorWidget>(GetWorld(), HitIndicatorWidgetClass);
 		HitIndicatorWidget->AddToViewport();
@@ -47,26 +49,25 @@ bool ASWeapon::ServerFire_Validate()
 }
 
 /**
- * @Param HitActor If this actor is on the other team the weapon hit will be broadcast
+ * @param HitActor If this actor is on the other team the weapon hit will be broadcast
  * @param bSkipCheck If true, broadcast weapon hit regardless
  */
 void ASWeapon::OnHit(AActor* HitActor, bool bSkipCheck)
 {
-	if (bSkipCheck)
+	if (!HitIndicatorWidget || (!HitActor && !bSkipCheck))
 	{
-		HitIndicatorWidget->PlayHitAnimation();
 		return;
 	}
 
-	if (!HitActor)
+	if (bSkipCheck)
 	{
-		return;
+		HitIndicatorWidget->PlayHitAnimation();
 	}
 
 	USHealthComponent* HitHealth = Cast<USHealthComponent>(HitActor->GetComponentByClass(USHealthComponent::StaticClass()));
 	if (HitHealth && GetOwner())
 	{
-		if (!USHealthComponent::IsFriendly(HitActor, GetOwner()))
+		if (HitIndicatorWidget && !USHealthComponent::IsFriendly(HitActor, GetOwner()))
 		{
 			HitIndicatorWidget->PlayHitAnimation();
 		}
