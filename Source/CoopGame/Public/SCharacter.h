@@ -79,7 +79,7 @@ protected:
 
 public:
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "PlayerWeapon")
+	UPROPERTY(Replicated, BlueprintReadWrite, Category = "PlayerWeapon")
 	bool bWantsToZoom;
 
 	virtual void Tick(float DeltaTime) override;
