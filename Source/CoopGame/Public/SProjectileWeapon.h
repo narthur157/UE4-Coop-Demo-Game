@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -13,20 +11,21 @@ struct FProjectileWeaponData
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditDefaultsOnly)
-    TSubclassOf<UDamageType> ProjectileDamageType;
+    UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeaponData")
+	TSubclassOf<UDamageType> ProjectileDamageType;
 
-    UPROPERTY(EditDefaultsOnly)
-    float ProjectileLifeTime = -1.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeaponData")
+	float ProjectileLifeTime = -1.0f;
 
-    UPROPERTY(EditDefaultsOnly)
-    float ProjectileDamage = 0.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeaponData")
+	float ProjectileDamage = 0.0f;
 
-    UPROPERTY(EditDefaultsOnly)
-    float ProjectileRadius = 0.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeaponData")
+	float ProjectileRadius = 0.0f;
 
-    UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeaponData")
     float LaunchSpeed = 0.0f;
+
 
     bool DoesExpire()
     {
@@ -34,24 +33,23 @@ struct FProjectileWeaponData
     }
 };
 
-/**
- * 
- */
 UCLASS()
 class COOPGAME_API ASProjectileWeapon : public ASWeapon
 {
 	GENERATED_BODY()
-	
+
 public:
+	ASProjectileWeapon();
 
 protected:
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeapon")
+	FVector ProjectileSpawnTranslate;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TSubclassOf<ASProjectile> ProjectileClass;
+    UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeapon")
+	TSubclassOf<ASProjectile> ProjectileClass;
 
-    UPROPERTY(EditAnywhere, Category = "Weapon")
+	UPROPERTY(EditAnywhere, Category = "ProjectileWeapon")
     FProjectileWeaponData ProjectileWeaponConfigData;
 
     virtual void Fire() override;
-
 };

@@ -18,8 +18,12 @@ public:
     ASProjectile_Bounce();
 
 protected:
+	UPROPERTY(EditDefaultsOnly, Category = "BounceProjectile")
+	bool bSetsTimerOnBounce = true;
+
+	// In seconds
+	UPROPERTY(EditDefaultsOnly, Category = "BounceProjectile")
+	float TimeToLiveAfterBounce = 0.2f;
 
     virtual void OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVector NormalImpulse, const FHitResult & Hit) override;
-	
-	
 };

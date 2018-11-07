@@ -13,10 +13,30 @@ ASProjectile_Bounce::ASProjectile_Bounce()
 
 void ASProjectile_Bounce::OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVector NormalImpulse, const FHitResult & Hit)
 {
+	if (bExploded)
+	{
+		return;
+	}
+
     if (Cast<APawn>(OtherActor))
     {
         bExploded = true;
-        Explode();
+
+		if (Role == ROLE_Authority)
+		{
+			OnRep_Exploded();
+		}
     }
-    
+	else if (bSetsTimerOnBounce)
+	{
+		bSetsTimerOnBounce = false;
+
+		if (WeaponData.ProjectileLifeTime && WeaponData.ProjectileDamage < TimeToLiveAfterBounce)
+		{
+			UE_LOG(LogTemp, Error, TEXT("TimeToLiveAfterBounce should be shorter than ProjectileLifeTime if bSetsTimerOnBounce is specified in SProjectile_Bounce"));
+		}
+
+		GetWorld()->GetTimerManager().ClearTimer(FuseTimerHandle);
+		GetWorld()->GetTimerManager().SetTimer(FuseTimerHandle, this, &ASProjectile::OnProjectileExpire, TimeToLiveAfterBounce, false);
+	}
 }

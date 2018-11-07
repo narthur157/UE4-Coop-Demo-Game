@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "SProjectile.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SphereComponent.h"
@@ -14,7 +12,6 @@
 
 ASProjectile::ASProjectile()
 {
-
     CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
     SetRootComponent(CollisionComp);
 
@@ -23,13 +20,15 @@ ASProjectile::ASProjectile()
     MeshComp->SetVisibility(true);
     MeshComp->SetupAttachment(CollisionComp);
 
-
     MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
     MovementComp->bAutoActivate = true;
     MovementComp->SetUpdatedComponent(CollisionComp);
 
+	NetUpdateFrequency = 40;
+	MinNetUpdateFrequency = 20.0f;
+
     SetReplicates(true);
-    SetReplicateMovement(true);
+	SetReplicateMovement(true);
 }
 
 void ASProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -37,7 +36,6 @@ void ASProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(ASProjectile, bExploded);
-
 }
 
 void ASProjectile::Initialize(const FProjectileWeaponData & Data)
@@ -48,7 +46,6 @@ void ASProjectile::Initialize(const FProjectileWeaponData & Data)
 
 void ASProjectile::Launch()
 {
-    
     if (!bWasInitialized)
     {
         UE_LOG(LogTemp, Warning, TEXT("Projectile fired despite not being Initialized. Please Initialze projectile. Undefined behavior incoming."))
@@ -68,20 +65,14 @@ void ASProjectile::Launch()
     }
 }
 
-void ASProjectile::ServerLaunch_Implementation()
-{
-    Launch();
-}
-
-bool ASProjectile::ServerLaunch_Validate()
-{
-    return true;
-}
-
 void ASProjectile::OnProjectileExpire()
 {
     bExploded = true;
-    OnRep_Exploded();
+
+	if (Role == ROLE_Authority)
+	{
+		OnRep_Exploded();
+	}
 }
 
 void ASProjectile::OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVector NormalImpulse, const FHitResult & Hit)
@@ -93,6 +84,8 @@ void ASProjectile::OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVec
 
 void ASProjectile::Explode()
 {
+	GetWorld()->GetTimerManager().ClearTimer(FuseTimerHandle);
+
     if (ExplosionEffect)
     {
         UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation(), FVector::ZeroVector.Rotation());
@@ -136,5 +129,4 @@ void ASProjectile::Explode()
 void ASProjectile::OnRep_Exploded()
 {
     Explode();
-    
 }
