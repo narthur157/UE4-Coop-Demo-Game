@@ -23,9 +23,8 @@ ASProjectile::ASProjectile()
     MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
     MovementComp->bAutoActivate = true;
     MovementComp->SetUpdatedComponent(CollisionComp);
-
-	NetUpdateFrequency = 40;
-	MinNetUpdateFrequency = 20.0f;
+	MovementComp->InitialSpeed = ProjectileSpeed;
+	MovementComp->MaxSpeed = 5000.0f;
 
     SetReplicates(true);
 	SetReplicateMovement(true);
@@ -50,10 +49,6 @@ void ASProjectile::Launch()
     {
         UE_LOG(LogTemp, Warning, TEXT("Projectile fired despite not being Initialized. Please Initialze projectile. Undefined behavior incoming."))
     }
-  
-    // Fire projectile
-    MovementComp->SetVelocityInLocalSpace(FVector::ForwardVector * WeaponData.LaunchSpeed);
-    MovementComp->Activate();
 
     // Register projectile to recieve hit events
     OnActorHit.AddDynamic(this, &ASProjectile::OnProjectileHit);
