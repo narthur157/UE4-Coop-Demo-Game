@@ -23,7 +23,6 @@ public:
 	ASProjectile();
 
 protected:
-
     UPROPERTY(VisibleAnywhere, Category = "Components")
     USphereComponent* CollisionComp = nullptr;
 
@@ -45,9 +44,6 @@ protected:
     UFUNCTION()
     virtual void OnProjectileHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
 
-    UFUNCTION()
-    virtual void OnProjectileExpire();
-
     UPROPERTY(ReplicatedUsing = OnRep_Exploded)
     bool bExploded = false;
 
@@ -60,11 +56,11 @@ protected:
     bool bWasInitialized = false;
 
 public:	
-    
+    UFUNCTION()
+    virtual void OnProjectileExpire();
+	
+	UFUNCTION()
     virtual void Launch();
-
-    UFUNCTION(Server, Reliable, WithValidation)
-    void ServerLaunch();
 	
     virtual void Initialize(const FProjectileWeaponData& Data);
 };

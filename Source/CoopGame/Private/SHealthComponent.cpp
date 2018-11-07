@@ -62,7 +62,7 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
     if (Health <= 0 && !bIsDead)
     {
         ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
-        if (GM)
+        if (GM && InstigatedBy && InstigatedBy->GetPawn() && GetOwner())
         {
             GM->OnActorKilled(GetOwner(), InstigatedBy->GetPawn(), InstigatedBy);
         }

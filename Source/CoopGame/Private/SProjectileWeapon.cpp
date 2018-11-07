@@ -7,6 +7,10 @@
 #include "Engine/World.h"   
 #include "Components/SkeletalMeshComponent.h"
 
+ASProjectileWeapon::ASProjectileWeapon()
+{
+	ProjectileSpawnTranslate = FVector(100.0f, 0, 0);
+}
 
 void ASProjectileWeapon::Fire()
 {
@@ -21,16 +25,19 @@ void ASProjectileWeapon::Fire()
 
     if (ProjectileClass && GetOwner())
     {
-        FVector ProjectileSpawnLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
+        FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleEffect, MuzzleLocation);
         FRotator ProjectileSpawnRotation;
         FVector OutViewPointLocation;
         GetOwner()->GetActorEyesViewPoint(OutViewPointLocation, ProjectileSpawnRotation);
+
+		OutViewPointLocation += ProjectileSpawnRotation.Vector() * ProjectileSpawnTranslate;
 
         FActorSpawnParameters SpawnParams;
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
         SpawnParams.Instigator = Cast<APawn>(GetOwner());
         SpawnParams.Owner = this;
-        ASProjectile* NewProjectile = GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, ProjectileSpawnLocation, ProjectileSpawnRotation, SpawnParams);
+        ASProjectile* NewProjectile = GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, OutViewPointLocation, ProjectileSpawnRotation, SpawnParams);
 
         NewProjectile->Initialize(ProjectileWeaponConfigData);
         NewProjectile->Launch();
