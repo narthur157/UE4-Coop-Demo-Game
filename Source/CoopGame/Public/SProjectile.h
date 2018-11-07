@@ -32,6 +32,9 @@ protected:
     UPROPERTY(VisibleAnywhere, Category = "Components")
     UStaticMeshComponent* MeshComp = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	float ProjectileSpeed;
+
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     UParticleSystem* ExplosionEffect = nullptr;
 
