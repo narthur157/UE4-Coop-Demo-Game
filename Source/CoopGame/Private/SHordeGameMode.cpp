@@ -45,7 +45,7 @@ void ASHordeGameMode::SpawnBotTimerElapsed()
 void ASHordeGameMode::EndWave()
 {
     GetWorldTimerManager().ClearTimer(TimerHandle_BotSpawner);
-    SetWaveState(EWaveState::WaitingToComplete);
+    SetWaveState(EWaveState::WaveComplete);
 }
 
 void ASHordeGameMode::PrepareForNextWave()
@@ -68,7 +68,6 @@ void ASHordeGameMode::PrepareForNextWave()
         // Spawn the next wave on a delay
         GetWorldTimerManager().SetTimer(TimerHandle_NextWaveStart, this, &ASHordeGameMode::StartWave, TimeBetweenWaves, false);
     }
-
     SetWaveState(EWaveState::WaitingToStart);
 
 }

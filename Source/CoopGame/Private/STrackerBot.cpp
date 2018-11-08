@@ -131,7 +131,12 @@ void ASTrackerBot::SelfDestruct()
         TArray<AActor*> IgnoredActors = { };
         float ActualDamage = ((GetDamageModifier() / 100) * ExplosionDamage) + ExplosionDamage;
 		bool bScaleDamageByDistance = bBotAttachesToPlayer;
-        UGameplayStatics::ApplyRadialDamage(this, ActualDamage, GetActorLocation(), ExplosionRadius,nullptr, IgnoredActors, this, GetController(), bScaleDamageByDistance);
+        UGameplayStatics::ApplyRadialDamage(this, ActualDamage, GetActorLocation(), ExplosionRadius,nullptr, IgnoredActors,this,GetController(), bScaleDamageByDistance);
+        // Kill ourselves
+        if (HealthComp->GetHealth() > 0)
+        {
+            UGameplayStatics::ApplyDamage(this, HealthComp->GetHealth(), GetController(), this, nullptr);
+        }
         // Give clients a chance to play effects
         SetLifeSpan(4.0);
     }
@@ -276,3 +281,6 @@ uint8 ASTrackerBot::GetTeamID()
 {
     return HealthComp->TeamNum;
 }
+
+
+

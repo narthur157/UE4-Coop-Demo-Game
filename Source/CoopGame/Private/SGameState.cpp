@@ -9,6 +9,7 @@
 void ASGameState::OnRep_WaveStateChanged(EWaveState OldState)
 {
     WaveStateChanged(WaveState, OldState);
+    OnWaveStateChanged.Broadcast(OldState, WaveState);
 }
 
 void ASGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -16,6 +17,7 @@ void ASGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(ASGameState, WaveState);
+    DOREPLIFETIME(ASGameState, NumEnemiesAlive);
 }
 
 void ASGameState::SetWaveState(EWaveState NewState)
@@ -30,24 +32,18 @@ void ASGameState::SetWaveState(EWaveState NewState)
 
 void ASGameState::MulticastGameOver_Implementation(bool bWasSuccessful)
 {
-    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-    {
-        ASPlayerController* PC = Cast<ASPlayerController>(It->Get());
-        if (PC && PC->IsLocalController())
-        {
-			APawn* MyPawn = Cast<APawn>(PC->GetPawn());
-
-            if (MyPawn)
-            {
-                MyPawn->DisableInput(PC);
-            }
-            PC->RecieveGameOver(bWasSuccessful);
-        }
-    }
+    TRACE("GameState GameOver");
+    OnGameOver.Broadcast(bWasSuccessful);
 }
 
 void ASGameState::MulticastActorKilled_Implementation(const FString& KillerName, const FString& KilledName)
 {
     OnActorKilledGameState.Broadcast(KillerName, KilledName);
+}
+
+void ASGameState::OnRep_NumEnemiesChanged()
+{
+    TRACE("NumberEnemiesChanged");
+    OnNumEnemiesChanged.Broadcast(NumEnemiesAlive);
 }
 
