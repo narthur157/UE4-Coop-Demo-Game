@@ -21,6 +21,9 @@ struct FProjectileWeaponData
 	float ProjectileDamage = 0.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeaponData")
+	float ProjectileDamageDirectHit = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeaponData")
 	float ProjectileRadius = 0.0f;
 
 

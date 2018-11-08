@@ -23,10 +23,12 @@ public:
 	ASProjectile();
 
 protected:
+	AActor* DirectHitActor = nullptr;
+
     UPROPERTY(VisibleAnywhere, Category = "Components")
     USphereComponent* CollisionComp = nullptr;
 
-    UPROPERTY(VisibleAnywhere, Category = "Components")
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UProjectileMovementComponent* MovementComp = nullptr;
 
     UPROPERTY(VisibleAnywhere, Category = "Components")
@@ -41,6 +43,10 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     USoundCue* ExplosionSoundEffect = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	USoundCue* DirectHitSoundEffect = nullptr;
+
+	// HitActor will take direct damage if specified
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     virtual void Explode();
 
