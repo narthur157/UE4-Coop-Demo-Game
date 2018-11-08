@@ -72,9 +72,18 @@ void ASProjectile::OnProjectileExpire()
 
 void ASProjectile::OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVector NormalImpulse, const FHitResult & Hit)
 {
+	DirectHitActor = OtherActor;
     bExploded = true;
     GetWorld()->GetTimerManager().ClearTimer(FuseTimerHandle);
     OnRep_Exploded();
+
+	APawn* OtherPawn = Cast<APawn>(OtherActor);
+	AController* InstContr = GetInstigatorController();
+
+	if (OtherPawn && InstContr && InstContr->IsLocalController() && DirectHitSoundEffect)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), DirectHitSoundEffect);
+	}
 }
 
 void ASProjectile::Explode()
@@ -85,10 +94,10 @@ void ASProjectile::Explode()
     {
         UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation(), FVector::ZeroVector.Rotation());
     }
+
     if (ExplosionSoundEffect)
     {
         UGameplayStatics::PlaySoundAtLocation(this, ExplosionSoundEffect, GetActorLocation());
-
     }
 
     // TODO: Find a way to remove this, calculate ignored actors in projectileweapondata?
@@ -97,24 +106,39 @@ void ASProjectile::Explode()
     {
 
         IDamageDealer* DamageDealer = Cast<IDamageDealer>(GetInstigator());
-        float ActualDamage = WeaponData.ProjectileDamage;
-        
+        float ActualDamageRadial = WeaponData.ProjectileDamage;
+		float DirectDamage = WeaponData.ProjectileDamageDirectHit;
+
 		if (DamageDealer)
         {
-            ActualDamage += (DamageDealer->GetDamageModifier() / 100) * ActualDamage;
+            ActualDamageRadial += (DamageDealer->GetDamageModifier() / 100) * ActualDamageRadial;
+			DirectDamage += (DamageDealer->GetDamageModifier() / 100) * DirectDamage;
         }
 
-		if (UGameplayStatics::ApplyRadialDamage(GetWorld(), WeaponData.ProjectileDamage, GetActorLocation(), WeaponData.ProjectileRadius, WeaponData.ProjectileDamageType, IgnoredActors, GetOwner(), Instigator->GetController(), true))
+		if (UGameplayStatics::ApplyRadialDamage(GetWorld(), ActualDamageRadial,
+			GetActorLocation(), WeaponData.ProjectileRadius, WeaponData.ProjectileDamageType,
+			IgnoredActors, GetOwner(), Instigator->GetController(), true))
 		{
 			ASWeapon* MyOwner = Cast<ASWeapon>(GetOwner());
+			
 			if (MyOwner)
 			{
 				MyOwner->OnHit(nullptr, true);
 			}
 		}
+		UE_LOG(LogTemp, Error, TEXT("dmg"));
+
+		if (DirectHitActor)
+		{
+			UE_LOG(LogTemp, Error, TEXT("dealt direct dmg"));
+
+			UGameplayStatics::ApplyDamage(DirectHitActor, DirectDamage, 
+				Instigator->GetController(), GetOwner(), WeaponData.ProjectileDamageType);
+		}
     }
 
     SetActorHiddenInGame(true);
+
     if (Role == ROLE_Authority)
     {
         SetLifeSpan(5.0f);
