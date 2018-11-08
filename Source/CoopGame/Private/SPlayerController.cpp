@@ -12,7 +12,6 @@ ASPlayerController::ASPlayerController()
   
 }
 
-
 void ASPlayerController::BeginPlay()
 {
     Super::BeginPlay();
@@ -21,28 +20,30 @@ void ASPlayerController::BeginPlay()
     {
         GameEventWidget = CreateWidget<USGameEventWidget>(this, GameEventWidgetClass);
         GameEventWidget->AddToViewport();
-  
-        ASGameState* GS = GetWorld()->GetGameState<ASGameState>();
-        if (ensureAlways(GS) && GameEventWidget)
-        {
-            GS->OnActorKilledGameState.AddDynamic(GameEventWidget, &USGameEventWidget::OnActorKilled);
-        }
+    }
+
+    ASGameState* GS = GetWorld()->GetGameState<ASGameState>();
+    if (ensureAlways(GS))
+    {
+        GS->OnGameOver.AddDynamic(this, &ASPlayerController::RecieveGameOver);
     }
 }
 
 void ASPlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
-
     ensure(InputComponent);
-
     InputComponent->BindAction("ToggleMenu", IE_Pressed, this, &ASPlayerController::ToggleMenu);
-
 }
 
 void ASPlayerController::RecieveGameOver(bool bWasSuccessful)
 {
-    OnRecieveGameOver(bWasSuccessful);
+   UE_LOG(LogTemp, Warning, TEXT("GameOver"));
+   if (GetPawn())
+   {
+       GetPawn()->DisableInput(this);
+   }
+   OnRecieveGameOver(bWasSuccessful);
 }
 
 void ASPlayerController::ToggleMenu()
@@ -56,7 +57,6 @@ void ASPlayerController::ToggleMenu()
             MenuWidget->SetVisibility(ESlateVisibility::Visible);
             GEngine->GameViewport->Viewport->LockMouseToViewport(false);
             bShowMouseCursor = true;
-            
         }
     }
     else
