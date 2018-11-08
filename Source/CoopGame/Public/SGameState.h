@@ -18,7 +18,9 @@ enum class EWaveState : uint8
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGameStateActorKilled, const FString&, KillerName, const FString&, KilledName);
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameStateGameOver, bool, bWasSuccessful);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameStateNumEnemiesChanged, int32, NumEnemiesAlive);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGameStateWaveChanged, EWaveState, OldState,  EWaveState, NewWaveState);
 /**
  * 
  */
@@ -28,6 +30,13 @@ class COOPGAME_API ASGameState : public AGameStateBase
 	GENERATED_BODY()
 	
 public:
+
+    UPROPERTY(BlueprintReadOnly, Replicated, Category = "WaveState")
+    float NextWaveStartTime = 0.0f;
+
+    UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_NumEnemiesChanged, Category = "WaveState")
+    int32 NumEnemiesAlive = 0;
+
     UFUNCTION(BlueprintCallable, Category = "WaveState")
     void SetWaveState(EWaveState NewState);
 
@@ -39,6 +48,18 @@ public:
 
     UPROPERTY(BlueprintAssignable, Category = "GameEvent")
     FGameStateActorKilled OnActorKilledGameState;
+
+    UPROPERTY(BlueprintAssignable, Category = "GameEvent")
+    FGameStateGameOver OnGameOver;
+
+    UPROPERTY(BlueprintAssignable, Category = "WaveState")
+    FGameStateWaveChanged OnWaveStateChanged;
+
+    UPROPERTY(BlueprintAssignable, Category = "GameObjective")
+    FGameStateNumEnemiesChanged OnNumEnemiesChanged;
+
+    UFUNCTION(BlueprintCallable, Category = "WaveState")
+    void OnRep_NumEnemiesChanged();
 
 protected:
     UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_WaveStateChanged, Category = "WaveState")

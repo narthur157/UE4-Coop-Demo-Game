@@ -38,10 +38,9 @@ void ASGameMode::CheckPlayerState()
 
     if (!bIsPlayerAlive)
     {
-        TRACE("All payers have died.");
+        TRACE("All players have died.");
         GameOver(false);
     }
-
 }
 
 // Called when the game has ended
@@ -73,3 +72,4 @@ void ASGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* Kille
 {
   
 }
+
