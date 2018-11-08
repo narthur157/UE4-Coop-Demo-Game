@@ -107,3 +107,4 @@ bool USHealthComponent::IsFriendly(AActor * ActorOne, AActor * ActorTwo)
     }
     return true;
 }
+

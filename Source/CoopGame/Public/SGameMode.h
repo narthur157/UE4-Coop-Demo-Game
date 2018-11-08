@@ -30,7 +30,6 @@ public:
 
 protected:
 
-    
     // Gamestate handlers 
     void CheckPlayerState();
 
@@ -41,7 +40,5 @@ protected:
 
     UFUNCTION(BlueprintImplementableEvent, Category = "GameMode")
     void OnGameOver(bool bWasSuccessful);
-    
-    
 
 };
