@@ -68,7 +68,7 @@ void ASGameMode::RestartDeadPlayers()
 }
 
 // Called when a player has died, used in order to avoid using tick to check player/wave state
-void ASGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AController* KillerController)
+void ASGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser)
 {
   
 }

@@ -36,9 +36,9 @@ void ASGameState::MulticastGameOver_Implementation(bool bWasSuccessful)
     OnGameOver.Broadcast(bWasSuccessful);
 }
 
-void ASGameState::MulticastActorKilled_Implementation(const FString& KillerName, const FString& KilledName)
+void ASGameState::MulticastActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser)
 {
-    OnActorKilledGameState.Broadcast(KillerName, KilledName);
+    OnActorKilledGameState.Broadcast(KilledActor, KillerActor, DamageCauser);
 }
 
 void ASGameState::OnRep_NumEnemiesChanged()
