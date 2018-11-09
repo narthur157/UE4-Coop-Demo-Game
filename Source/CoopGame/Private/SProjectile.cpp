@@ -82,16 +82,14 @@ void ASProjectile::OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVec
 	}
 
 	NewStatus.bExploded = true;
-    GetWorld()->GetTimerManager().ClearTimer(FuseTimerHandle);
+	ExplosionStatus = NewStatus;
+    
+	GetWorld()->GetTimerManager().ClearTimer(FuseTimerHandle);
 
 	if (Role == ROLE_Authority)
 	{
 	    OnRep_Exploded();
 	}
-
-	APawn* OtherPawn = Cast<APawn>(OtherActor);
-	AController* InstContr = GetInstigatorController();
-	ExplosionStatus = NewStatus;
 }
 
 void ASProjectile::DirectHit()
@@ -99,10 +97,8 @@ void ASProjectile::DirectHit()
 	AController* InstContr = GetInstigatorController();
 
 	// directly hitting an explosive barrel, for example, doesn't warrant a special sound
-	if (ExplosionStatus.bWasDirectPawnHit && InstContr && InstContr->IsLocalController() && DirectHitSoundEffect)
+	if (ExplosionStatus.bWasDirectPawnHit && DirectHitSoundEffect)
 	{
-		UE_LOG(LogTemp, Error, TEXT("direct hit sound"));
-
 		UGameplayStatics::PlaySound2D(GetWorld(), DirectHitSoundEffect);
 	}
 
