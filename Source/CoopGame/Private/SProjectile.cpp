@@ -126,12 +126,9 @@ void ASProjectile::Explode()
 				MyOwner->OnHit(nullptr, true);
 			}
 		}
-		UE_LOG(LogTemp, Error, TEXT("dmg"));
 
 		if (DirectHitActor)
 		{
-			UE_LOG(LogTemp, Error, TEXT("dealt direct dmg"));
-
 			UGameplayStatics::ApplyDamage(DirectHitActor, DirectDamage, 
 				Instigator->GetController(), GetOwner(), WeaponData.ProjectileDamageType);
 		}
