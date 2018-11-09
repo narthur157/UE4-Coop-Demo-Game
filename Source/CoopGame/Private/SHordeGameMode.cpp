@@ -67,9 +67,13 @@ void ASHordeGameMode::PrepareForNextWave()
     {
         // Spawn the next wave on a delay
         GetWorldTimerManager().SetTimer(TimerHandle_NextWaveStart, this, &ASHordeGameMode::StartWave, TimeBetweenWaves, false);
+        ASGameState* GS = GetGameState<ASGameState>();
+        if (ensureAlways(GS))
+        {
+            GS->NextWaveStartTime = GetWorld()->TimeSeconds + TimeBetweenWaves;
+        }
     }
     SetWaveState(EWaveState::WaitingToStart);
-
 }
 
 // Iterate over all of the pawns, if we find a bot and its still alive then carry on
@@ -117,24 +121,13 @@ void ASHordeGameMode::SetWaveState(EWaveState State)
 }
 
 // Called when a player has died, used in order to avoid using tick to check player/wave state
-void ASHordeGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AController* KillerController)
+void ASHordeGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser)
 {
     // TODO: We only really need to check one or the other based on whether or not the killed actor is a player
     ASGameState* GS = GetGameState<ASGameState>();
     if (KillerActor && KilledActor)
     {
-        FString KillerName = KillerActor->GetName();
-        FString KilledName = KilledActor->GetName();
-        // TODO: Move this to a globally accessable place, it is a utility function which could be reused
-        if (KillerName.Len() > MAX_NAME_LENGTH)
-        {
-            KillerName = KillerName.Left(MAX_NAME_LENGTH - 3) + "...";
-        }
-        if (KilledName.Len() > MAX_NAME_LENGTH)
-        {
-            KilledName = KilledName.Left(MAX_NAME_LENGTH - 3) + "...";
-        }
-        GS->MulticastActorKilled(KillerName, KilledName);
+        GS->MulticastActorKilled(KilledActor, KillerActor, DamageCauser);
     }
 
     CheckPlayerState();

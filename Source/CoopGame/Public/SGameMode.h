@@ -7,7 +7,6 @@
 #include "SGameMode.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActorKilled, AActor*, KilledActor, AActor*, KillerActor, AController*, KillerController);
 
 /**
  * 
@@ -21,12 +20,9 @@ public:
     ASGameMode();
     virtual void StartPlay() override;
 
-    UPROPERTY(BlueprintAssignable, Category = "GameMode")
-    FOnActorKilled ActorKilled;
-
     UFUNCTION(BlueprintNativeEvent, Category = "GameMode")
-    void OnActorKilled(AActor* KilledActor, AActor* KillerActor, AController* KillerController);
-    virtual void OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AController* KillerController);
+    void OnActorKilled(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser);
+    virtual void OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser);
 
 protected:
 
