@@ -9,8 +9,8 @@
 UENUM(BlueprintType)
 enum class EWaveState : uint8
 {
+    None,
     WaitingToStart,
-    PreparingNextWave, 
     WaitingToComplete,
     WaveComplete,
     GameOver
@@ -63,7 +63,7 @@ public:
 
 protected:
     UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_WaveStateChanged, Category = "WaveState")
-    EWaveState WaveState = EWaveState::WaitingToStart;
+    EWaveState WaveState = EWaveState::None;
 
     UFUNCTION()
     void OnRep_WaveStateChanged(EWaveState OldState);
