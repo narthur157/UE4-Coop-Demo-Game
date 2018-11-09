@@ -30,23 +30,15 @@ void ASHitscanWeapon::Fire()
     AActor* Owner = GetOwner();
     if (Owner)
     {
-
-        UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
-
-        // Perform line trace
         FVector EyeLocation;
         FRotator EyeRotation;
         Owner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
-        
 
         FCollisionQueryParams QueryParams;
         QueryParams.AddIgnoredActor(Owner);
         QueryParams.AddIgnoredActor(this);
         QueryParams.bTraceComplex = true;
         QueryParams.bReturnPhysicalMaterial = true;
-
-        // The value of the end point of the trace. If hit, hit location. Else, max trace range location
-       
 
         // Bullet Spread
         float HalfRad = FMath::DegreesToRadians(BulletSpread);
@@ -60,57 +52,52 @@ void ASHitscanWeapon::Fire()
         FHitResult Hit;
         if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd, COLLISION_WEAPON, QueryParams))
 		{
-            // On Hit
             AActor* HitActor = Hit.GetActor();
 
             // Get surface type to use to calculate damage multipler/impact effects
             SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
 
-            // Better way of doing this in the future, maybe enure that owners are damage dealers
+            // Better way of doing this in the future, maybe ensure that owners are damage dealers
             IDamageDealer* DamageDealer = Cast<IDamageDealer>(GetOwner());
             // Calculate damage multiplier
             float ActualDamage = BaseDamage;
-            if (DamageDealer)
+            
+			if (DamageDealer)
             {
                 ActualDamage += (DamageDealer->GetDamageModifier() / 100) * ActualDamage;
             }
-            if (SurfaceType == SURFACE_FLESHVULNERABLE)
+            
+			if (SurfaceType == SURFACE_FLESHVULNERABLE)
             {
                 ActualDamage *= 4.0f;
 			}
 
 			OnHit(HitActor);
 
-            // Do Damage
             UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, Owner->GetInstigatorController(), this, DamageType);
 
-            // Apply impact effects based on surface type
             PlayImpactEffect(SurfaceType, Hit.ImpactPoint);
 
-            // Set Trace endpoint to the hit impact point
             TraceEndPoint = Hit.ImpactPoint;
-
         }
 
-        // If we are the server, replicate the hitscan information out so other clients know where/how to play their effects
-        if (Role == ROLE_Authority)
-        {
-            HitScanTrace.TraceTo = TraceEndPoint;
-            HitScanTrace.SurfaceType = SurfaceType;
-        }
+		// Replicated
+		HitScanTrace.TraceTo = TraceEndPoint;
+		HitScanTrace.SurfaceType = SurfaceType;
+		
+		// COND_SkipOwner is set
+		OnRep_HitScanTrace();
 
-        // Draw tracer effects
-        DrawTracerEffect(TraceEndPoint);
-
-        // Set last fire time
         LastFireTime = GetWorld()->TimeSeconds;
     }
 }
 
 void ASHitscanWeapon::OnRep_HitScanTrace()
 {
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), FireSound, GetActorLocation());
     DrawTracerEffect(HitScanTrace.TraceTo);
-    PlayImpactEffect(HitScanTrace.SurfaceType, HitScanTrace.TraceTo);
+	PlayImpactEffect(HitScanTrace.SurfaceType, HitScanTrace.TraceTo);
+	DrawTracerEffect(HitScanTrace.TraceTo);
 }
 
 void ASHitscanWeapon::DrawTracerEffect(const FVector &TraceEndPoint)
