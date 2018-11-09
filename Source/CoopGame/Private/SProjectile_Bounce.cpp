@@ -13,14 +13,14 @@ ASProjectile_Bounce::ASProjectile_Bounce()
 
 void ASProjectile_Bounce::OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVector NormalImpulse, const FHitResult & Hit)
 {
-	if (bExploded)
+	if (ExplosionStatus.bExploded)
 	{
 		return;
 	}
 
     if (Cast<APawn>(OtherActor))
     {
-        bExploded = true;
+        ExplosionStatus.bExploded = true;
 
 		if (Role == ROLE_Authority)
 		{

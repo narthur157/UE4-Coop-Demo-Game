@@ -26,6 +26,9 @@ ASProjectile::ASProjectile()
 	MovementComp->InitialSpeed = ProjectileSpeed;
 	MovementComp->MaxSpeed = 5000.0f;
 
+	ExplosionStatus.bExploded = false;
+	ExplosionStatus.bWasDirectPawnHit = false;
+
     SetReplicates(true);
 	SetReplicateMovement(true);
 }
@@ -34,7 +37,7 @@ void ASProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-    DOREPLIFETIME(ASProjectile, bExploded);
+    DOREPLIFETIME(ASProjectile, ExplosionStatus);
 }
 
 void ASProjectile::Initialize(const FProjectileWeaponData & Data)
@@ -50,10 +53,8 @@ void ASProjectile::Launch()
         UE_LOG(LogTemp, Warning, TEXT("Projectile fired despite not being Initialized. Please Initialze projectile. Undefined behavior incoming."))
     }
 
-    // Register projectile to recieve hit events
     OnActorHit.AddDynamic(this, &ASProjectile::OnProjectileHit);
 
-    // if the weapon has designated this projectile to expire, set a timer to do so
     if (WeaponData.DoesExpire())
     {
         GetWorld()->GetTimerManager().SetTimer(FuseTimerHandle, this, &ASProjectile::OnProjectileExpire, WeaponData.ProjectileLifeTime, false);
@@ -62,7 +63,7 @@ void ASProjectile::Launch()
 
 void ASProjectile::OnProjectileExpire()
 {
-    bExploded = true;
+    ExplosionStatus.bExploded = true;
 
 	if (Role == ROLE_Authority)
 	{
@@ -72,18 +73,53 @@ void ASProjectile::OnProjectileExpire()
 
 void ASProjectile::OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVector NormalImpulse, const FHitResult & Hit)
 {
+	FProjectileExplosion NewStatus;
 	DirectHitActor = OtherActor;
-    bExploded = true;
+	
+	if (Cast<APawn>(OtherActor))
+	{
+		NewStatus.bWasDirectPawnHit = true;
+	}
+
+	NewStatus.bExploded = true;
     GetWorld()->GetTimerManager().ClearTimer(FuseTimerHandle);
-    OnRep_Exploded();
+
+	if (Role == ROLE_Authority)
+	{
+	    OnRep_Exploded();
+	}
 
 	APawn* OtherPawn = Cast<APawn>(OtherActor);
 	AController* InstContr = GetInstigatorController();
+	ExplosionStatus = NewStatus;
+}
 
-	if (OtherPawn && InstContr && InstContr->IsLocalController() && DirectHitSoundEffect)
+void ASProjectile::DirectHit()
+{
+	AController* InstContr = GetInstigatorController();
+
+	// directly hitting an explosive barrel, for example, doesn't warrant a special sound
+	if (ExplosionStatus.bWasDirectPawnHit && InstContr && InstContr->IsLocalController() && DirectHitSoundEffect)
 	{
+		UE_LOG(LogTemp, Error, TEXT("direct hit sound"));
+
 		UGameplayStatics::PlaySound2D(GetWorld(), DirectHitSoundEffect);
 	}
+
+	if (Role == ROLE_Authority && DirectHitActor)
+	{
+		float DirectDamage = ApplyDamageModifier(WeaponData.ProjectileDamageDirectHit);
+
+		UGameplayStatics::ApplyDamage(DirectHitActor, DirectDamage,
+			Instigator->GetController(), GetOwner(), WeaponData.ProjectileDamageType);
+	}
+}
+
+float ASProjectile::ApplyDamageModifier(float Damage)
+{
+	IDamageDealer* DamageDealer = Cast<IDamageDealer>(GetInstigator());
+	
+	return DamageDealer ? Damage += (DamageDealer->GetDamageModifier() / 100) * Damage : Damage;
 }
 
 void ASProjectile::Explode()
@@ -100,46 +136,31 @@ void ASProjectile::Explode()
         UGameplayStatics::PlaySoundAtLocation(this, ExplosionSoundEffect, GetActorLocation());
     }
 
+	DirectHit();
+
     // TODO: Find a way to remove this, calculate ignored actors in projectileweapondata?
     TArray<AActor*> IgnoredActors = { this, GetOwner(), Instigator };
     if (Role == ROLE_Authority)
     {
 
-        IDamageDealer* DamageDealer = Cast<IDamageDealer>(GetInstigator());
-        float ActualDamageRadial = WeaponData.ProjectileDamage;
-		float DirectDamage = WeaponData.ProjectileDamageDirectHit;
-
-		if (DamageDealer)
-        {
-            ActualDamageRadial += (DamageDealer->GetDamageModifier() / 100) * ActualDamageRadial;
-			DirectDamage += (DamageDealer->GetDamageModifier() / 100) * DirectDamage;
-        }
-
-		if (UGameplayStatics::ApplyRadialDamage(GetWorld(), ActualDamageRadial,
+        float ActualDamageRadial = ApplyDamageModifier(WeaponData.ProjectileDamage);
+		
+		bool HitSomething = UGameplayStatics::ApplyRadialDamage(GetWorld(), ActualDamageRadial,
 			GetActorLocation(), WeaponData.ProjectileRadius, WeaponData.ProjectileDamageType,
-			IgnoredActors, GetOwner(), Instigator->GetController(), true))
+			IgnoredActors, GetOwner(), Instigator->GetController(), true);
+
+		ASWeapon* MyOwner = Cast<ASWeapon>(GetOwner());
+
+		if (HitSomething && MyOwner)
 		{
-			ASWeapon* MyOwner = Cast<ASWeapon>(GetOwner());
-			
-			if (MyOwner)
-			{
-				MyOwner->OnHit(nullptr, true);
-			}
+			MyOwner->OnHit(nullptr, true);
 		}
 
-		if (DirectHitActor)
-		{
-			UGameplayStatics::ApplyDamage(DirectHitActor, DirectDamage, 
-				Instigator->GetController(), GetOwner(), WeaponData.ProjectileDamageType);
-		}
-    }
+        
+		SetLifeSpan(5.0f);
+	}
 
     SetActorHiddenInGame(true);
-
-    if (Role == ROLE_Authority)
-    {
-        SetLifeSpan(5.0f);
-    }
 }
 
 void ASProjectile::OnRep_Exploded()

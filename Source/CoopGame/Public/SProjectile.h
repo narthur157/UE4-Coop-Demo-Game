@@ -13,6 +13,20 @@ class USphereComponent;
 class UStaticMeshComponent;
 class USoundCue;
 
+USTRUCT()
+struct FProjectileExplosion
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY()
+	bool bWasDirectPawnHit = false;
+
+	UPROPERTY()
+	bool bExploded = false;
+};
+
 UCLASS()
 class COOPGAME_API ASProjectile : public AActor
 {
@@ -53,8 +67,14 @@ protected:
     UFUNCTION()
     virtual void OnProjectileHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
 
-    UPROPERTY(ReplicatedUsing = OnRep_Exploded)
-    bool bExploded = false;
+	/** Deal damage and play effects for a direct hit */
+	virtual void DirectHit();
+
+	/** Checks if instigator implements damage dealer and uses the modifier if available */
+	float ApplyDamageModifier(float Damage);
+
+	UPROPERTY(ReplicatedUsing = OnRep_Exploded)
+	FProjectileExplosion ExplosionStatus;
 
     UFUNCTION()
     void OnRep_Exploded();
