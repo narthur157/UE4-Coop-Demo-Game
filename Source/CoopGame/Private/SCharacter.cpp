@@ -7,10 +7,11 @@
 #include "Components/CapsuleComponent.h"
 #include "SHealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "BehaviorTree/BehaviorTree.h"
 #include "UnrealNetwork.h"
 #include "SWeaponComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "UnrealNames.h"
+#include "GameFramework/PlayerState.h"
 
 ASCharacter::ASCharacter()
 {
@@ -181,6 +182,16 @@ void ASCharacter::OnHealthChanged(USHealthComponent * ChangedHealthComp, float H
 
         // Die
         GetMovementComponent()->StopMovementImmediately();
+		
+		APlayerController* PC = Cast<APlayerController>(GetController());
+
+		if (PC)
+		{
+			PC->PlayerState->bIsSpectator = true;
+			PC->ChangeState(NAME_Spectating);
+			PC->ClientGotoState(NAME_Spectating);
+		}
+
         GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         DetachFromControllerPendingDestroy();
 		PrimaryActorTick.bCanEverTick = false;
