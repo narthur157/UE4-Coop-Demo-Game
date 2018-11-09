@@ -183,6 +183,7 @@ void ASCharacter::OnHealthChanged(USHealthComponent * ChangedHealthComp, float H
         GetMovementComponent()->StopMovementImmediately();
         GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         DetachFromControllerPendingDestroy();
+		PrimaryActorTick.bCanEverTick = false;
         SetLifeSpan(10.0f);
     }
 }
