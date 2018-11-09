@@ -45,7 +45,6 @@ void ASHordeGameMode::SpawnBotTimerElapsed()
 void ASHordeGameMode::EndWave()
 {
     GetWorldTimerManager().ClearTimer(TimerHandle_BotSpawner);
-    SetWaveState(EWaveState::WaveComplete);
 }
 
 void ASHordeGameMode::PrepareForNextWave()
@@ -74,6 +73,7 @@ void ASHordeGameMode::PrepareForNextWave()
         }
     }
     SetWaveState(EWaveState::WaitingToStart);
+
 }
 
 // Iterate over all of the pawns, if we find a bot and its still alive then carry on
@@ -129,7 +129,6 @@ void ASHordeGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* 
     {
         GS->MulticastActorKilled(KilledActor, KillerActor, DamageCauser);
     }
-
     CheckPlayerState();
     CheckWaveState();
 }
