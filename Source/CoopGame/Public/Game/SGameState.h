@@ -17,10 +17,18 @@ enum class EWaveState : uint8
 
 };
 
+/** Broadcasts when an actor has been killed */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FGameStateActorKilled, AActor*, KilledActor, AActor*, KillerActor, AActor*, DamageCauser);
+
+/** Broadcasts when the game has ended */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameStateGameOver, bool, bWasSuccessful);
+
+/** Broadcasts when the game has ended */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameStateNumEnemiesChanged, int32, NumEnemiesAlive);
+
+/** Broadcasts when the wave state has changed */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGameStateWaveChanged, EWaveState, OldState,  EWaveState, NewWaveState);
+
 /**
  * 
  */
