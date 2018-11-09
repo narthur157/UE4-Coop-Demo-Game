@@ -41,16 +41,17 @@ void ASPowerupActor::OnRep_PowerupActive()
     FString LogActiveDeactive;
     LogActiveDeactive = bIsPowerupActive ? FString(TEXT("active")) : FString(TEXT("deactive"));
     TRACE("%s %s.", *GetName(), *LogActiveDeactive);
-    OnPowerupStateChanged(bIsPowerupActive);
-}
-
-void ASPowerupActor::ActivatePowerup(AActor* InstigatorActor)
-{
+	
 	if (PowerupSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PowerupSound, GetActorLocation());
 	}
 
+    OnPowerupStateChanged(bIsPowerupActive);
+}
+
+void ASPowerupActor::ActivatePowerup(AActor* InstigatorActor)
+{
     TRACE("%s Activated on %s", *GetName(), *InstigatorActor->GetName());
     OnActivated(InstigatorActor);
     bIsPowerupActive = true;
