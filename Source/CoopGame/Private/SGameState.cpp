@@ -18,6 +18,7 @@ void ASGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
     DOREPLIFETIME(ASGameState, WaveState);
     DOREPLIFETIME(ASGameState, NumEnemiesAlive);
+    DOREPLIFETIME(ASGameState, NextWaveStartTime);
 }
 
 void ASGameState::SetWaveState(EWaveState NewState)
