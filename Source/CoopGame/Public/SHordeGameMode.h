@@ -58,6 +58,6 @@ protected:
 
     void CheckWaveState();
 
-    virtual void OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AController* KillerController) override;
+    virtual void OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser) override;
 	
 };

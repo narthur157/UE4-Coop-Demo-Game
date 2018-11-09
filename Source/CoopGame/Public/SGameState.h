@@ -17,7 +17,7 @@ enum class EWaveState : uint8
 
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGameStateActorKilled, const FString&, KillerName, const FString&, KilledName);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FGameStateActorKilled, AActor*, KilledActor, AActor*, KillerActor, AActor*, DamageCauser);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameStateGameOver, bool, bWasSuccessful);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameStateNumEnemiesChanged, int32, NumEnemiesAlive);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGameStateWaveChanged, EWaveState, OldState,  EWaveState, NewWaveState);
@@ -44,7 +44,7 @@ public:
     void MulticastGameOver(bool bWasSuccessful);
 
     UFUNCTION(NetMulticast, Reliable)
-    void MulticastActorKilled(const FString& KillerName, const FString& KilledName);
+    void MulticastActorKilled(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser);
 
     UPROPERTY(BlueprintAssignable, Category = "GameEvent")
     FGameStateActorKilled OnActorKilledGameState;
