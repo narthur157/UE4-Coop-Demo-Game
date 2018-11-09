@@ -73,6 +73,11 @@ void ASProjectile::OnProjectileExpire()
 
 void ASProjectile::OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVector NormalImpulse, const FHitResult & Hit)
 {
+	if (OtherActor == Instigator)
+	{
+		return;
+	}
+
 	FProjectileExplosion NewStatus;
 	DirectHitActor = OtherActor;
 	
