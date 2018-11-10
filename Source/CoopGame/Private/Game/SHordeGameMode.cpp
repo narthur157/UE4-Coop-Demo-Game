@@ -1,18 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SHordeGameMode.h"
-#include "SGameState.h"
-#include "SGameMode.h"
 #include "CoopGame.h"
 #include "Blueprint/UserWidget.h"
 #include "SHealthComponent.h"
 #include "SPlayerState.h"
-
+#include "SHordeGameState.h"
 
 
 ASHordeGameMode::ASHordeGameMode()
 {
-    GameStateClass = ASGameState::StaticClass();
+    GameStateClass = ASHordeGameState::StaticClass();
     PlayerStateClass = ASPlayerState::StaticClass();
     
 }
@@ -66,10 +64,10 @@ void ASHordeGameMode::PrepareForNextWave()
     {
         // Spawn the next wave on a delay
         GetWorldTimerManager().SetTimer(TimerHandle_NextWaveStart, this, &ASHordeGameMode::StartWave, TimeBetweenWaves, false);
-        ASGameState* GS = GetGameState<ASGameState>();
+        ASHordeGameState* GS = GetGameState<ASHordeGameState>();
         if (ensureAlways(GS))
         {
-            GS->NextWaveStartTime = GetWorld()->TimeSeconds + TimeBetweenWaves;
+            GS->SetNextWaveStartTime(GetWorld()->TimeSeconds + TimeBetweenWaves);
         }
     }
     SetWaveState(EWaveState::WaitingToStart);
@@ -113,7 +111,7 @@ void ASHordeGameMode::CheckWaveState()
 // Changes the state of the wave spawner
 void ASHordeGameMode::SetWaveState(EWaveState State)
 {
-    ASGameState* GS = GetGameState<ASGameState>();
+    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
     if (ensureAlways(GS))
     {
         GS->SetWaveState(State);
