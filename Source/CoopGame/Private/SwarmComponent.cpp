@@ -55,7 +55,7 @@ void USwarmComponent::OnProximityOverlap(UPrimitiveComponent * OverlappedCompone
     for (int32 i = 0; i < PowerUpActors.Num(); i++)
     {
 
-        if (OtherActor->IsA(PowerUpActors[i]))
+        if (PowerUpActors[i] && OtherActor->IsA(PowerUpActors[i]))
         {
             NumOverlappingActors++;
             PowerLevel = NumOverlappingActors * PowerGainedPerActor;
@@ -72,7 +72,7 @@ void USwarmComponent::OnProximityEndOverlap(UPrimitiveComponent * OverlappedComp
 
     for (int32 i = 0; i < PowerUpActors.Num(); i++)
     {
-        if (OtherActor->IsA(PowerUpActors[i]))
+        if (PowerUpActors[i] && OtherActor->IsA(PowerUpActors[i]))
         {
             NumOverlappingActors--;
             // Prevent going below zero for some god-unknown reason
