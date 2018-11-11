@@ -76,3 +76,8 @@ void ASPlayerController::ToggleMenu()
     }
 }
 
+void ASPlayerController::SetPawn(APawn* InPawn)
+{
+    Super::SetPawn(InPawn);
+    OnPawnChange();
+}
