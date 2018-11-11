@@ -28,6 +28,12 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget")
     TSubclassOf<USGameEventWidget> GameEventWidgetClass = nullptr;
 
+    UFUNCTION(BlueprintImplementableEvent, Category = "AController")
+    void OnPawnChange();
+
+    UPROPERTY(BlueprintReadWrite, Category = "PawnData")
+    UUserWidget* PawnWidget = nullptr;
+
     USGameEventWidget* GameEventWidget = nullptr;
       
     UUserWidget* MenuWidget = nullptr;
@@ -42,4 +48,10 @@ public:
 	
     UFUNCTION(BlueprintImplementableEvent, Category = "GameOver")
     void OnRecieveGameOver(bool bWasSuccessful);
+
+    void SetPawn(APawn* InPawn) override;
+
+protected:
+   
 };
+

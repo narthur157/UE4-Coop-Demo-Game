@@ -77,6 +77,7 @@ protected:
 	UFUNCTION(Server, Unreliable, WithValidation)
 	void ServerSetZoom(bool bZoom);
 
+   
 public:
 
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "PlayerWeapon")
@@ -108,4 +109,6 @@ public:
 
 	/* Override so that we can stop firing when disabled */
 	virtual void DisableInput(APlayerController* PlayerController) override;
+
+
 };
