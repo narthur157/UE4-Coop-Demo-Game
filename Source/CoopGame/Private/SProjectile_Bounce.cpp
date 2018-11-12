@@ -20,7 +20,9 @@ void ASProjectile_Bounce::OnProjectileHit(AActor * SelfActor, AActor * OtherActo
 
     if (Cast<APawn>(OtherActor))
     {
+		DirectHitActor = OtherActor;
         ExplosionStatus.bExploded = true;
+		ExplosionStatus.bWasDirectPawnHit = true;
 
 		if (Role == ROLE_Authority)
 		{
