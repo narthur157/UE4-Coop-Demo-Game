@@ -34,7 +34,9 @@ void USHealthComponent::BeginPlay()
             Owner->OnTakeAnyDamage.AddDynamic(this, &USHealthComponent::HandleTakeDamage);
         }
         Health = MaxHealth;
+        OnHealthChanged.Broadcast(this, Health, 0, nullptr, nullptr, nullptr);
     }
+
 }
 
 // This only runs onn server because we are only binding to this delegate onn server
