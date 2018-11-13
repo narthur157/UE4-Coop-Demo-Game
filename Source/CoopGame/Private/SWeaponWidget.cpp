@@ -17,3 +17,4 @@ void USWeaponWidget::RefreshAmmo_Implementation()
 void USWeaponWidget::InitializeWeaponWidget_Implementation(USWeaponComponent* NewWeaponComponent, int32 NumberWeaponSlots)
 {
 }
+
