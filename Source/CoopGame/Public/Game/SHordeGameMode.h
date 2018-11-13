@@ -11,7 +11,8 @@ enum class EWaveState : uint8;
 class UUserWidget;
 
 /**
- *  Base wave gamemode, win condition = WaveCount == NumberWaves, lose condition = players dead
+ * The base gamemode for Horde and other Wave-Spawning type GameModes. Should be used in conjunction with a SHordeGameState varient in order to
+ * send information related to the number of enemies left in a wave/the current state of the wave/etc to clients.
  */
 UCLASS()
 class COOPGAME_API ASHordeGameMode : public ASGameMode
