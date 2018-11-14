@@ -82,6 +82,19 @@ void ASCharacter::BeginPlay()
     HealthComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
 }
 
+void ASCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	if (Role == ROLE_SimulatedProxy && IsPlayerControlled())
+	{
+		UE_LOG(LogTemp, Error, TEXT("NOT NULL %s"), *GetName());
+
+		GetMesh()->SetRenderCustomDepth(true);
+		GetMesh()->SetCustomDepthStencilValue(0);
+	}
+}
+
 void ASCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);

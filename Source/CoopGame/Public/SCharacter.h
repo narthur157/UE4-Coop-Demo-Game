@@ -13,7 +13,6 @@ class USpringArmComponent;
 class USWeaponComponent;
 class UHealthComponent;
 
-
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter, public IDamageDealer, public ITeamMember
 {
@@ -26,6 +25,9 @@ public:
 protected:
     // Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	// Override to set player glows, won't work if other team also has player controlled SCharacters
+	virtual void OnRep_PlayerState() override;
 
     // Movement functions
     UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
