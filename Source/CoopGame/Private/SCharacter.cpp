@@ -36,6 +36,7 @@ ASCharacter::ASCharacter()
 
     ZoomedFOV = 65.0;
     ZoomInterpSpeed = 20.0f;
+
 }
 
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -72,7 +73,15 @@ void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-    DefaultFOV = CameraComp->FieldOfView;
+	DefaultFOV = CameraComp->FieldOfView;
+	UMaterialInstanceDynamic* MatInstance = GetMesh()->CreateDynamicMaterialInstance(0, GetMesh()->GetMaterial(0));
+
+	if (MatInstance)
+	{
+		MatInstance->SetVectorParameterValue("BodyColor", BodyColor);
+		GetMesh()->SetMaterial(0, MatInstance);
+	}
+
     HealthComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
 }
 
