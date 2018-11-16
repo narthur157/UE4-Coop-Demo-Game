@@ -31,6 +31,9 @@ protected:
     UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
     bool bWantsToSprint = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player")
+	FLinearColor BodyColor = FLinearColor(1.0f, 1.0f, 1.0f, 0);
+
     float SprintSpeed = 200.0f;
 
     void MoveForward(float RelativeSpeed);
