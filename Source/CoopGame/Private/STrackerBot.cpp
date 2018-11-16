@@ -116,12 +116,7 @@ void ASTrackerBot::OnTakeDamage(USHealthComponent * ChangedHealthComp, float Hea
     {
         SelfDestruct();
     }
-    if (MatInstance->IsValidLowLevel())
-    {
-        MatInstance->SetScalarParameterValue("LastTimeDamageTaken", GetWorld()->TimeSeconds);
-    }
 }
-
 
 void ASTrackerBot::SelfDestruct()
 {

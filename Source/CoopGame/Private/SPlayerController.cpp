@@ -79,7 +79,7 @@ void ASPlayerController::ToggleMenu()
 void ASPlayerController::SetPawn(APawn* InPawn)
 {
     Super::SetPawn(InPawn);
-    UE_LOG(LogTemp, Warning, TEXT("Changed pawn"))
+
     OnPawnChange();
 }
 

@@ -7,6 +7,10 @@
 #include "SPowerupActor.generated.h"
 
 class USoundBase;
+class UParticleSystem;
+class UParticleSystemComponent;
+class USceneComponent;
+class USPulseGlowComponent;
 
 UCLASS()
 class COOPGAME_API ASPowerupActor : public AActor
@@ -21,7 +25,37 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-    // Time between powerup ticks
+	UFUNCTION()
+	void OnRep_PowerupActive();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
+	void OnPowerupStateChanged(bool bNewIsActive);
+
+	UFUNCTION(NetMulticast, WithValidation, Reliable)
+	void MulticastSpawnPowerupEffect(AActor* MyActor);
+
+	UFUNCTION(NetMulticast, WithValidation, Reliable)
+	void MulticastDespawnPowerupEffect();
+
+	UFUNCTION()
+	void OnTickPowerup();
+
+
+	// Will be attached to actor for duration of powerup if defined
+	UPROPERTY(EditDefaultsOnly, Category = "PowerupFX")
+	UParticleSystem* PowerupEffect = nullptr;
+
+	// Alternative to defining an attachment point
+	UPROPERTY(EditDefaultsOnly, Category = "PowerupFX")
+	FVector PowerupEffectSpawnOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditDefaultsOnly, Category = "PowerupFX")
+	FColor GlowColor = FColor::White;
+
+	UPROPERTY(EditDefaultsOnly, Category = "PowerupFX")
+	USoundBase* PowerupSound;
+
+	// Time between powerup ticks
     UPROPERTY(EditDefaultsOnly, Category = "Powerup")
     float PowerupInterval= 0.0f;
 
@@ -29,24 +63,20 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Powerup")
     int32 TotalNumberOfTicks = 0;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Powerup")
-	USoundBase* PowerupSound;
+	// Actor who received the powerup
+	UPROPERTY(BlueprintReadOnly)
+	AActor* ActivatedFor = nullptr;
+
+	UPROPERTY(ReplicatedUsing = OnRep_PowerupActive)
+	bool bIsPowerupActive = false;
+
+	UParticleSystemComponent* ActivePowerupEffect = nullptr;
+
+	USPulseGlowComponent* ActivePulseComp = nullptr;
 
     FTimerHandle TimerHandle_PowerupTick;
 
     int32 TicksProcessed = 0;
-
-    UFUNCTION()
-    void OnTickPowerup();
-
-    UPROPERTY(ReplicatedUsing=OnRep_PowerupActive)
-    bool bIsPowerupActive = false;
-
-    UFUNCTION()
-    void OnRep_PowerupActive();
-
-    UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
-    void OnPowerupStateChanged(bool bNewIsActive);
 
 public:	
 
