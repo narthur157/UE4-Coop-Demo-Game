@@ -18,9 +18,6 @@ public:
 	// Sets default values for this component's properties
 	USHealthComponent();
 
-    UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "HealthComponent")
-    uint8 TeamNum = 255;
-
     UPROPERTY(EditDefaultsOnly, Replicated, BlueprintReadOnly, Category = "HealthComponent")
     bool bDamageSelf = true;
 
@@ -53,6 +50,4 @@ public:
     UFUNCTION(BlueprintCallable, Category = "HealthComponent")
     float GetHealth() const { return Health; }
 
-    UFUNCTION(BlueprintCallable, BlueprintPure, Category = "HealthComponent")
-    static bool IsFriendly(AActor* ActorOne, AActor* ActorTwo);
 };

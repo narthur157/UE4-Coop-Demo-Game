@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "UnrealNetwork.h"
 #include "SWeaponComponent.h"
+#include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "UnrealNames.h"
 #include "GameFramework/PlayerState.h"
@@ -23,6 +24,8 @@ ASCharacter::ASCharacter()
 
     HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComponent"));
     WeaponComp = CreateDefaultSubobject<USWeaponComponent>(TEXT("WeaponComponent"));
+    TeamComp = CreateDefaultSubobject<UTeamComponent>(TEXT("TeamComponent"));
+
 
 	SetReplicates(true);
 
@@ -134,7 +137,7 @@ void ASCharacter::EndSprint()
 
 uint8 ASCharacter::GetTeamID()
 {
-    return HealthComp->TeamNum;
+    return TeamComp->GetTeamID();
 }
 
 void ASCharacter::StartFire()

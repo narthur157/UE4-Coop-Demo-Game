@@ -6,11 +6,10 @@
 #include "GameFramework/GameModeBase.h"
 #include "SGameMode.generated.h"
 
-
-class UUserWidget;
+class ASTeam;
 
 /**
- * Base GameState type. Simply recieves events about Actors being killed. Specific GameModes should be derived from here.
+ * Base GameMode type. Simply recieves events about Actors being killed. Specific GameModes should be derived from here.
  * This class does not, and should not, know any specifics about concrete GameModes.
  */
 UCLASS(ABSTRACT)
@@ -21,6 +20,9 @@ class COOPGAME_API ASGameMode : public AGameModeBase
 public:
     ASGameMode();
     virtual void StartPlay() override;
+    
+    UPROPERTY(EditDefaultsOnly, Category = "GameMode")
+    bool bIsFriendlyFireEnabled = false;
 
     /** To be called when an actor is killed, calls on an SGameState to broadcast to clients that an enemy has died */
     UFUNCTION(BlueprintNativeEvent, Category = "GameMode")
@@ -29,7 +31,7 @@ public:
 
 protected:
 
-
+  
     /** Determines if there are any players alive,  */
     void CheckPlayerState();
 
@@ -44,6 +46,7 @@ protected:
     UFUNCTION(BlueprintImplementableEvent, Category = "GameMode")
     void OnGameOver(bool bWasSuccessful);
 
-
     virtual void InitializeHUDForPlayer_Implementation(APlayerController* NewPlayer) override;
+
+
 };

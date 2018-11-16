@@ -11,6 +11,7 @@
 class USHealthComponent;
 class UMaterialInstanceDynamic;
 class USphereComponent;
+class UTeamComponent;
 class USoundCue;
 
 UCLASS()
@@ -33,6 +34,9 @@ protected:
     USHealthComponent* HealthComp = nullptr;
 
     UPROPERTY(VisibleAnywhere, Category = "Components")
+    UTeamComponent* TeamComp = nullptr;
+
+    UPROPERTY(VisibleAnywhere, Category = "Components")
     USphereComponent* ProximityExplosionRadius = nullptr;
 
     // Pulse material
@@ -40,7 +44,7 @@ protected:
 
     UFUNCTION()
     void OnTakeDamage(USHealthComponent * ChangedHealthComp, float Health, float HealthDelta, 
-        const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser);
+    const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser);
 
     UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
     float ExplosionRadius = 200;

@@ -2,6 +2,7 @@
 
 #include "DefenseObjective.h"
 #include "Net/UnrealNetwork.h"
+#include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "SHealthComponent.h"
 
 // Sets default values
@@ -11,6 +12,7 @@ ADefenseObjective::ADefenseObjective()
 	PrimaryActorTick.bCanEverTick = false;
     SetReplicates(true);
     HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComponent"));
+    TeamComp = CreateDefaultSubobject<UTeamComponent>(TEXT("TeamComponnent"));
 }
 
 void ADefenseObjective::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -29,7 +31,7 @@ void ADefenseObjective::BeginPlay()
 
 uint8 ADefenseObjective::GetTeamID()
 {
-    return HealthComp->TeamNum;
+    return TeamComp->GetTeamID();
 }
 
 void ADefenseObjective::OnRep_ObjectiveDestroyed()

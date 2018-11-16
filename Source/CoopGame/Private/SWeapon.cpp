@@ -7,6 +7,7 @@
 #include "Engine/World.h"
 #include "SHealthComponent.h"
 #include "UserWidget.h"
+#include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "SHitIndicatorWidget.h"
 
 ASWeapon::ASWeapon()
@@ -68,7 +69,7 @@ void ASWeapon::OnHit(AActor* HitActor, bool bSkipCheck)
 	USHealthComponent* HitHealth = Cast<USHealthComponent>(HitActor->GetComponentByClass(USHealthComponent::StaticClass()));
 	if (HitHealth && GetOwner())
 	{
-		if (HitIndicatorWidget && !USHealthComponent::IsFriendly(HitActor, GetOwner()))
+		if (HitIndicatorWidget && !UTeamComponent::IsActorFriendly(HitActor, GetOwner()))
 		{
 			HitIndicatorWidget->PlayHitAnimation();
 		}

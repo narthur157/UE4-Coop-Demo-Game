@@ -12,7 +12,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class USWeaponComponent;
 class UHealthComponent;
-
+class UTeamComponent;
 
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter, public IDamageDealer, public ITeamMember
@@ -56,6 +56,9 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
     USHealthComponent* HealthComp = nullptr;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Team")
+    UTeamComponent* TeamComp = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "Player")
     float ZoomedFOV;

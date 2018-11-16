@@ -4,6 +4,7 @@
 #include "SHealthComponent.h"
 #include "SPlayerState.h"
 #include "SGameState.h"
+#include "STeam.h"
 #include "CoopGame.h"
 
 

@@ -10,6 +10,8 @@
 #include "GameFramework/GameState.h"
 #include "Components/SphereComponent.h"
 #include "Sound/SoundCue.h"
+#include "Gameplay/GameplayComponents/TeamComponent.h"
+#include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -26,6 +28,8 @@ ASTrackerBot::ASTrackerBot()
     HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("Health Component"));
     HealthComp->OnHealthChanged.AddDynamic(this, &ASTrackerBot::OnTakeDamage);
     
+    TeamComp = CreateDefaultSubobject<UTeamComponent>(TEXT("Team Component"));
+
     ProximityExplosionRadius = CreateDefaultSubobject<USphereComponent>(TEXT("ProximityRadius"));
     ProximityExplosionRadius->SetupAttachment(RootComponent);
     ProximityExplosionRadius->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -69,7 +73,7 @@ FVector ASTrackerBot::GetNextPathPoint()
     {
         APawn* TestPawn = It->Get();
         
-		if (!TestPawn || TestPawn == this || USHealthComponent::IsFriendly(TestPawn, this))
+		if (!TestPawn || TestPawn == this || UTeamComponent::IsActorFriendly(this, TestPawn))
         {
             continue;
         }
@@ -186,7 +190,7 @@ void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComp
 	}
 
     APawn* OtherActorPawn = Cast<APawn>(OtherActor);
-    if (OtherActorPawn && OtherActorPawn != this && !USHealthComponent::IsFriendly(OtherActorPawn, this))
+    if (OtherActorPawn && OtherActorPawn != this && !UTeamComponent::IsActorFriendly(OtherActorPawn, this))
     {
         if (Role == ROLE_Authority)
         {
@@ -279,7 +283,8 @@ bool ASTrackerBot::AttachBotToActor(APawn* OtherPawn)
 
 uint8 ASTrackerBot::GetTeamID()
 {
-    return HealthComp->TeamNum;
+    //TODO fix this
+    return 0;
 }
 
 
