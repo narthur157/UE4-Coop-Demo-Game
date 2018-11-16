@@ -85,17 +85,25 @@ void ASCharacter::BeginPlay()
     HealthComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
 }
 
+void ASCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	if (Role == ROLE_SimulatedProxy && IsPlayerControlled())
+	{
+		UE_LOG(LogTemp, Error, TEXT("NOT NULL %s"), *GetName());
+
+		GetMesh()->SetRenderCustomDepth(true);
+		GetMesh()->SetCustomDepthStencilValue(0);
+	}
+}
+
 void ASCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
     float TargetFOV = bWantsToZoom ? ZoomedFOV : DefaultFOV;
     float NewFOV = FMath::FInterpTo(CameraComp->FieldOfView, TargetFOV, DeltaTime, ZoomInterpSpeed);
-
-	if (Role == ROLE_AutonomousProxy)
-	{
-		ServerSetZoom(bWantsToZoom);
-	}
 
     CameraComp->SetFieldOfView(NewFOV);
 }
@@ -123,11 +131,21 @@ void ASCharacter::EndCrouch()
 void ASCharacter::BeginZoom()
 {
     bWantsToZoom = true;
+
+	if (Role == ROLE_AutonomousProxy)
+	{
+		ServerSetZoom(bWantsToZoom);
+	}
 }
 
 void ASCharacter::EndZoom()
 {
     bWantsToZoom = false;
+
+	if (Role == ROLE_AutonomousProxy)
+	{
+		ServerSetZoom(bWantsToZoom);
+	}
 }
 
 // TODO: Server functions so this works in multiplayer

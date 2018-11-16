@@ -2,6 +2,8 @@
 #include "CoopGame.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "SPulseGlowComponent.h"
 
 ASPowerupActor::ASPowerupActor()
 {
@@ -12,6 +14,28 @@ void ASPowerupActor::BeginPlay()
 {
 	Super::BeginPlay();
    
+}
+
+void ASPowerupActor::MulticastDespawnPowerupEffect_Implementation()
+{
+	if (ActivePowerupEffect)
+	{
+		ActivePowerupEffect->DestroyComponent();
+		ActivePowerupEffect = nullptr;
+	}
+}
+
+void ASPowerupActor::MulticastSpawnPowerupEffect_Implementation(AActor* MyActor)
+{
+	ActivePulseComp = Cast<USPulseGlowComponent>(MyActor->GetComponentByClass(USPulseGlowComponent::StaticClass()));
+	
+	if (ActivePulseComp)
+	{
+		ActivePulseComp->BeginPulsing(1.0f, GlowColor, 0.75f, TotalNumberOfTicks * PowerupInterval);
+	}
+
+	UMeshComponent* InstMesh = Cast<UMeshComponent>(MyActor->GetComponentByClass(UMeshComponent::StaticClass()));
+	ActivePowerupEffect = UGameplayStatics::SpawnEmitterAttached(PowerupEffect, InstMesh, NAME_None, PowerupEffectSpawnOffset, FRotator::ZeroRotator, EAttachLocation::KeepRelativeOffset);
 }
 
 void ASPowerupActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -29,6 +53,7 @@ void ASPowerupActor::OnTickPowerup()
     TRACE("%s ticked.", *GetName());
     if (TotalNumberOfTicks <= TicksProcessed)
     {
+		MulticastDespawnPowerupEffect();
         OnExpired();
         bIsPowerupActive = false;
         OnRep_PowerupActive();
@@ -53,11 +78,15 @@ void ASPowerupActor::OnRep_PowerupActive()
 void ASPowerupActor::ActivatePowerup(AActor* InstigatorActor)
 {
     TRACE("%s Activated on %s", *GetName(), *InstigatorActor->GetName());
+	ActivatedFor = InstigatorActor;
+
     OnActivated(InstigatorActor);
     bIsPowerupActive = true;
     OnRep_PowerupActive();
 
-    if (PowerupInterval > 0.0f)
+	MulticastSpawnPowerupEffect(InstigatorActor);
+    
+	if (PowerupInterval > 0.0f)
     {
         GetWorldTimerManager().SetTimer(TimerHandle_PowerupTick, this, &ASPowerupActor::OnTickPowerup, PowerupInterval, true);
     }
@@ -67,5 +96,12 @@ void ASPowerupActor::ActivatePowerup(AActor* InstigatorActor)
     }
 }
 
+bool ASPowerupActor::MulticastSpawnPowerupEffect_Validate(AActor* MyActor)
+{
+	return true;
+}
 
-
+bool ASPowerupActor::MulticastDespawnPowerupEffect_Validate()
+{
+	return true;
+}
