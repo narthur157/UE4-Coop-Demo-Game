@@ -8,6 +8,7 @@
 #include "DefenseObjective.generated.h"
 
 class USHealthComponent;
+class UTeamComponent;
 
 UCLASS()
 class COOPGAME_API ADefenseObjective : public AActor, public ITeamMember
@@ -35,6 +36,9 @@ protected:
 
     UPROPERTY(VisibleAnywhere, Category = "ObjectiveHealth")
     USHealthComponent* HealthComp;
+
+    UPROPERTY(VisibleAnywhere, Category = "Team")
+    UTeamComponent* TeamComp;
 
     UFUNCTION(BlueprintImplementableEvent, Category = "DefenseObjective")
     void OnHealthComponentTakeDamage(USHealthComponent* DamagedHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);

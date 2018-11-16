@@ -27,14 +27,14 @@ public:
 
 protected:
 
-    // Wave spawning
+    /** The number of waves designated before the players win the game. */
     UPROPERTY(EditDefaultsOnly, Category = "GameMode")
     int32 NumberWaves = 1;
 
-    // Preparation time between waves
     UPROPERTY(EditDefaultsOnly, Category = "GameMode")
     float TimeBetweenWaves = 0.0f;
 
+    /** Counter which displays the current wave count, can be used to adjust wave strength or show players progress when compared to NumberWaves */
     int32 CurrentWaveCount = 0;
 
     // Integer used to control how many bots we are spawning in the current wave
@@ -47,16 +47,22 @@ protected:
     UFUNCTION(BlueprintImplementableEvent, Category = "GameMode")
     void SpawnNewBot();
 
+    /** Spawns a bot, called by @TimerHandle_BotSpawner. Will call EndWave if there are no more bots to spawn after this iteration */
     void SpawnBotTimerElapsed();
 
+    /** Starts the spawning of the current wave. */
     void StartWave();
 
+    /**Stops the spawning of the current wave. */
     void EndWave();
 
+    /** Waits for the time designated by @TimeBetweenWaves to start the next wave */
     void PrepareForNextWave();
 
+    /** Changes the WaveState, calls upon SHordeGameState which then shows the change to clients . */
     void SetWaveState(EWaveState State);
 
+    /** Determines if there are any players or bots alive */
     void CheckWaveState();
 
     virtual void OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser) override;

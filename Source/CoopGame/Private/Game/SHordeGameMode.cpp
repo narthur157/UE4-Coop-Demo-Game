@@ -48,6 +48,7 @@ void ASHordeGameMode::EndWave()
 void ASHordeGameMode::PrepareForNextWave()
 {
     RestartDeadPlayers();
+
     // Game is finished, players win on waves
     if (CurrentWaveCount == NumberWaves && NumberWaves > 0)
     {

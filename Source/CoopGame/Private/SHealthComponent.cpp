@@ -2,7 +2,9 @@
 
 #include "SHealthComponent.h"
 #include "SGameMode.h"
+#include "SGameState.h"
 #include "CoopGame.h"
+#include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -39,11 +41,13 @@ void USHealthComponent::BeginPlay()
 
 }
 
-// This only runs onn server because we are only binding to this delegate onn server
+// This only runs on server because we are only binding to this delegate on server
 void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
     //IsFriendly(DamagedActor, InstigatedBy->GetPawn())
-    if (Damage <= 0 || bIsDead || (!InstigatedBy && false))
+    ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
+
+    if (Damage <= 0 || bIsDead || (!GM->bIsFriendlyFireEnabled && UTeamComponent::IsActorFriendly(DamagedActor, InstigatedBy->GetPawn() )))
     {
         return;
     }
@@ -63,7 +67,6 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
 
     if (Health <= 0 && !bIsDead)
     {
-        ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
         if (GM && InstigatedBy && InstigatedBy->GetPawn() && GetOwner())
         {
             TRACE("%s", *DamageCauser->GetName());
@@ -90,24 +93,5 @@ void USHealthComponent::Heal(float HealAmount)
     TRACE("%s healed for %f hp.", *GetOwner()->GetName(), HealAmount);
     Health = FMath::Clamp(Health + HealAmount, 0.0f, MaxHealth);
     OnHealthChanged.Broadcast(this, Health, -HealAmount, nullptr, nullptr, nullptr);
-}
-
-bool USHealthComponent::IsFriendly(AActor * ActorOne, AActor * ActorTwo)
-{
-    if (!ActorOne || !ActorTwo) { return true; }
-
-    USHealthComponent* HealthCompOne = ActorOne->FindComponentByClass<USHealthComponent>();
-    USHealthComponent* HealthCompTwo = ActorTwo->FindComponentByClass<USHealthComponent>();
-
-    if (HealthCompOne && HealthCompTwo)
-    {
-        if (ActorOne == ActorTwo && HealthCompOne->bDamageSelf)
-        {
-            return false;
-        }
-
-        return HealthCompOne->TeamNum == HealthCompTwo->TeamNum;
-    }
-    return true;
 }
 
