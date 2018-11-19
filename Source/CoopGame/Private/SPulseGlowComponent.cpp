@@ -24,12 +24,15 @@ void USPulseGlowComponent::BeginPulsing(float Intensity /*= 0.0f*/, FColor Color
 	SetParams(MatInst, Intensity, Color, Frequency);
 	
 	FTimerHandle Handle;
+
 	GetWorld()->GetTimerManager().SetTimer(Handle, this, &USPulseGlowComponent::StopPulsing, Duration, false);
-	
+
 	FPulseData NewPulse = FPulseData(Handle, Intensity, Color, Frequency, Duration);
+
 	ActivePulses.Add(NewPulse);
 }
 
+// @TODO: Rename GlowColor to PulseColor
 void USPulseGlowComponent::SetParams(UMaterialInstanceDynamic* MatInstance, float Intensity /*= 0.0f*/, FColor Color /*= FColor::White*/, float Frequency /*= 1.0f*/)
 {
 	MatInstance->SetScalarParameterValue("PulseFreq", Frequency);
@@ -37,18 +40,25 @@ void USPulseGlowComponent::SetParams(UMaterialInstanceDynamic* MatInstance, floa
 	MatInstance->SetVectorParameterValue("GlowColor", Color);
 }
 
+/** Pulses are added on in a stacked manner. Since they are not ordered by duration, RemoveAll is used to 
+ * clear any effects which have ended. The top pulse in the stack should always be visible
+ * A shorter pulse followed by a longer pulse will result in the shorter pulse being removed midway
+ * without any noticeable effect. The longer pulse will then be "re-applied" without effect
+ * A longer pulse followed by shorter will result in the long being re-applied after the short finishes
+ **/
 void USPulseGlowComponent::StopPulsing()
 {
-	ActivePulses.Pop();
+	ActivePulses.RemoveAll([&](FPulseData MyPulse) {
+		return GetWorld()->GetTimerManager().GetTimerRemaining(MyPulse.Timer) <= 0.0f;
+	});
 
-	if (ActivePulses.Num() > 0)
-	{
-		FPulseData PData = ActivePulses.Last();
-		USPulseGlowComponent::SetParams(MatInst, PData.Intensity, PData.Color, PData.Frequency);
-	}
-	else
+	if (ActivePulses.Num() == 0)
 	{
 		USPulseGlowComponent::SetParams(MatInst);
+		return;
 	}
+
+	FPulseData PData = ActivePulses.Last();
+	USPulseGlowComponent::SetParams(MatInst, PData.Intensity, PData.Color, PData.Frequency);
 }
 
