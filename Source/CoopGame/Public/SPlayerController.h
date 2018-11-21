@@ -9,6 +9,8 @@
 class UUserWidget;
 class USGameEventWidget;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerPawnChanged, APawn*, NewPawn);
+
 /**
  * 
  */
@@ -21,6 +23,9 @@ protected:
 
     UFUNCTION(BlueprintCallable, Category = "MenuOps")
     void ToggleMenu();
+
+    UPROPERTY(BlueprintAssignable, Category = "PawnData")
+    FOnPlayerPawnChanged OnPawnChanged;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget")
     TSubclassOf<UUserWidget> MenuWidgetClass = nullptr;

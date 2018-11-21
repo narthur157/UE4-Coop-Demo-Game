@@ -31,10 +31,7 @@ void ASGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 void ASGameState::CreateTeam(uint8 TeamID)
 {
-    if (Role < ROLE_Authority)
-    {
-        return;
-    }
+    if (Role < ROLE_Authority) { return; }
 
     for (ASTeam* Team : Teams)
     {
@@ -79,3 +76,14 @@ bool ASGameState::ServerAddPlayerToTeam_Validate(AController* Player, uint8 Team
     return true;
 }
 
+ASTeam* ASGameState::GetTeam(uint8 TeamIndex)
+{
+    for (ASTeam* Team : Teams)
+    {
+        if (Team->GetTeamID() == TeamIndex)
+        {
+            return Team;
+        }
+    }
+    return nullptr;
+}

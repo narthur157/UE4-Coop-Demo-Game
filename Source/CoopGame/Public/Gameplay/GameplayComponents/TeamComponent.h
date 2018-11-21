@@ -6,7 +6,9 @@
 #include "Components/ActorComponent.h"
 #include "TeamComponent.generated.h"
 
+class ASTeam;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTeamComponentOnTeamChanged, AActor*, Actor, ASTeam*, NewTeam);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class COOPGAME_API UTeamComponent : public UActorComponent
@@ -22,22 +24,25 @@ protected:
 	virtual void BeginPlay() override;
 
     UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_TeamChanged)
-    uint8 TeamID = 255;
+    ASTeam* Team;
 
     UFUNCTION()
-    void OnRep_TeamChanged() {};
+    void OnRep_TeamChanged();
 
 public:	
 	
-    UFUNCTION(BlueprintCallable, Category = "Team")
-    uint8 GetTeam() { return TeamID; }
+    UPROPERTY(BlueprintAssignable, Category = "Team")
+    FTeamComponentOnTeamChanged OnTeamChanged;
 
     UFUNCTION(BlueprintCallable, Category = "Team")
-    void SetTeam(uint8 NewTeamID);
+    ASTeam* GetTeam() const { return Team; }
 
     UFUNCTION(BlueprintCallable, Category = "Team")
-    uint8 GetTeamID();
-	
+    uint8 GetTeamID() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Team")
+    void SetTeam(ASTeam* NewTeam);
+
     UFUNCTION(BlueprintCallable, Category = "Team")
     static bool IsActorFriendly(AActor* ActorOne, AActor* ActorTwo);
     //static bool IsPlayerFriendly(AController* ControllerOne, AController* ControllerTwo);
