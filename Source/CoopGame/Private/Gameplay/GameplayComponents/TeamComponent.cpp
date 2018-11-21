@@ -14,7 +14,8 @@ UTeamComponent::UTeamComponent()
 void UTeamComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-    DOREPLIFETIME(UTeamComponent, TeamID);
+
+    DOREPLIFETIME(UTeamComponent, Team);
 
 }
 
@@ -28,22 +29,21 @@ void UTeamComponent::BeginPlay()
 	
 }
 
-void UTeamComponent::SetTeam(uint8 NewTeamID)
+uint8 UTeamComponent::GetTeamID() const
+{
+    return Team ? Team->GetTeamID() : 255;
+}
+
+void UTeamComponent::SetTeam(ASTeam* NewTeam) 
 {
     if (GetOwnerRole() < ROLE_Authority)
     {
         return;
     }
 
-    TeamID = NewTeamID;
+    Team = NewTeam;
+    OnRep_TeamChanged();
 }
-
-
-uint8 UTeamComponent::GetTeamID()
-{
-    return TeamID;
-}
-
 
 bool UTeamComponent::IsActorFriendly(AActor* ActorOne, AActor* ActorTwo)
 {
@@ -61,4 +61,9 @@ bool UTeamComponent::IsActorFriendly(AActor* ActorOne, AActor* ActorTwo)
     }
     return false;
 
+}
+
+void UTeamComponent::OnRep_TeamChanged()
+{
+    OnTeamChanged.Broadcast(GetOwner(), Team);
 }

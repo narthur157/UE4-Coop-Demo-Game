@@ -8,8 +8,29 @@ void ASPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+    DOREPLIFETIME(ASPlayerState, CurrentPawn)
+    DOREPLIFETIME(ASPlayerState, Team);
+
 }
 void ASPlayerState::AddScore(float ScoreDelta)
 {
     Score += ScoreDelta;
+}
+
+void ASPlayerState::SetCurrentPawn(APawn * NewCurrentPawn)
+{
+    if (Role < ROLE_Authority) { return; }
+
+    CurrentPawn = NewCurrentPawn;
+    OnCurrentPawnChanged.Broadcast(this, CurrentPawn);
+}
+
+void ASPlayerState::OnRep_CurrentPawn()
+{
+    OnCurrentPawnChanged.Broadcast(this, CurrentPawn);
+}
+
+void ASPlayerState::OnRep_Team()
+{
+    OnTeamChanged.Broadcast(this, Team);
 }

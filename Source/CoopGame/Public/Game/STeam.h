@@ -4,11 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "CoopGame.h"
 #include "STeam.generated.h"
 
 class APlayerState;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTeamUpdated, const ASTeam*, ChangedTeam);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMemberJoined, const ASTeam*, Team, const APlayerState*, NewMember);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMemberLeft, const ASTeam*, Team, const APlayerState*, OldMember);
 
 
 /**
@@ -22,6 +25,12 @@ class COOPGAME_API ASTeam : public AActor
 
 public:
     ASTeam();
+
+    UPROPERTY(BlueprintAssignable, Category = "Team")
+    FMemberJoined OnMemberJoined;
+
+    UPROPERTY(BlueprintAssignable, Category = "Team")
+    FTeamUpdated OnTeamUpdated;
 
     UFUNCTION(BlueprintCallable, Category = "Team")
     void SetTeamID(uint8 NewTeamID);
@@ -37,6 +46,7 @@ public:
 
 protected:
 
+    UPROPERTY(Replicated)
     uint8 TeamID;
 
     /** Used so we can access team members on server. This will be null on clients */
@@ -47,7 +57,9 @@ protected:
     TArray<APlayerState*> MemberStates;
 
     UFUNCTION()
-    void OnRep_MemberStates() {};
-
+        void OnRep_MemberStates() {}
+     
+    UFUNCTION(NetMulticast, Reliable, WithValidation)
+    void PlayerJoinedTeam(APlayerState* Player);
 
 };

@@ -45,6 +45,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Teams")
     void CreateTeam(uint8 NewTeamID);
    
+    UFUNCTION(BlueprintCallable, Category = "Teams")
+    ASTeam* GetTeam(uint8 TeamIndex);
+
     /** [ServerOnly] */
     UFUNCTION(BlueprintCallable, Category = "Teams")
     void AddPlayerToTeam(AController* NewTeamMember, uint8 TeamToChangeTo);
@@ -53,7 +56,9 @@ public:
 
 protected:
 
-    UPROPERTY(BlueprintReadOnly, Replicated, Category = "Teams")
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Teams, Category = "Teams")
     TArray<ASTeam*> Teams;
 
+    UFUNCTION(BlueprintCallable, Category = "Teams")
+    void OnRep_Teams() {}
 };

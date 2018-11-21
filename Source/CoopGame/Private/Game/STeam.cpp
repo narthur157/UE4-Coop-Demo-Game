@@ -4,10 +4,13 @@
 #include "Net/UnrealNetwork.h"
 #include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "GameFramework/Controller.h"
+#include "CoopGame.h"
 #include "GameFramework/PlayerState.h"
+
 ASTeam::ASTeam()
 {
-    bReplicates = true;
+    SetReplicates(true);
+    bAlwaysRelevant = true;
 }
 
 
@@ -16,11 +19,13 @@ void ASTeam::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePr
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(ASTeam, MemberStates);
+    DOREPLIFETIME(ASTeam, TeamID);
 }
 
 void ASTeam::SetTeamID(uint8 NewTeamID)
 {
     TeamID = NewTeamID;
+    OnTeamUpdated.Broadcast(this);
 }
 
 void ASTeam::AddToTeam(AController* Controller)
@@ -36,10 +41,18 @@ void ASTeam::AddToTeam(AController* Controller)
         }
     }
 
-    if (Controller->PlayerState)
-    {
-        MemberStates.Add(Controller->PlayerState);
-
-    }
     Members.Add(Controller);
+    MemberStates.Add(Controller->PlayerState);
+    PlayerJoinedTeam(Controller->PlayerState);
+}
+
+void ASTeam::PlayerJoinedTeam_Implementation(APlayerState* Player)
+{
+    TRACE("Netmulticast");
+    OnMemberJoined.Broadcast(this, Player);
+}
+
+bool ASTeam::PlayerJoinedTeam_Validate(APlayerState* Player)
+{
+    return true;
 }

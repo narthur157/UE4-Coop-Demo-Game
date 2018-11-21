@@ -5,6 +5,7 @@
 #include "SGameState.h"
 #include "Blueprint/UserWidget.h"
 #include "SGameEventWidget.h"
+#include "SPlayerState.h"
 
 ASPlayerController::ASPlayerController()
     : APlayerController()
@@ -16,6 +17,8 @@ void ASPlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
+
+
     if (GameEventWidgetClass && IsLocalController())
     {
         GameEventWidget = CreateWidget<USGameEventWidget>(this, GameEventWidgetClass);
@@ -26,6 +29,13 @@ void ASPlayerController::BeginPlay()
     if (ensureAlways(GS))
     {
         GS->OnGameOver.AddDynamic(this, &ASPlayerController::RecieveGameOver);
+    }
+
+    // Update our player state when we possess a new pawn
+    ASPlayerState* PS = Cast<ASPlayerState>(PlayerState);
+    if (PS)
+    {
+        OnPawnChanged.AddDynamic(PS, &ASPlayerState::SetCurrentPawn);
     }
 }
 
@@ -79,7 +89,7 @@ void ASPlayerController::ToggleMenu()
 void ASPlayerController::SetPawn(APawn* InPawn)
 {
     Super::SetPawn(InPawn);
-
+    OnPawnChanged.Broadcast(InPawn);
     OnPawnChange();
 }
 
