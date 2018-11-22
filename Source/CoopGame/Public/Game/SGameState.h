@@ -15,7 +15,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FGameStateActorKilled, AActor*, K
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameStateGameOver, bool, bWasSuccessful);
 
 
-class ASTeam;
+class ASTeamManager;
 
 /**
  * Base GameState type. Simply broadcasts general events such as GameOver/Actor killed to clients. Specific GameStates should be derived from here.
@@ -27,7 +27,10 @@ class COOPGAME_API ASGameState : public AGameStateBase
 	GENERATED_BODY()
 	
 public:
+    ASGameState();
 
+    UFUNCTION(BlueprintPure, Category = "Team")
+    ASTeamManager* GetTeamManager();
 
     UFUNCTION(NetMulticast, Reliable)
     void MulticastGameOver(bool bWasSuccessful);
@@ -41,24 +44,12 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "GameEvent")
     FGameStateGameOver OnGameOver;
 
-    /** [ServerOnly] */
-    UFUNCTION(BlueprintCallable, Category = "Teams")
-    void CreateTeam(uint8 NewTeamID);
-   
-    UFUNCTION(BlueprintCallable, Category = "Teams")
-    ASTeam* GetTeam(uint8 TeamIndex);
-
-    /** [ServerOnly] */
-    UFUNCTION(BlueprintCallable, Category = "Teams")
-    void AddPlayerToTeam(AController* NewTeamMember, uint8 TeamToChangeTo);
-    UFUNCTION(Server, Reliable, WithValidation, Category = "Teams")
-    void ServerAddPlayerToTeam(AController* NewTeamMember, uint8 TeamToChangeTo);
+    virtual void PreInitializeComponents() override;
 
 protected:
 
-    UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Teams, Category = "Teams")
-    TArray<ASTeam*> Teams;
+    UPROPERTY(VisibleAnywhere, Category = "Team")
+    ASTeamManager* TeamManager = nullptr;
 
-    UFUNCTION(BlueprintCallable, Category = "Teams")
-    void OnRep_Teams() {}
+   
 };
