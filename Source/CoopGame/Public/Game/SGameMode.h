@@ -19,7 +19,6 @@ class COOPGAME_API ASGameMode : public AGameModeBase
 	
 public:
     ASGameMode();
-    virtual void StartPlay() override;
     
     UPROPERTY(EditDefaultsOnly, Category = "GameMode")
     bool bIsFriendlyFireEnabled = false;
@@ -29,6 +28,13 @@ public:
     void OnActorKilled(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser);
     virtual void OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser);
 
+    virtual void StartPlay() override;
+
+    virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+
+    virtual void RestartPlayerAtPlayerStart(AController* NewPlayer, AActor* StartSpot) override;
+
+    
 protected:
 
   
@@ -45,6 +51,15 @@ protected:
     /** Blueprint Interface for GameOver events */
     UFUNCTION(BlueprintImplementableEvent, Category = "GameMode")
     void OnGameOver(bool bWasSuccessful);
+
+    UFUNCTION(BlueprintImplementableEvent, Category = "GameMode")
+    void OnASDRestartPlayerAtPlayerStart(AController* NewPlayer, AActor* StartSpot);
+
+    UFUNCTION(BlueprintImplementableEvent, Category = "GameMode")
+    void OnInitGame(const FString& MapName, const FString& Options);
+
+    UFUNCTION(BlueprintImplementableEvent, Category = "GameMode")
+    void OnStartPlay();
 
     virtual void InitializeHUDForPlayer_Implementation(APlayerController* NewPlayer) override;
 
