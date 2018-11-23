@@ -2,11 +2,10 @@
 
 #include "SGameMode.h"
 #include "SHealthComponent.h"
-#include "SPlayerState.h"
-#include "SGameState.h"
-#include "STeam.h"
-#include "CoopGame.h"
+#include "Engine/World.h"
 
+#include "SGameState.h"
+#include "SPlayerState.h"
 
 ASGameMode::ASGameMode()
 {
@@ -17,6 +16,9 @@ ASGameMode::ASGameMode()
 void ASGameMode::StartPlay()
 {
     Super::StartPlay();
+
+    OnStartPlay();
+
 }
 
 // Iterate over all the players, if none are alive then its a loss
@@ -39,7 +41,6 @@ void ASGameMode::CheckPlayerState()
 
     if (!bIsPlayerAlive)
     {
-        TRACE("All players have died.");
         GameOver(false);
     }
 }
@@ -79,3 +80,17 @@ void ASGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* Kille
     
 }
 
+
+void ASGameMode::RestartPlayerAtPlayerStart(AController* NewPlayer, AActor* StartSpot)
+{
+    Super::RestartPlayerAtPlayerStart(NewPlayer, StartSpot);
+
+    OnASDRestartPlayerAtPlayerStart(NewPlayer, StartSpot);
+}
+
+void ASGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+    Super::InitGame(MapName, Options, ErrorMessage);
+
+    OnInitGame(MapName, Options);
+}
