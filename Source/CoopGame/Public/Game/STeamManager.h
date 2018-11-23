@@ -30,8 +30,11 @@ public:
     /** [ServerOnly] */
     UFUNCTION(BlueprintCallable, Category = "Teams")
     void AddPlayerToTeam(AController* NewTeamMember, uint8 TeamToChangeTo);
-    UFUNCTION(Server, Reliable, WithValidation, Category = "Teams")
-    void ServerAddPlayerToTeam(AController* NewTeamMember, uint8 TeamToChangeTo);
+
+    UFUNCTION(BlueprintCallable, Category = "Teams")
+    void AddActorToTeam(AActor * Actor, uint8 TeamToAddTo);
+
+ 
 	
 protected:
 

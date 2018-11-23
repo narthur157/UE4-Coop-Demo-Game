@@ -46,13 +46,36 @@ void ASTeam::AddToTeam(AController* Controller)
     PlayerJoinedTeam(Controller->PlayerState);
 }
 
+void ASTeam::AddActorToTeam(AActor* Actor)
+{
+    if (Role < ROLE_Authority) { return; }
+
+    MemberActors.Add(Actor);
+}
+
+void ASTeam::RemoveActorFromTeam(AActor * Actor)
+{
+    if (Role < ROLE_Authority) { return; }
+
+    MemberActors.Remove(Actor);
+}
+
 void ASTeam::PlayerJoinedTeam_Implementation(APlayerState* Player)
 {
-    TRACE("Netmulticast");
     OnMemberJoined.Broadcast(this, Player);
 }
 
 bool ASTeam::PlayerJoinedTeam_Validate(APlayerState* Player)
+{
+    return true;
+}
+
+void ASTeam::ActorJoinedTeam_Implementation(AActor* Actor)
+{
+    OnActorJoined.Broadcast(this, Actor);
+}
+
+bool ASTeam::ActorJoinedTeam_Validate(AActor* Actor)
 {
     return true;
 }

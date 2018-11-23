@@ -4,6 +4,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Engine/World.h"
 #include "STeam.h"
+#include "TeamComponent.h"
 
 
 
@@ -42,7 +43,6 @@ void ASTeamManager::AddPlayerToTeam(AController* Player, uint8 TeamToAddTo)
 {
     if (Role < ROLE_Authority)
     {
-        ServerAddPlayerToTeam(Player, TeamToAddTo);
         return;
     }
 
@@ -57,14 +57,29 @@ void ASTeamManager::AddPlayerToTeam(AController* Player, uint8 TeamToAddTo)
     }
 }
 
-void ASTeamManager::ServerAddPlayerToTeam_Implementation(AController* Player, uint8 TeamToAddTo)
-{
-    AddPlayerToTeam(Player, TeamToAddTo);
-}
 
-bool ASTeamManager::ServerAddPlayerToTeam_Validate(AController* Player, uint8 TeamToAddTo)
+void ASTeamManager::AddActorToTeam(AActor* Actor, uint8 TeamToAddTo)
 {
-    return true;
+    if (Role < ROLE_Authority)
+    {
+        return;
+    }
+
+    ASTeam* Team = GetTeam(TeamToAddTo);
+    UTeamComponent* TeamComponent = Actor->FindComponentByClass<UTeamComponent>();
+    if (!Team || !TeamComponent)
+    {
+        return;
+    }
+
+    if (TeamComponent->GetTeam())
+    {
+        TeamComponent->GetTeam()->RemoveActorFromTeam(Actor);
+    }
+    
+    Team->AddActorToTeam(Actor);
+    TeamComponent->SetTeam(Team);
+
 }
 
 ASTeam* ASTeamManager::GetTeam(uint8 TeamIndex)
