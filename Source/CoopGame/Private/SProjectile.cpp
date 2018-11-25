@@ -157,10 +157,10 @@ void ASProjectile::Explode()
 			MyOwner->OnHit(nullptr, true);
 		}
 
-        
-		SetLifeSpan(5.0f);
+		SetLifeSpan(0.5f);
 	}
 
+	MeshComp->SetCollisionResponseToAllChannels(ECR_Ignore);
     SetActorHiddenInGame(true);
 }
 
