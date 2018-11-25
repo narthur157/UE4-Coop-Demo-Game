@@ -4,6 +4,7 @@
 #include "SGameMode.h"
 #include "SGameState.h"
 #include "CoopGame.h"
+#include "Engine/Engine.h"
 #include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -47,7 +48,9 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
     //IsFriendly(DamagedActor, InstigatedBy->GetPawn())
     ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
 
-    if (Damage <= 0 || bIsDead || (!GM->bIsFriendlyFireEnabled && UTeamComponent::IsActorFriendly(DamagedActor, InstigatedBy->GetPawn() )))
+    // @TODO right now self damage is simply just enabled, because we need the trackerbot to be able to kill itself essentially
+    // This is not correct.
+    if (Damage <= 0 || bIsDead || (!GM->bIsFriendlyFireEnabled && UTeamComponent::IsActorFriendly(DamagedActor, InstigatedBy->GetPawn()) && DamagedActor != InstigatedBy->GetPawn()))
     {
         return;
     }

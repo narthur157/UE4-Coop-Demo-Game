@@ -5,6 +5,11 @@
 #include "Blueprint/UserWidget.h"
 #include "SHealthComponent.h"
 #include "SPlayerState.h"
+#include "STeamManager.h"
+#include "Engine/Engine.h"
+#include "Engine/World.h"
+#include "STeam.h"
+#include "TimerManager.h"
 #include "SHordeGameState.h"
 
 
@@ -71,8 +76,8 @@ void ASHordeGameMode::PrepareForNextWave()
             GS->SetNextWaveStartTime(GetWorld()->TimeSeconds + TimeBetweenWaves);
         }
     }
-    SetWaveState(EWaveState::WaitingToStart);
 
+    SetWaveState(EWaveState::WaitingToStart);
 }
 
 // Iterate over all of the pawns, if we find a bot and its still alive then carry on
@@ -83,29 +88,22 @@ void ASHordeGameMode::CheckWaveState()
     {
         return;
     }
-
-    bool bIsAnyBotAlive = false;
-    for (FConstPawnIterator It = GetWorld()->GetPawnIterator(); It; ++It)
+    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
+    if (!GS)
     {
-        // If we are player controlled
-        APawn* TestPawn = It->Get();
-        if (!TestPawn || TestPawn->IsPlayerControlled())
-        {
-            continue;
-        }
-        USHealthComponent* HealthComp = TestPawn->FindComponentByClass<USHealthComponent>();
-        if (HealthComp && HealthComp->GetHealth() > 0)
-        {
-            // Bot is still alive
-            bIsAnyBotAlive = true;
-            break;
-        }
+        return;
     }
-    if (!bIsAnyBotAlive)
+    
+    ASTeam* HordeTeam = GS->GetTeamManager()->GetTeam(HordeTeamNumber);
+    if (!HordeTeam)
     {
-        TRACE("Bots have all died.");
-        SetWaveState(EWaveState::WaveComplete);
+        return;
+    }
+
+    if (HordeTeam->GetMemberActors().Num() <= 0)
+    {
         PrepareForNextWave();
+        HordeTeam->ClearTeam();
     }
 }
 
@@ -128,6 +126,4 @@ void ASHordeGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* 
     {
         GS->MulticastActorKilled(KilledActor, KillerActor, DamageCauser);
     }
-    CheckPlayerState();
-    CheckWaveState();
 }

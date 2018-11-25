@@ -33,44 +33,45 @@ class COOPGAME_API ASHordeGameState : public ASGameState
 	
 public:
 
+
+
     UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_NumEnemiesChanged, Category = "WaveState")
-        int32 NumEnemiesAlive = 0;
+    int32 NumEnemiesAlive = 0;
 
     UFUNCTION(BlueprintCallable, Category = "WaveState")
-        void SetWaveState(EWaveState NewState);
+    void SetWaveState(EWaveState NewState);
 
     UFUNCTION(BlueprintCallable, Category = "WaveState")
-        void SetNextWaveStartTime(float NewNextWaveStartTime) { NextWaveStartTime = NewNextWaveStartTime; }
+    void SetNextWaveStartTime(float NewNextWaveStartTime) { NextWaveStartTime = NewNextWaveStartTime; }
 
     UFUNCTION(BlueprintPure, Category = "WaveState")
-        float GetNextWaveStartTime() { return NextWaveStartTime; }
+    float GetNextWaveStartTime() { return NextWaveStartTime; }
 
     /** Broadcasts when the wave state has changed */
     UPROPERTY(BlueprintAssignable, Category = "WaveState")
-        FGameStateWaveChanged OnWaveStateChanged;
+    FGameStateWaveChanged OnWaveStateChanged;
 
     /** Broadcasts when a enemy has died in the wave */
     UPROPERTY(BlueprintAssignable, Category = "WaveState")
-        FGameStateNumEnemiesChanged OnNumEnemiesChanged;
+    FGameStateNumEnemiesChanged OnNumEnemiesChanged;
 
     /** Blueprint interface for HordeGameState logic to run when the wave state has been changed */
     UFUNCTION(BlueprintImplementableEvent, Category = "WaveState")
-        void WaveStateChanged(EWaveState NewState, EWaveState OldState);
+    void WaveStateChanged(EWaveState NewState, EWaveState OldState);
 
-   
 protected:
 
     /** Replicated value that determines when the next wave will spawn as specified by the gamestate */
     UPROPERTY(BlueprintReadOnly, Replicated, Category = "WaveState")
-        float NextWaveStartTime = 0.0f;
+    float NextWaveStartTime = 0.0f;
 
     /** Used to broadcast changes in the number of enemies to any listening entites on the client. */
     UFUNCTION(BlueprintCallable, Category = "WaveState")
-        void OnRep_NumEnemiesChanged();
+    void OnRep_NumEnemiesChanged();
 
     /** Enum representing the current state of the wave, see EWaveState definition for value details. */
     UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_WaveStateChanged, Category = "WaveState")
-        EWaveState WaveState = EWaveState::None;
+    EWaveState WaveState = EWaveState::None;
 
     /** Used to broadcast changes in waves to any listening entites on the client. */
     UFUNCTION()
