@@ -88,7 +88,7 @@ protected:
 
     FVector GetNextPathPoint();
     FVector NextPathPoint;
-    void MoveTowardsTarget();
+    void MoveTowardsTarget(float DeltaTime);
 
     bool bTriggered = false;
 

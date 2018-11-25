@@ -19,7 +19,6 @@ void ADefenseObjective::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(ADefenseObjective, bObjectiveDestroyed);
-
 }
 
 // Called when the game starts or when spawned

@@ -222,10 +222,11 @@ void ASCharacter::OnHealthChanged(USHealthComponent * ChangedHealthComp, float H
 			PC->ClientGotoState(NAME_Spectating);
 		}
 
+		GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
         GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         DetachFromControllerPendingDestroy();
 		PrimaryActorTick.bCanEverTick = false;
-        SetLifeSpan(10.0f);
+        SetLifeSpan(3.0f);
     }
 }
 
