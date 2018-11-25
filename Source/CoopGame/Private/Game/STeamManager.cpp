@@ -26,6 +26,7 @@ void ASTeamManager::CreateTeam(uint8 TeamID)
 {
     if (Role < ROLE_Authority) { return; }
 
+    // Determine if there already exists a team with the specified ID
     for (ASTeam* Team : Teams)
     {
         if (Team->GetTeamID() == TeamID)
@@ -34,6 +35,7 @@ void ASTeamManager::CreateTeam(uint8 TeamID)
         }
     }
 
+    // Creates the team and adds it to the Team array
     ASTeam* NewTeam = GetWorld()->SpawnActor<ASTeam>(ASTeam::StaticClass());
     NewTeam->SetTeamID(TeamID);
     Teams.Add(NewTeam);
@@ -41,10 +43,7 @@ void ASTeamManager::CreateTeam(uint8 TeamID)
 
 void ASTeamManager::AddPlayerToTeam(AController* Player, uint8 TeamToAddTo)
 {
-    if (Role < ROLE_Authority)
-    {
-        return;
-    }
+    if (Role < ROLE_Authority) { return; }
 
     // Get the team whoose ID matches the TeamToAddTo
     for (ASTeam* Team : Teams)
@@ -60,10 +59,7 @@ void ASTeamManager::AddPlayerToTeam(AController* Player, uint8 TeamToAddTo)
 
 void ASTeamManager::AddActorToTeam(AActor* Actor, uint8 TeamToAddTo)
 {
-    if (Role < ROLE_Authority)
-    {
-        return;
-    }
+    if (Role < ROLE_Authority) { return; }
 
     ASTeam* Team = GetTeam(TeamToAddTo);
     UTeamComponent* TeamComponent = Actor->FindComponentByClass<UTeamComponent>();
