@@ -20,7 +20,6 @@ void ASTeam::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePr
 
     DOREPLIFETIME(ASTeam, MemberStates);
     DOREPLIFETIME(ASTeam, TeamID);
-    DOREPLIFETIME(ASTeam, NumberEnemiesLeft);
 }
 
 void ASTeam::SetTeamID(uint8 NewTeamID)
@@ -52,23 +51,7 @@ void ASTeam::AddActorToTeam(AActor* Actor)
     if (Role < ROLE_Authority) { return; }
 
     MemberActors.Add(Actor);
-}
-
-void ASTeam::RemoveActorFromTeam(AActor * Actor)
-{
-    if (Role < ROLE_Authority) { return; }
-
-    MemberActors.Remove(Actor);
-}
-
-void ASTeam::PlayerJoinedTeam_Implementation(APlayerState* Player)
-{
-    OnMemberJoined.Broadcast(this, Player);
-}
-
-bool ASTeam::PlayerJoinedTeam_Validate(APlayerState* Player)
-{
-    return true;
+    ActorJoinedTeam(Actor);
 }
 
 void ASTeam::ActorJoinedTeam_Implementation(AActor* Actor)
@@ -76,7 +59,82 @@ void ASTeam::ActorJoinedTeam_Implementation(AActor* Actor)
     OnActorJoined.Broadcast(this, Actor);
 }
 
-bool ASTeam::ActorJoinedTeam_Validate(AActor* Actor)
+bool ASTeam::ActorJoinedTeam_Validate(AActor* Actor) { return true; }
+
+void ASTeam::RemoveActorFromTeam(AActor * Actor)
 {
-    return true;
+    if (Role < ROLE_Authority) { return; }
+
+    MemberActors.Remove(Actor);
+    ActorLeftTeam(Actor);
+}
+
+void ASTeam::ActorLeftTeam_Implementation(AActor* Actor)
+{
+    OnActorLeft.Broadcast(this, Actor);
+}
+
+bool ASTeam::ActorLeftTeam_Validate(AActor* Actor) { return true; }
+
+
+void ASTeam::PlayerJoinedTeam_Implementation(APlayerState* Player)
+{
+    OnMemberJoined.Broadcast(this, Player);
+}
+
+bool ASTeam::PlayerJoinedTeam_Validate(APlayerState* Player) { return true; }
+
+TArray<AActor*> ASTeam::GetActorsOfClass(TSubclassOf<AActor> ActorClass)
+{
+    TArray<AActor*> FoundActors;
+    for (AActor* Actor : MemberActors)
+    {
+        if (Actor->IsA(ActorClass))
+        {
+            FoundActors.Add(Actor);
+        }
+    }
+    return FoundActors;
+}
+
+TArray<AActor*> ASTeam::GetActorsOfClassMultiple(const TArray<TSubclassOf<AActor>>& Types)
+{
+    TArray<AActor*> FoundActors;
+
+    if (Types.Num() == 0) { return FoundActors; }
+
+    for (AActor* Actor : MemberActors)
+    {
+        if (Types.Contains(Actor->GetClass()))
+        {
+            FoundActors.Add(Actor);
+        }
+    }
+    return FoundActors;
+}
+
+TArray<AActor*> ASTeam::GetActorsWithInterface(TSubclassOf<UInterface> Interface)
+{
+    TArray<AActor*> FoundActors;
+    for (AActor* Actor : MemberActors)
+    {
+        if (Actor->GetClass()->ImplementsInterface(Interface))
+        {
+            FoundActors.Add(Actor);
+        }
+    }
+    return FoundActors;
+}
+
+TArray<AActor*> ASTeam::GetActorsWithTag(FName Tag)
+{
+    TArray<AActor*> FoundActors;
+    for (AActor* Actor : MemberActors)
+    {
+        if (Actor->ActorHasTag(Tag))
+        {
+            FoundActors.Add(Actor);
+        }
+    }
+    return FoundActors;
 }

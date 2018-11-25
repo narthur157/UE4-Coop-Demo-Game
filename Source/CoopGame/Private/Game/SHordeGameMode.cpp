@@ -87,20 +87,21 @@ void ASHordeGameMode::CheckWaveState()
     if (NumberBotsToSpawn > 0 || GetWorldTimerManager().IsTimerActive(TimerHandle_NextWaveStart))
     {
         return;
+
     }
+
     ASHordeGameState* GS = GetGameState<ASHordeGameState>();
     if (!GS)
     {
         return;
     }
-    
     ASTeam* HordeTeam = GS->GetTeamManager()->GetTeam(HordeTeamNumber);
     if (!HordeTeam)
     {
         return;
     }
 
-    if (HordeTeam->GetMemberActors().Num() <= 0)
+    if (HordeTeam->GetActorsOfClassMultiple(HordeUnitTypes).Num() <= 0)
     {
         PrepareForNextWave();
         HordeTeam->ClearTeam();
@@ -120,10 +121,8 @@ void ASHordeGameMode::SetWaveState(EWaveState State)
 // Called when a player has died, used in order to avoid using tick to check player/wave state
 void ASHordeGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser)
 {
-    // TODO: We only really need to check one or the other based on whether or not the killed actor is a player
-    ASGameState* GS = GetGameState<ASGameState>();
-    if (KillerActor && KilledActor)
-    {
-        GS->MulticastActorKilled(KilledActor, KillerActor, DamageCauser);
-    }
+    Super::OnActorKilled_Implementation(KilledActor, KillerActor, DamageCauser);
+   
+    CheckWaveState();
+    CheckPlayerState();
 }

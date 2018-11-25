@@ -19,8 +19,6 @@ class COOPGAME_API ASHordeGameMode : public ASGameMode
 {
 	GENERATED_BODY()
 	
-
-
 public:
     ASHordeGameMode();
     virtual void StartPlay() override;
@@ -36,6 +34,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeGameMode")
     uint8 HordeTeamNumber = 1;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeGameMode")
+    TArray<TSubclassOf<AActor>> HordeUnitTypes;
 
     UPROPERTY(EditDefaultsOnly, Category = "GameMode")
     float TimeBetweenWaves = 0.0f;

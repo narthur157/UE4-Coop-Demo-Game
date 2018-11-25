@@ -4,6 +4,9 @@
 #include "SHealthComponent.h"
 #include "Engine/World.h"
 
+#include "STeamManager.h"
+#include "TeamComponent.h"
+#include "STeam.h"
 #include "SGameState.h"
 #include "SPlayerState.h"
 
@@ -77,7 +80,19 @@ void ASGameMode::InitializeHUDForPlayer_Implementation(APlayerController * NewPl
 // Called when a player has died, used in order to avoid using tick to check player/wave state
 void ASGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser)
 {
-    
+    ASGameState* GS = GetGameState<ASGameState>();
+    // Broadcast that an actor has died
+    if (GS && KillerActor && KilledActor)
+    {
+        GS->MulticastActorKilled(KilledActor, KillerActor, DamageCauser);
+    }
+
+    // Remove the killed actor from the team it is on
+    UTeamComponent* TeamComp = KilledActor->FindComponentByClass<UTeamComponent>();
+    if (TeamComp)
+    {
+        GS->GetTeamManager()->GetTeam(TeamComp->GetTeamID())->RemoveActorFromTeam(KilledActor);
+    }
 }
 
 
@@ -94,3 +109,4 @@ void ASGameMode::InitGame(const FString& MapName, const FString& Options, FStrin
 
     OnInitGame(MapName, Options);
 }
+
