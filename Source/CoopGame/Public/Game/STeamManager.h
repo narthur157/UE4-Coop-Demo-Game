@@ -36,8 +36,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Teams")
     void AddActorToTeam(AActor * Actor, uint8 TeamToAddTo);
 
- 
-	
 protected:
 
     /** All the teams currently in the game */
