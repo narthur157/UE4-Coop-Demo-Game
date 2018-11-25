@@ -155,26 +155,13 @@ void ASTrackerBot::SelfDestruct()
         
 		float ActualDamage = ((GetDamageModifier() / 100) * ExplosionDamage) + ExplosionDamage;
 		bool bScaleDamageByDistance = bBotAttachesToPlayer;
-<<<<<<< HEAD
+
         UGameplayStatics::ApplyRadialDamage(this, ActualDamage, GetActorLocation(), ExplosionRadius,nullptr, IgnoredActors,this,GetController(), bScaleDamageByDistance);
         // Kill ourselves
         UGameplayStatics::ApplyDamage(this, HealthComp->GetHealth(), GetController(), this, nullptr);
         
         // Give clients a chance to play effects
-        SetLifeSpan(4.0);
-=======
-        
-		UGameplayStatics::ApplyRadialDamage(this, ActualDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetController(), bScaleDamageByDistance);
-        
-		// Kill ourselves
-        if (HealthComp->GetHealth() > 0)
-        {
-            UGameplayStatics::ApplyDamage(this, HealthComp->GetHealth(), GetController(), this, nullptr);
-        }
-
-		// Give clients a chance to play effects
         SetLifeSpan(1.0);
->>>>>>> 66e86d4e9e165c7ccbf245e99bb85cc5a238ecd3
     }
 
 	MeshComp->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -226,9 +213,6 @@ void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComp
     if (OtherActorPawn && OtherActorPawn != this && !UTeamComponent::IsActorFriendly(OtherActorPawn, this))
     {
 		USHealthComponent* OtherHealth = OtherActor->FindComponentByClass<USHealthComponent>();
-
-		UE_LOG(LogTemp, Log, TEXT("TrackerBot triggered by %s, my team %d, their team %d"),
-			*OtherActorPawn->GetName(), HealthComp->TeamNum, OtherHealth->TeamNum);
 
         if (Role == ROLE_Authority)
         {
