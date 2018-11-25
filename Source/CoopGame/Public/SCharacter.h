@@ -61,7 +61,7 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons")
     USWeaponComponent* WeaponComp = nullptr;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (ExposeOnSpawn = true))
     USHealthComponent* HealthComp = nullptr;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Team")

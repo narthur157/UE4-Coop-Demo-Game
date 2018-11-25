@@ -17,6 +17,15 @@
 #include "Game/SGameState.h"
 #include "Engine/Engine.h"
 #include "Net/UnrealNetwork.h"
+#include "DrawDebugHelpers.h"
+
+static int32 DebugTrackerBotNavigation = 0;
+FAutoConsoleVariableRef CVARDebugTrackerBotNavigation(
+	TEXT("COOP.TrackerBotNavigation"),
+	DebugTrackerBotNavigation,
+	TEXT("Draws debug objects for tracker bot navigation"),
+	ECVF_Cheat);
+
 
 ASTrackerBot::ASTrackerBot()
 {
@@ -69,6 +78,9 @@ void ASTrackerBot::BeginPlay()
 
 FVector ASTrackerBot::GetNextPathPoint()
 {
+    GetWorldTimerManager().ClearTimer(TimerHandle_RefreshPath);
+    GetWorldTimerManager().SetTimer(TimerHandle_RefreshPath, this, &ASTrackerBot::RefreshPath, RefreshInterval, false);
+
     AActor* BestTarget = nullptr;
     float NearestTargetDistance = FLT_MAX;
 
@@ -81,18 +93,18 @@ FVector ASTrackerBot::GetNextPathPoint()
             continue;
         }
 
-        USHealthComponent* OtherHealthComp = TestPawn->FindComponentByClass<USHealthComponent>();
-        
-		if (OtherHealthComp && OtherHealthComp->GetHealth() > 0)
+
+        USHealthComponent* HealthComp = TestPawn->FindComponentByClass<USHealthComponent>();
+
+		if (HealthComp && HealthComp->GetHealth() > 0)
         {
-            // Bot is still alive, check and store nearest target if this target is closer than the previous nearest
+            // Target is still alive, check and store nearest target if this target is closer than the previous nearest
             float Distance = (TestPawn->GetActorLocation() - GetActorLocation()).Size();
             
 			if (NearestTargetDistance > Distance)
             {
                 BestTarget = TestPawn;
                 NearestTargetDistance = Distance;
-
             }
         }
     }
@@ -100,14 +112,23 @@ FVector ASTrackerBot::GetNextPathPoint()
     if (BestTarget)
     {
         UNavigationPath* NavPath = UNavigationSystemV1::FindPathToActorSynchronously(GetWorld(), GetActorLocation(), BestTarget);
-        GetWorldTimerManager().ClearTimer(TimerHandle_RefreshPath);
-        GetWorldTimerManager().SetTimer(TimerHandle_RefreshPath, this, &ASTrackerBot::RefreshPath, RefreshInterval, false);
 
         if (NavPath && NavPath->PathPoints.Num() > 0)
         {
+			if (DebugTrackerBotNavigation)
+			{
+				DrawDebugSphere(GetWorld(), NavPath->PathPoints[1], 100, 12, FColor::Red, true, 5.0f, 0, 1);
+			}
+
             return NavPath->PathPoints[1];
         }
+		else
+		{
+			return BestTarget->GetActorLocation();
+		}
     }
+
+	UE_LOG(LogTemp, Error, TEXT("TrackerBot failed to find path"));
 
     return GetActorLocation();
 }
@@ -131,15 +152,32 @@ void ASTrackerBot::SelfDestruct()
     if (Role == ROLE_Authority)
     {
         TArray<AActor*> IgnoredActors = { };
-        float ActualDamage = ((GetDamageModifier() / 100) * ExplosionDamage) + ExplosionDamage;
+        
+		float ActualDamage = ((GetDamageModifier() / 100) * ExplosionDamage) + ExplosionDamage;
 		bool bScaleDamageByDistance = bBotAttachesToPlayer;
+<<<<<<< HEAD
         UGameplayStatics::ApplyRadialDamage(this, ActualDamage, GetActorLocation(), ExplosionRadius,nullptr, IgnoredActors,this,GetController(), bScaleDamageByDistance);
         // Kill ourselves
         UGameplayStatics::ApplyDamage(this, HealthComp->GetHealth(), GetController(), this, nullptr);
         
         // Give clients a chance to play effects
         SetLifeSpan(4.0);
+=======
+        
+		UGameplayStatics::ApplyRadialDamage(this, ActualDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetController(), bScaleDamageByDistance);
+        
+		// Kill ourselves
+        if (HealthComp->GetHealth() > 0)
+        {
+            UGameplayStatics::ApplyDamage(this, HealthComp->GetHealth(), GetController(), this, nullptr);
+        }
+
+		// Give clients a chance to play effects
+        SetLifeSpan(1.0);
+>>>>>>> 66e86d4e9e165c7ccbf245e99bb85cc5a238ecd3
     }
+
+	MeshComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 }
 
 void ASTrackerBot::Tick(float DeltaTime)
@@ -148,11 +186,11 @@ void ASTrackerBot::Tick(float DeltaTime)
 
     if (!bSelfDestructionAttached && !bExploded && Role == ROLE_Authority)
     {
-        MoveTowardsTarget();
+        MoveTowardsTarget(DeltaTime);
     }
 }
 
-void ASTrackerBot::MoveTowardsTarget()
+void ASTrackerBot::MoveTowardsTarget(float DeltaTime)
 {
     float DistanceToTarget = (GetActorLocation() - NextPathPoint).Size();
 
@@ -172,8 +210,7 @@ void ASTrackerBot::MoveTowardsTarget()
 
 	if (SpeedTowardsTarget <= MaxSpeed)
 	{
-
-		ForceDirection *= MovementForce;
+		ForceDirection *= MovementForce * (DeltaTime * 100);
 		MeshComp->AddForce(ForceDirection, NAME_None, bUseVelocityChange);
 	}
 }
@@ -188,6 +225,11 @@ void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComp
     APawn* OtherActorPawn = Cast<APawn>(OtherActor);
     if (OtherActorPawn && OtherActorPawn != this && !UTeamComponent::IsActorFriendly(OtherActorPawn, this))
     {
+		USHealthComponent* OtherHealth = OtherActor->FindComponentByClass<USHealthComponent>();
+
+		UE_LOG(LogTemp, Log, TEXT("TrackerBot triggered by %s, my team %d, their team %d"),
+			*OtherActorPawn->GetName(), HealthComp->TeamNum, OtherHealth->TeamNum);
+
         if (Role == ROLE_Authority)
         {
 			if (bBotAttachesToPlayer)
