@@ -81,8 +81,8 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
 
 void USHealthComponent::OnRep_Health(float OldHealth)
 {
-    float Damage = Health - OldHealth;
-    TRACE("%s Health changed. Current Health: %f", *GetOwner()->GetName(), Health);
+    float Damage = OldHealth - Health;
+    TRACE("%s Health changed. Current Health: %f. Damage: %f", *GetOwner()->GetName(), Health, Damage);
     OnHealthChanged.Broadcast(this, Health, Damage, nullptr, nullptr, nullptr);
 }
 

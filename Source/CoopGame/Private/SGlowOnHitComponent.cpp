@@ -11,26 +11,27 @@ void USGlowOnHitComponent::BeginPlay()
 
 	AActor* MyOwner = GetOwner();
 
-	if (!ensureAlways(MyOwner)) { return; }
+	if (!ensureAlwaysMsgf(MyOwner, TEXT("GlowOnHitComponent requires owner to be set"))) { return; }
 	
 	USHealthComponent* HealthComp = Cast<USHealthComponent>(MyOwner->GetComponentByClass(USHealthComponent::StaticClass()));
-	HealthComp->OnHealthChanged.AddDynamic(this, &USGlowOnHitComponent::OnHealthChanged);
 
 	if (!ensureMsgf(HealthComp, TEXT("GlowOnHitComponent requires a HealthComp to be set on its parent")))
 	{
 		return;
 	}
+
+	HealthComp->OnHealthChanged.AddDynamic(this, &USGlowOnHitComponent::OnHealthChanged);
 }
 
 void USGlowOnHitComponent::OnHealthChanged(USHealthComponent * ChangedHealthComp, float Health, float HealthDelta, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
 	AActor* MyOwner = GetOwner();
 
-	if (!ensureAlways(MyOwner)) { return; }
+	if (!ensureAlwaysMsgf(MyOwner, TEXT("GlowOnHitComponent requires owner to be set"))) { return; }
 
 	UMeshComponent* MeshComp = Cast<UMeshComponent>(MyOwner->GetComponentByClass(UMeshComponent::StaticClass()));
 	
-	if (!ensure(MeshComp)) { return; }
+	if (!ensureMsgf(MeshComp, TEXT("GlowOnHitComponent requires a mesh on owner"))) { return; }
 	
 	UMaterialInstanceDynamic* MatInst = Cast<UMaterialInstanceDynamic>(MeshComp->GetMaterial(GlowMaterialIndex));
 
