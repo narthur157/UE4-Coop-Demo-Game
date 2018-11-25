@@ -10,6 +10,7 @@
 class APlayerState;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTeamUpdated, const ASTeam*, ChangedTeam);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FNumberEnemiesLeftChanged, const ASTeam*, Team, int32, NumberEnemiesLeft);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMemberJoined, const ASTeam*, Team, const APlayerState*, NewMember);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMemberLeft, const ASTeam*, Team, const APlayerState*, OldMember);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FActorJoined, const ASTeam*, Team, const AActor*, Actor);
@@ -35,6 +36,9 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "Team")
     FTeamUpdated OnTeamUpdated;
 
+    UPROPERTY(BlueprintAssignable, Category = "Team")
+    FNumberEnemiesLeftChanged OnNumberEnemiesLeftChanged;
+
     UFUNCTION(BlueprintCallable, Category = "Team")
     void SetTeamID(uint8 NewTeamID);
    
@@ -54,7 +58,19 @@ public:
     TArray<APlayerState*> GetMemberStates() { return MemberStates; }
 
     UFUNCTION(BlueprintCallable, Category = "Team")
-        TArray<AActor*> GetMemberActors() { return MemberActors; }
+    TArray<AActor*> GetMemberActors() { return MemberActors; }
+
+    UFUNCTION(BlueprintPure, Category = "Team")
+    int32 GetNumberEnemiesRemaining() { return NumberEnemiesLeft; }
+
+    UFUNCTION(BlueprintCallable, Category = "Team")
+    void AddToNumberEnemiesLeft(int32 NumberToAdd) { NumberToAdd >= 0 ? NumberEnemiesLeft += NumberToAdd : NumberEnemiesLeft += 0; };
+
+    UFUNCTION(BlueprintCallable, Category = "Team")
+    void RemoveFromNumberEnemiesLeft(int32 NumberToRemove) { NumberToRemove >= 0 ? NumberEnemiesLeft -= NumberToRemove : NumberEnemiesLeft -= 0; }
+
+    UFUNCTION(BlueprintCallable, Category = "Team")
+    void ClearTeam() { MemberActors.Empty(); MemberStates.Empty(); }
 
 protected:
 
@@ -71,12 +87,18 @@ protected:
     UPROPERTY(ReplicatedUsing = OnRep_MemberActors)
     TArray<AActor*> MemberActors;
 
+    UPROPERTY(ReplicatedUsing = OnRep_NumberEnemiesLeft)
+    int32 NumberEnemiesLeft = 0;
+
     UFUNCTION()
     void OnRep_MemberActors() {}
 
     UFUNCTION()
     void OnRep_MemberStates() {}
      
+    UFUNCTION()
+    void OnRep_NumberEnemiesLeft() { OnNumberEnemiesLeftChanged.Broadcast(this, NumberEnemiesLeft); };
+
     UFUNCTION(NetMulticast, Reliable, WithValidation)
     void PlayerJoinedTeam(APlayerState* Player);
 

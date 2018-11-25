@@ -8,11 +8,14 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "CoopGame.h"
 #include "GameFramework/GameState.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/SphereComponent.h"
 #include "Sound/SoundCue.h"
 #include "Gameplay/GameplayComponents/TeamComponent.h"
-#include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "TimerManager.h"
+#include "Game/SGameState.h"
+#include "Engine/Engine.h"
 #include "Net/UnrealNetwork.h"
 
 ASTrackerBot::ASTrackerBot()
@@ -78,9 +81,9 @@ FVector ASTrackerBot::GetNextPathPoint()
             continue;
         }
 
-        USHealthComponent* HealthComp = TestPawn->FindComponentByClass<USHealthComponent>();
+        USHealthComponent* OtherHealthComp = TestPawn->FindComponentByClass<USHealthComponent>();
         
-		if (HealthComp && HealthComp->GetHealth() > 0)
+		if (OtherHealthComp && OtherHealthComp->GetHealth() > 0)
         {
             // Bot is still alive, check and store nearest target if this target is closer than the previous nearest
             float Distance = (TestPawn->GetActorLocation() - GetActorLocation()).Size();
@@ -132,10 +135,8 @@ void ASTrackerBot::SelfDestruct()
 		bool bScaleDamageByDistance = bBotAttachesToPlayer;
         UGameplayStatics::ApplyRadialDamage(this, ActualDamage, GetActorLocation(), ExplosionRadius,nullptr, IgnoredActors,this,GetController(), bScaleDamageByDistance);
         // Kill ourselves
-        if (HealthComp->GetHealth() > 0)
-        {
-            UGameplayStatics::ApplyDamage(this, HealthComp->GetHealth(), GetController(), this, nullptr);
-        }
+        UGameplayStatics::ApplyDamage(this, HealthComp->GetHealth(), GetController(), this, nullptr);
+        
         // Give clients a chance to play effects
         SetLifeSpan(4.0);
     }
@@ -278,8 +279,7 @@ bool ASTrackerBot::AttachBotToActor(APawn* OtherPawn)
 
 uint8 ASTrackerBot::GetTeamID()
 {
-    //TODO fix this
-    return 0;
+    return TeamComp->GetTeamID();
 }
 
 

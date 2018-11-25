@@ -28,8 +28,14 @@ public:
 protected:
 
     /** The number of waves designated before the players win the game. */
-    UPROPERTY(EditDefaultsOnly, Category = "GameMode")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GameMode")
     int32 NumberWaves = 1;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeTeamMode")
+    uint8 PlayerTeamNumber = 0;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeGameMode")
+    uint8 HordeTeamNumber = 1;
 
     UPROPERTY(EditDefaultsOnly, Category = "GameMode")
     float TimeBetweenWaves = 0.0f;
@@ -63,6 +69,7 @@ protected:
     void SetWaveState(EWaveState State);
 
     /** Determines if there are any players or bots alive */
+    UFUNCTION(BlueprintCallable, Category = "WaveState")
     void CheckWaveState();
 
     virtual void OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser) override;

@@ -20,6 +20,7 @@ void ASTeam::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePr
 
     DOREPLIFETIME(ASTeam, MemberStates);
     DOREPLIFETIME(ASTeam, TeamID);
+    DOREPLIFETIME(ASTeam, NumberEnemiesLeft);
 }
 
 void ASTeam::SetTeamID(uint8 NewTeamID)
