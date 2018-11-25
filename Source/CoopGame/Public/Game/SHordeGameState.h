@@ -34,7 +34,6 @@ class COOPGAME_API ASHordeGameState : public ASGameState
 public:
 
 
-
     UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_NumEnemiesChanged, Category = "WaveState")
     int32 NumEnemiesAlive = 0;
 
