@@ -91,8 +91,6 @@ void ASCharacter::OnRep_PlayerState()
 
 	if (Role == ROLE_SimulatedProxy && IsPlayerControlled())
 	{
-		UE_LOG(LogTemp, Error, TEXT("NOT NULL %s"), *GetName());
-
 		GetMesh()->SetRenderCustomDepth(true);
 		GetMesh()->SetCustomDepthStencilValue(0);
 	}

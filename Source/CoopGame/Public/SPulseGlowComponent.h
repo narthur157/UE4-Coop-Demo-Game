@@ -33,7 +33,10 @@ class COOPGAME_API USPulseGlowComponent : public UActorComponent
 public:	
 	USPulseGlowComponent();
 	// Negative duration indicates that pulse goes on until stopped
+	UFUNCTION(BlueprintCallable)
 	void BeginPulsing(float Intensity = 1.0f, FColor Color = FColor::White, float Frequency = 1.0f, float Duration  = -1.0f);
+
+	UFUNCTION(BlueprintCallable)
 	void StopPulsing();
 
 protected:
