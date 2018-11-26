@@ -23,6 +23,20 @@ ASHordeGameMode::ASHordeGameMode()
 void ASHordeGameMode::StartPlay()
 {
     Super::StartPlay();
+
+    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
+    if (!GS) { return; }
+
+    GS->GetTeamManager()->CreateTeam(HordeTeamNumber);
+    GS->HordeTeam = GS->GetTeamManager()->GetTeam(HordeTeamNumber);
+    GS->GetTeamManager()->CreateTeam(PlayerTeamNumber);
+    GS->PlayerTeam = GS->GetTeamManager()->GetTeam(PlayerTeamNumber);
+
+    if (GS->HordeTeam)
+    {
+        TRACE("TeamCreated");
+    }
+    
     PrepareForNextWave();
 }
 
@@ -37,6 +51,7 @@ void ASHordeGameMode::StartWave()
 
 void ASHordeGameMode::SpawnBotTimerElapsed()
 {
+
     SpawnNewBot();
     NumberBotsToSpawn--;
     if (NumberBotsToSpawn <= 0)
@@ -84,10 +99,10 @@ void ASHordeGameMode::PrepareForNextWave()
 // This should really be generalized more into a team format somehow? broadcast win/lose conditions based on teamID
 void ASHordeGameMode::CheckWaveState()
 {
+
     if (NumberBotsToSpawn > 0 || GetWorldTimerManager().IsTimerActive(TimerHandle_NextWaveStart))
     {
         return;
-
     }
 
     ASHordeGameState* GS = GetGameState<ASHordeGameState>();
@@ -101,11 +116,15 @@ void ASHordeGameMode::CheckWaveState()
         return;
     }
 
-    if (HordeTeam->GetActorsOfClassMultiple(HordeUnitTypes).Num() <= 0)
+    // Perhaps in the future its best to have an interface for mobs that can be wave mobs.
+    TArray<AActor*> WaveMobsAlive = HordeTeam->GetActorsWithTag("WaveMob");
+    if (WaveMobsAlive.Num() <= 0)
     {
         PrepareForNextWave();
         HordeTeam->ClearTeam();
+        return;
     }
+
 }
 
 // Changes the state of the wave spawner

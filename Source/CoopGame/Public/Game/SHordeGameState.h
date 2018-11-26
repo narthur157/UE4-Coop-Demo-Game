@@ -6,6 +6,8 @@
 #include "SGameState.h"
 #include "SHordeGameState.generated.h"
 
+
+
 /** Represents the current state of the wave */
 UENUM(BlueprintType)
 enum class EWaveState : uint8
@@ -16,8 +18,13 @@ enum class EWaveState : uint8
     WaveComplete /** A Success case has happened, the wave was completed and has the possibility to loop around to WaitingToStart */
 };
 
-/** Broadcasts when a enemy has died in the wave */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameStateNumEnemiesChanged, int32, NumEnemiesAlive);
+class ASTeam;
+
+/** Broadcasts that the horde team was set */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHordeTeamChanged, const ASTeam*, HordeTeam);
+
+/** Broadcasts that the player team was set */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerTeamChanged, const ASTeam*, PlayerTeam);
 
 /** Broadcasts when the wave state has changed */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGameStateWaveChanged, EWaveState, OldState, EWaveState, NewWaveState);
@@ -34,8 +41,18 @@ class COOPGAME_API ASHordeGameState : public ASGameState
 public:
 
 
-    UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_NumEnemiesChanged, Category = "WaveState")
-    int32 NumEnemiesAlive = 0;
+
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_HordeTeam, Category = "TeamStates")
+    ASTeam* HordeTeam = nullptr;
+
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_PlayerTeam, Category = "TeamStates")
+    ASTeam* PlayerTeam = nullptr;
+
+    UPROPERTY(BlueprintAssignable, Category = "TeamStates")
+    FOnHordeTeamChanged OnHordeTeamChanged;
+
+    UPROPERTY(BlueprintAssignable, Category = "TeamStates")
+    FOnPlayerTeamChanged OnPlayerTeamChanged;
 
     UFUNCTION(BlueprintCallable, Category = "WaveState")
     void SetWaveState(EWaveState NewState);
@@ -50,23 +67,16 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "WaveState")
     FGameStateWaveChanged OnWaveStateChanged;
 
-    /** Broadcasts when a enemy has died in the wave */
-    UPROPERTY(BlueprintAssignable, Category = "WaveState")
-    FGameStateNumEnemiesChanged OnNumEnemiesChanged;
-
     /** Blueprint interface for HordeGameState logic to run when the wave state has been changed */
     UFUNCTION(BlueprintImplementableEvent, Category = "WaveState")
     void WaveStateChanged(EWaveState NewState, EWaveState OldState);
+
 
 protected:
 
     /** Replicated value that determines when the next wave will spawn as specified by the gamestate */
     UPROPERTY(BlueprintReadOnly, Replicated, Category = "WaveState")
     float NextWaveStartTime = 0.0f;
-
-    /** Used to broadcast changes in the number of enemies to any listening entites on the client. */
-    UFUNCTION(BlueprintCallable, Category = "WaveState")
-    void OnRep_NumEnemiesChanged();
 
     /** Enum representing the current state of the wave, see EWaveState definition for value details. */
     UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_WaveStateChanged, Category = "WaveState")
@@ -75,5 +85,11 @@ protected:
     /** Used to broadcast changes in waves to any listening entites on the client. */
     UFUNCTION()
     void OnRep_WaveStateChanged(EWaveState OldState);
+
+    UFUNCTION()
+    void OnRep_HordeTeam();
+
+    UFUNCTION()
+    void OnRep_PlayerTeam();
 };
 

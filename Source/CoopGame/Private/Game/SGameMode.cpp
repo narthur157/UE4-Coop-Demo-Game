@@ -21,7 +21,6 @@ void ASGameMode::StartPlay()
     Super::StartPlay();
 
     OnStartPlay();
-
 }
 
 // Iterate over all the players, if none are alive then its a loss
@@ -91,7 +90,11 @@ void ASGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* Kille
     UTeamComponent* TeamComp = KilledActor->FindComponentByClass<UTeamComponent>();
     if (TeamComp)
     {
-        GS->GetTeamManager()->GetTeam(TeamComp->GetTeamID())->RemoveActorFromTeam(KilledActor);
+        ASTeam* ActorTeam = GS->GetTeamManager()->GetTeam(TeamComp->GetTeamID());
+        if (ActorTeam)
+        {
+            ActorTeam->RemoveActorFromTeam(KilledActor);
+        }
     }
 }
 

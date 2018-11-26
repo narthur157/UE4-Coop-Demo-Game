@@ -8,6 +8,8 @@
 
 class ASTeam;
 
+
+
 /**
  * Primary worker class for teams. Contains information about the playerstates and actors assigned to each team.
  */
@@ -18,14 +20,16 @@ class COOPGAME_API ASTeamManager : public AInfo
 	
 
 public:
+
+
     ASTeamManager();
 
     /** [ServerOnly] Creates the a team with the specified ID, does nothing if that team already exists */
     UFUNCTION(BlueprintCallable, Category = "Teams")
-    void CreateTeam(uint8 NewTeamID);
+    ASTeam* CreateTeam(uint8 NewTeamID);
 
     /** Returns the teams at the specified index, or null if that team doesnt exist */
-    UFUNCTION(BlueprintCallable, Category = "Teams")
+    UFUNCTION(BlueprintPure, Category = "Teams")
     ASTeam* GetTeam(uint8 TeamIndex);
 
     /** [ServerOnly] Adds a controller to the team at the specified index, does nothing if the ID does not exist */

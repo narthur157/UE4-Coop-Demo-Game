@@ -5,6 +5,7 @@
 #include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "GameFramework/Controller.h"
 #include "CoopGame.h"
+#include "Engine/Engine.h"
 #include "GameFramework/PlayerState.h"
 
 ASTeam::ASTeam()
@@ -19,6 +20,7 @@ void ASTeam::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePr
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(ASTeam, MemberStates);
+    DOREPLIFETIME(ASTeam, MemberActors);
     DOREPLIFETIME(ASTeam, TeamID);
 }
 
@@ -41,7 +43,9 @@ void ASTeam::AddToTeam(AController* Controller)
         }
     }
 
+    TRACE("PlayerJoinedTeam");
     Members.Add(Controller);
+    // This isnt being called for some reason
     MemberStates.Add(Controller->PlayerState);
     PlayerJoinedTeam(Controller->PlayerState);
 }
@@ -56,6 +60,7 @@ void ASTeam::AddActorToTeam(AActor* Actor)
 
 void ASTeam::ActorJoinedTeam_Implementation(AActor* Actor)
 {
+    TRACE("ActorJoinedTeam %d", TeamID);
     OnActorJoined.Broadcast(this, Actor);
 }
 
@@ -71,6 +76,7 @@ void ASTeam::RemoveActorFromTeam(AActor * Actor)
 
 void ASTeam::ActorLeftTeam_Implementation(AActor* Actor)
 {
+    TRACE("ActorLeftTeam %d", TeamID);
     OnActorLeft.Broadcast(this, Actor);
 }
 

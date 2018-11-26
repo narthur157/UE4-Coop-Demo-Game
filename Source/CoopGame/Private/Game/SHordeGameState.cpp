@@ -2,7 +2,22 @@
 
 #include "SHordeGameState.h"
 #include "Net/UnrealNetwork.h"
+#include "STeamManager.h"
+#include "Engine/Engine.h"
 #include "CoopGame.h"
+
+
+
+void ASHordeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ASHordeGameState, PlayerTeam);
+    DOREPLIFETIME(ASHordeGameState, HordeTeam);
+
+    DOREPLIFETIME(ASHordeGameState, WaveState);
+    DOREPLIFETIME(ASHordeGameState, NextWaveStartTime);
+}
 
 
 void ASHordeGameState::OnRep_WaveStateChanged(EWaveState OldState)
@@ -11,13 +26,16 @@ void ASHordeGameState::OnRep_WaveStateChanged(EWaveState OldState)
     OnWaveStateChanged.Broadcast(OldState, WaveState);
 }
 
-void ASHordeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void ASHordeGameState::OnRep_HordeTeam()
 {
-    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    TRACE("RepHordeTeam");
+    OnHordeTeamChanged.Broadcast(HordeTeam);
+}
 
-    DOREPLIFETIME(ASHordeGameState, WaveState);
-    DOREPLIFETIME(ASHordeGameState, NumEnemiesAlive);
-    DOREPLIFETIME(ASHordeGameState, NextWaveStartTime);
+void ASHordeGameState::OnRep_PlayerTeam()
+{
+    TRACE("RepPlayerTeam");
+    OnPlayerTeamChanged.Broadcast(PlayerTeam);
 }
 
 void ASHordeGameState::SetWaveState(EWaveState NewState)
@@ -28,11 +46,5 @@ void ASHordeGameState::SetWaveState(EWaveState NewState)
         WaveState = NewState;
         OnRep_WaveStateChanged(OldState);
     }
-}
-
-void ASHordeGameState::OnRep_NumEnemiesChanged()
-{
-    TRACE("NumberEnemiesChanged");
-    OnNumEnemiesChanged.Broadcast(NumEnemiesAlive);
 }
 
