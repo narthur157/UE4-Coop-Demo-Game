@@ -22,16 +22,16 @@ void ASTeamManager::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
     DOREPLIFETIME(ASTeamManager, Teams);
 }
 
-void ASTeamManager::CreateTeam(uint8 TeamID)
+ASTeam* ASTeamManager::CreateTeam(uint8 TeamID)
 {
-    if (Role < ROLE_Authority) { return; }
+    if (Role < ROLE_Authority) { return nullptr; }
 
     // Determine if there already exists a team with the specified ID
     for (ASTeam* Team : Teams)
     {
         if (Team->GetTeamID() == TeamID)
         {
-            return;
+            return nullptr;
         }
     }
 
@@ -39,6 +39,7 @@ void ASTeamManager::CreateTeam(uint8 TeamID)
     ASTeam* NewTeam = GetWorld()->SpawnActor<ASTeam>(ASTeam::StaticClass());
     NewTeam->SetTeamID(TeamID);
     Teams.Add(NewTeam);
+    return NewTeam;
 }
 
 void ASTeamManager::AddPlayerToTeam(AController* Player, uint8 TeamToAddTo)
@@ -75,7 +76,6 @@ void ASTeamManager::AddActorToTeam(AActor* Actor, uint8 TeamToAddTo)
     
     Team->AddActorToTeam(Actor);
     TeamComponent->SetTeam(Team);
-
 }
 
 ASTeam* ASTeamManager::GetTeam(uint8 TeamIndex)
