@@ -32,6 +32,7 @@ void ASTeam::SetTeamID(uint8 NewTeamID)
 
 void ASTeam::AddToTeam(AController* Controller)
 {
+
     // Don't run this on clients. Only server functions are able to change teams.
     if (Role < ROLE_Authority) { return; }
 
@@ -43,9 +44,8 @@ void ASTeam::AddToTeam(AController* Controller)
         }
     }
 
-    TRACE("PlayerJoinedTeam");
+    TRACE("PlayerJoinedTeam %d", TeamID);
     Members.Add(Controller);
-    // This isnt being called for some reason
     MemberStates.Add(Controller->PlayerState);
     PlayerJoinedTeam(Controller->PlayerState);
 }
