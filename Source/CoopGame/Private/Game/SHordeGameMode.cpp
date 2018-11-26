@@ -27,10 +27,11 @@ void ASHordeGameMode::StartPlay()
     ASHordeGameState* GS = GetGameState<ASHordeGameState>();
     if (!GS) { return; }
 
-    GS->GetTeamManager()->CreateTeam(HordeTeamNumber);
-    GS->HordeTeam = GS->GetTeamManager()->GetTeam(HordeTeamNumber);
     GS->GetTeamManager()->CreateTeam(PlayerTeamNumber);
     GS->PlayerTeam = GS->GetTeamManager()->GetTeam(PlayerTeamNumber);
+    GS->GetTeamManager()->CreateTeam(HordeTeamNumber);
+    GS->HordeTeam = GS->GetTeamManager()->GetTeam(HordeTeamNumber);
+    
 
     if (GS->HordeTeam)
     {

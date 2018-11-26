@@ -3,7 +3,10 @@
 #include "STeamManager.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/World.h"
+#include "Engine/Engine.h"
+#include "GameFramework/Controller.h"
 #include "STeam.h"
+#include "CoopGame.h"
 #include "TeamComponent.h"
 
 
@@ -44,6 +47,7 @@ ASTeam* ASTeamManager::CreateTeam(uint8 TeamID)
 
 void ASTeamManager::AddPlayerToTeam(AController* Player, uint8 TeamToAddTo)
 {
+
     if (Role < ROLE_Authority) { return; }
 
     // Get the team whoose ID matches the TeamToAddTo
@@ -51,10 +55,14 @@ void ASTeamManager::AddPlayerToTeam(AController* Player, uint8 TeamToAddTo)
     {
         if (Team->GetTeamID() == TeamToAddTo)
         {
+            TRACE("Adding Player: %s to team %d", *Player->GetName(), TeamToAddTo);
             Team->AddToTeam(Player);
         }
-        break;
+        return;
     }
+
+    TRACE("No team with ID %d found", TeamToAddTo);
+
 }
 
 
