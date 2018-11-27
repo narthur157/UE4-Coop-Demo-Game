@@ -31,12 +31,7 @@ void ASHordeGameMode::StartPlay()
     GS->PlayerTeam = GS->GetTeamManager()->GetTeam(PlayerTeamNumber);
     GS->GetTeamManager()->CreateTeam(HordeTeamNumber);
     GS->HordeTeam = GS->GetTeamManager()->GetTeam(HordeTeamNumber);
-    
-
-    if (GS->HordeTeam)
-    {
-        TRACE("TeamCreated");
-    }
+    GS->OnRep_HordeTeam();
     
     PrepareForNextWave();
 }

@@ -19,7 +19,6 @@ void ASHordeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
     DOREPLIFETIME(ASHordeGameState, NextWaveStartTime);
 }
 
-
 void ASHordeGameState::OnRep_WaveStateChanged(EWaveState OldState)
 {
     WaveStateChanged(WaveState, OldState);
