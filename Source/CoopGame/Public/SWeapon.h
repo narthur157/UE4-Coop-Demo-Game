@@ -28,15 +28,6 @@ class COOPGAME_API ASWeapon : public AActor
 public:	
 	ASWeapon();
 
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    EAmmoType GetAmmoType() { return AmmoType; }
-
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    UTexture2D* GetWeaponIcon() { return WeaponIcon; }
-
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    float GetAmmoInClip() { return AmmoInClip; }
-
 protected:
 
     // Weapon Data
@@ -62,14 +53,16 @@ protected:
     UTexture2D* WeaponIcon = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    float TimeBetweenShots = 0.5f;
+	float TimeBetweenShots = 0.5f;
 
     UPROPERTY(EditDefaultsOnly, Category = "WeaponData")
     EAmmoType AmmoType = EAmmoType::NONE;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponData")
+	uint8 MaxAmmo = 20;
 
-    UPROPERTY(EditDefaultsOnly, Replicated, Category = "WeaponData")
-    float AmmoInClip = 20.0f;
+    UPROPERTY(Replicated)
+    uint8 AmmoInClip = MaxAmmo;
 
 	USHitIndicatorWidget* HitIndicatorWidget = nullptr;
 
@@ -81,17 +74,39 @@ protected:
 
     float LastFireTime = -9999999;
 
+	FTimerHandle TimerHandle_ReloadTimer;
+
     // Functionality
-    virtual void Fire() {}
+	virtual void Fire() {};
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerReload();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerCancelReload();
 
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerFire();
 
-public:	
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponData")
+	float TimeToReload = 1.5f;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "PlayerWeapon")
+	bool bIsReloading;
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	EAmmoType GetAmmoType() { return AmmoType; }
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	UTexture2D* GetWeaponIcon() { return WeaponIcon; }
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	float GetAmmoInClip() { return AmmoInClip; }
 
 	virtual void BeginPlay() override;
-
-public:
+	virtual void Reload();
+	virtual void CancelReload();
 	virtual void OnHit(AActor* HitActor, bool bSkipCheck = false);
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -99,5 +114,4 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     virtual void StopFire();	
-   
 };

@@ -1,7 +1,6 @@
 #include "SCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "SWeapon.h"
-#include "Engine/World.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -9,10 +8,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "UnrealNetwork.h"
 #include "SWeaponComponent.h"
+#include "SWeaponWidget.h"
 #include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "UnrealNames.h"
 #include "GameFramework/PlayerState.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 ASCharacter::ASCharacter()
 {
@@ -26,7 +27,6 @@ ASCharacter::ASCharacter()
     WeaponComp = CreateDefaultSubobject<USWeaponComponent>(TEXT("WeaponComponent"));
     TeamComp = CreateDefaultSubobject<UTeamComponent>(TEXT("TeamComponent"));
 
-
 	SetReplicates(true);
 
     CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
@@ -36,7 +36,6 @@ ASCharacter::ASCharacter()
 
     ZoomedFOV = 65.0;
     ZoomInterpSpeed = 20.0f;
-
 }
 
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -55,6 +54,15 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::Jump);
     PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &ASCharacter::BeginZoom);
     PlayerInputComponent->BindAction("Zoom", IE_Released, this, &ASCharacter::EndZoom);
+
+	FInputActionBinding ReloadPressedAB("Reload", IE_Pressed);
+
+	ReloadPressedAB.ActionDelegate.GetDelegateForManualSet().BindLambda([&]()
+	{
+		WeaponComp->GetCurrentWeapon()->Reload();
+	});
+
+	PlayerInputComponent->AddActionBinding(ReloadPressedAB);
 
     PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASCharacter::StartFire);
     PlayerInputComponent->BindAction("Fire", IE_Released, this, &ASCharacter::StopFire);
@@ -163,6 +171,26 @@ void ASCharacter::EndSprint()
 uint8 ASCharacter::GetTeamID()
 {
     return TeamComp->GetTeamID();
+}
+
+float ASCharacter::GetReloadSpeed()
+{
+	if (WeaponComp && WeaponComp->GetCurrentWeapon())
+	{
+		return WeaponComp->GetCurrentWeapon()->TimeToReload;
+	}
+
+	return 10.0f; // this should make the anim look horribly wrong so that something is obviously wrong
+}
+
+bool ASCharacter::GetIsReloading()
+{
+	if (WeaponComp && WeaponComp->GetCurrentWeapon())
+	{
+		return WeaponComp->GetCurrentWeapon()->bIsReloading;
+	}
+
+	return false;
 }
 
 void ASCharacter::StartFire()

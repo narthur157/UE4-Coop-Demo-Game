@@ -17,7 +17,6 @@ public:
 
     UPROPERTY()
     FVector_NetQuantize TraceTo;
-
 };
 
 UCLASS()
@@ -27,7 +26,6 @@ class COOPGAME_API ASHitscanWeapon : public ASWeapon
 	
 
 protected:
-
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     TSubclassOf<UDamageType> DamageType;
 
@@ -57,7 +55,4 @@ protected:
     void DrawTracerEffect(const FVector &TraceEndPoint);
 
     void PlayImpactEffect(EPhysicalSurface SurfaceType, FVector ImpactPoint);
-
-public:
-
 };

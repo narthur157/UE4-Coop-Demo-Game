@@ -9,7 +9,6 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "DamageDealer.h"
-#include "Engine/World.h"
 
 void ASHitscanWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -21,11 +20,11 @@ void ASHitscanWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 void ASHitscanWeapon::Fire()
 {
-   if (Role < ROLE_Authority)
-   {
-       ServerFire();
-   }
-
+	if (Role < ROLE_Authority)
+	{
+		ServerFire();
+	}
+   
     AmmoInClip--;
     AActor* Owner = GetOwner();
     if (Owner)

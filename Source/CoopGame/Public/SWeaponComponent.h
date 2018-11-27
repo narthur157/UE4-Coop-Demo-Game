@@ -9,6 +9,7 @@
 class USWeaponWidget;
 class ASWeapon;
 class UImage;
+class UTexture2D;
 enum class EAmmoType : uint8;
 
 USTRUCT(BlueprintType)
@@ -23,7 +24,7 @@ struct FWeaponAmmoInventoryItem
     UTexture2D* AmmoImage;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-    int32 CurrentStackSize = 0;
+    int32 CurrentStackSize = 20;
 
 };
 
@@ -35,6 +36,8 @@ class COOPGAME_API USWeaponComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	USWeaponComponent();
+
+	USWeaponWidget* WeaponWidget = nullptr;
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     USWeaponWidget* DrawWeaponWidget(APlayerController* OwningController, int32 NumberWeaponSlots);

@@ -1,14 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "SWeapon.h"
 #include "DrawDebugHelpers.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "Engine/World.h"
 #include "SHealthComponent.h"
 #include "UserWidget.h"
 #include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "SHitIndicatorWidget.h"
+#include "TimerManager.h"
 
 ASWeapon::ASWeapon()
 {
@@ -24,12 +22,63 @@ void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(ASWeapon, bIsReloading);
     DOREPLIFETIME(ASWeapon, AmmoInClip);
+}
+
+void ASWeapon::Reload()
+{
+	if (bIsReloading || AmmoInClip == MaxAmmo)
+	{
+		return;
+	}
+
+	// Start the reload animation client side
+	bIsReloading = true;
+	ServerReload();
+}
+
+void ASWeapon::CancelReload()
+{
+	bIsReloading = false;
+	GetWorldTimerManager().ClearTimer(TimerHandle_ReloadTimer);
+
+	if (Role < ROLE_Authority)
+	{
+		ServerCancelReload();
+	}
+}
+
+void ASWeapon::ServerReload_Implementation()
+{
+	bIsReloading = true;
+
+	GetWorldTimerManager().SetTimer(TimerHandle_ReloadTimer, [&]() {
+		AmmoInClip = MaxAmmo;
+		bIsReloading = false;
+	}, TimeToReload, false);
+}
+
+bool ASWeapon::ServerReload_Validate()
+{
+	return true;
+}
+
+void ASWeapon::ServerCancelReload_Implementation()
+{
+	CancelReload();
+}
+
+bool ASWeapon::ServerCancelReload_Validate()
+{
+	return true;
 }
 
 void ASWeapon::BeginPlay()
 {
 	APawn* MyPawn = Cast<APawn>(GetOwner());
+
+	AmmoInClip = MaxAmmo;
 
 	if (HitIndicatorWidgetClass && MyPawn && MyPawn->IsPlayerControlled())
 	{
@@ -78,14 +127,24 @@ void ASWeapon::OnHit(AActor* HitActor, bool bSkipCheck)
 
 void ASWeapon::StartFire()
 {
-
     float FirstDelay = FMath::Max(LastFireTime + TimeBetweenShots - GetWorld()->TimeSeconds, 0.0f);
-    GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShots, this, &ASWeapon::Fire, TimeBetweenShots, true, FirstDelay);
+
+	GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShots, [&]()
+	{
+		if (AmmoInClip <= 0)
+		{
+			StopFire();
+			Reload();
+		}
+		else
+		{
+			CancelReload();
+			Fire();
+		}
+	}, TimeBetweenShots, true, FirstDelay);
 }
 
 void ASWeapon::StopFire()
 {
     GetWorldTimerManager().ClearTimer(TimerHandle_TimeBetweenShots);
 }
-
-

@@ -1,5 +1,3 @@
- // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "SWeaponComponent.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
@@ -7,18 +5,14 @@
 #include "CoopGame.h"
 #include "SWeaponWidget.h"
 #include "SWeapon.h"
+#include "Components/SkeletalMeshComponent.h"
 
-// Sets default values for this component's properties
 USWeaponComponent::USWeaponComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
     SetIsReplicated(true);
-	// ...
 }
 
-// Called when the game starts
 void USWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -81,6 +75,7 @@ void USWeaponComponent::EquipWeapon(ASWeapon* Weapon)
     {
         CurrentWeapon->SetActorHiddenInGame(true);
     }
+
     SetCurrentWeapon(Weapon);
 }
 
@@ -94,6 +89,11 @@ void USWeaponComponent::SetCurrentWeapon(ASWeapon* Weapon)
 
         USkeletalMeshComponent* OwningMesh = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
         CurrentWeapon->AttachToComponent(OwningMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
+
+		if (Weapon->GetAmmoInClip() <= 0)
+		{
+			Weapon->Reload();
+		}
     }
 }
 
@@ -104,7 +104,18 @@ void USWeaponComponent::OnRep_CurrentWeapon()
 
 void USWeaponComponent::OnRep_WeaponInventory()
 {
-    
+	for (ASWeapon* W : WeaponInventory)
+	{
+		if (!W)
+		{
+			return;
+		}
+	}
+
+	if (WeaponWidget)
+	{
+		WeaponWidget->RefreshWeapons();
+	}
 }
 
 void USWeaponComponent::ServerEquipWeapon_Implementation(ASWeapon* Weapon)
@@ -121,18 +132,19 @@ void USWeaponComponent::ChangeWeapon()
 {
     if (WeaponInventory.Num() == 0)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Failed: WeaponInventoryEmpty"));
+        UE_LOG(LogTemp, Log, TEXT("Failed: WeaponInventoryEmpty"));
         return;
     }
 
     if (!CurrentWeapon)
     {
-        UE_LOG(LogTemp, Warning, TEXT("No Current Weapon, Equipping First"));
+        UE_LOG(LogTemp, Log, TEXT("No Current Weapon, Equipping First"));
         EquipWeapon(WeaponInventory[0]);
     }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("WeaponSwap Success"));
+        UE_LOG(LogTemp, Log, TEXT("WeaponSwap Success"));
+		GetCurrentWeapon()->CancelReload();
         StopFire();
         int32 CurrentWeaponIndex = WeaponInventory.Find(CurrentWeapon);
         if (CurrentWeaponIndex == WeaponInventory.Num() - 1)
@@ -165,13 +177,11 @@ void USWeaponComponent::StopFire()
 
 USWeaponWidget* USWeaponComponent::DrawWeaponWidget(APlayerController* OwningController, int32 NumberWeaponSlots)
 {
-    USWeaponWidget* NewWidget = nullptr;
     if (OwningController)
     {
-        NewWidget = CreateWidget<USWeaponWidget>(OwningController,WeaponsWidgetClass);
-        NewWidget->InitializeWeaponWidget(this, NumberWeaponSlots);
-        NewWidget->RefreshAmmo();
-        NewWidget->RefreshWeapons();
+        WeaponWidget = CreateWidget<USWeaponWidget>(OwningController,WeaponsWidgetClass);
+        WeaponWidget->InitializeWeaponWidget(this, NumberWeaponSlots);
     }
-    return NewWidget;
+
+    return WeaponWidget;
 }
