@@ -22,7 +22,7 @@ void ASPlayerState::SetCurrentPawn(APawn * NewCurrentPawn)
     if (Role < ROLE_Authority) { return; }
 
     CurrentPawn = NewCurrentPawn;
-    OnCurrentPawnChanged.Broadcast(this, CurrentPawn);
+    OnRep_CurrentPawn();
 }
 
 void ASPlayerState::OnRep_CurrentPawn()

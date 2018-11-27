@@ -127,19 +127,23 @@ void ASWeapon::OnHit(AActor* HitActor, bool bSkipCheck)
 
 void ASWeapon::StartFire()
 {
+	if (AmmoInClip <= 0)
+	{
+		return;
+	}
+
     float FirstDelay = FMath::Max(LastFireTime + TimeBetweenShots - GetWorld()->TimeSeconds, 0.0f);
 
 	GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShots, [&]()
 	{
+		CancelReload();
+		Fire();
+
+		// If the weapon is equipped with 0 
 		if (AmmoInClip <= 0)
 		{
 			StopFire();
 			Reload();
-		}
-		else
-		{
-			CancelReload();
-			Fire();
 		}
 	}, TimeBetweenShots, true, FirstDelay);
 }

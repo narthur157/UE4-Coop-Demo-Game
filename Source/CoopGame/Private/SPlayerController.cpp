@@ -18,7 +18,6 @@ void ASPlayerController::BeginPlay()
     Super::BeginPlay();
 
 
-
     if (GameEventWidgetClass && IsLocalController())
     {
         GameEventWidget = CreateWidget<USGameEventWidget>(this, GameEventWidgetClass);
@@ -36,6 +35,7 @@ void ASPlayerController::BeginPlay()
     if (PS)
     {
         OnPawnChanged.AddDynamic(PS, &ASPlayerState::SetCurrentPawn);
+        PS->SetCurrentPawn(GetPawn());
     }
 }
 
