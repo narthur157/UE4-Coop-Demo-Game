@@ -16,7 +16,6 @@ void UTeamComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(UTeamComponent, Team);
-
 }
 
 
@@ -25,8 +24,6 @@ void UTeamComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
 }
 
 uint8 UTeamComponent::GetTeamID() const
