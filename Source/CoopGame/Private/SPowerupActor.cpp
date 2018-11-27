@@ -2,12 +2,16 @@
 #include "CoopGame.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/Engine.h"
+#include "TimerManager.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "SPulseGlowComponent.h"
 
 ASPowerupActor::ASPowerupActor()
 {
     SetReplicates(true);
+    bAlwaysRelevant = true;
 }
 
 void ASPowerupActor::BeginPlay()

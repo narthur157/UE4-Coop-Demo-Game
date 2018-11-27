@@ -76,6 +76,7 @@ public:
 
 protected:
 
+
     /** Replicated value that determines when the next wave will spawn as specified by the gamestate */
     UPROPERTY(BlueprintReadOnly, Replicated, Category = "WaveState")
     float NextWaveStartTime = 0.0f;
