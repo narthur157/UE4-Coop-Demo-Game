@@ -8,6 +8,7 @@
 
 
 enum class EWaveState : uint8;
+class ASPowerupActor;
 class UUserWidget;
 
 /**
@@ -25,20 +26,25 @@ public:
 
 protected:
 
+    UPROPERTY(EditDefaultsOnly, Category = "HordeMode")
+    TArray<TSubclassOf<ASPowerupActor>> AllPossibleWaveAffixes;
+
+    TMap<TSubclassOf<ASPowerupActor>, ASPowerupActor*> SpawnedAffixes;
+
     /** The number of waves designated before the players win the game. */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GameMode")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
     int32 NumberWaves = 1;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeTeamMode")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
     uint8 PlayerTeamNumber = 0;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeGameMode")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
     uint8 HordeTeamNumber = 1;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeGameMode")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
     TArray<TSubclassOf<AActor>> HordeUnitTypes;
 
-    UPROPERTY(EditDefaultsOnly, Category = "GameMode")
+    UPROPERTY(EditDefaultsOnly, Category = "HordeMode")
     float TimeBetweenWaves = 0.0f;
 
     /** Counter which displays the current wave count, can be used to adjust wave strength or show players progress when compared to NumberWaves */
@@ -75,4 +81,6 @@ protected:
 
     virtual void OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser) override;
 	
+    UFUNCTION(BlueprintCallable, Category = "HordeWaveStateSpawningWoWGreatCategory")
+    void ApplyWaveAffixes();
 };

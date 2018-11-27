@@ -9,6 +9,7 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "STeam.h"
+#include "SPowerupActor.h"
 #include "TimerManager.h"
 #include "SHordeGameState.h"
 
@@ -52,6 +53,7 @@ void ASHordeGameMode::SpawnBotTimerElapsed()
     NumberBotsToSpawn--;
     if (NumberBotsToSpawn <= 0)
     {
+        ApplyWaveAffixes();
         EndWave();
     }
 }
@@ -140,4 +142,33 @@ void ASHordeGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* 
    
     CheckWaveState();
     CheckPlayerState();
+}
+
+
+void ASHordeGameMode::ApplyWaveAffixes()
+{
+    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
+    if (!GS || AllPossibleWaveAffixes.Num() <= 0)
+    {
+        return;
+    }
+  
+    TSubclassOf<ASPowerupActor> Chosen = AllPossibleWaveAffixes[FMath::RandRange(0, AllPossibleWaveAffixes.Num() - 1)];
+    ASPowerupActor* PowerupActor = GetWorld()->SpawnActor<ASPowerupActor>(Chosen);
+    SpawnedAffixes.Add(Chosen, PowerupActor);
+    AllPossibleWaveAffixes.Remove(Chosen);
+
+
+    ASTeam* HordeTeam = GS->HordeTeam;
+    TArray<AActor*> HordeTeamPawns = GS->HordeTeam->GetActorsWithTag("WaveMob");
+    
+    for (AActor* HordeWaveActor : HordeTeamPawns)
+    {
+        if (HordeWaveActor)
+        {
+            PowerupActor->ActivatePowerup(HordeWaveActor);
+        }
+    }
+
+    
 }
