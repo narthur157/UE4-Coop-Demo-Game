@@ -71,6 +71,8 @@ public:
     UFUNCTION(BlueprintImplementableEvent, Category = "WaveState")
     void WaveStateChanged(EWaveState NewState, EWaveState OldState);
 
+    UFUNCTION()
+    void OnRep_HordeTeam();
 
 protected:
 
@@ -85,9 +87,6 @@ protected:
     /** Used to broadcast changes in waves to any listening entites on the client. */
     UFUNCTION()
     void OnRep_WaveStateChanged(EWaveState OldState);
-
-    UFUNCTION()
-    void OnRep_HordeTeam();
 
     UFUNCTION()
     void OnRep_PlayerTeam();
