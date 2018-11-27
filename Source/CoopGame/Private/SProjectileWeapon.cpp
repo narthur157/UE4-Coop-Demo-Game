@@ -23,6 +23,8 @@ void ASProjectileWeapon::Fire()
         return;
     }
 
+	AmmoInClip--;
+
     if (ProjectileClass && GetOwner())
     {
         FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);

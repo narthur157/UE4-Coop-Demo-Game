@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,9 +6,6 @@
 
 class USWeaponComponent;
 
-/**
- * 
- */
 UCLASS()
 class COOPGAME_API USWeaponWidget : public UUserWidget
 {
@@ -22,7 +17,6 @@ protected:
     USWeaponComponent* WeaponComponent = nullptr;
 
 public:
-
     // In the future this widget should utiliize an observer pattern and bind to events on the weapon component
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "WeaponHUD")
         void RefreshWeapons();
@@ -32,5 +26,4 @@ public:
 
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "WeaponHUD")
         void InitializeWeaponWidget(USWeaponComponent* NewWeaponComponent, int32 NumberWeaponSlots);
-
 };

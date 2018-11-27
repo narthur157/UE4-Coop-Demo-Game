@@ -61,7 +61,7 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons")
     USWeaponComponent* WeaponComp = nullptr;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (ExposeOnSpawn = true))
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
     USHealthComponent* HealthComp = nullptr;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Team")
@@ -87,11 +87,9 @@ protected:
 	UFUNCTION(Server, Unreliable, WithValidation)
 	void ServerSetZoom(bool bZoom);
 
-   
 public:
-
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "PlayerWeapon")
-	bool bWantsToZoom;
+	bool bWantsToZoom = false;
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -105,6 +103,12 @@ public:
 
     /** Implements ITeamMember */ 
     virtual uint8 GetTeamID() override;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PlayerWeapon")
+	float GetReloadSpeed();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PlayerWeapon")
+	bool GetIsReloading();
 
     /**  Weapon operations, calling these from character for now because we might want to play animations/whatever
      *	 before firing/on changing weapons
