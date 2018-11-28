@@ -9,7 +9,7 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "STeam.h"
-#include "SPowerupActor.h"
+#include "Gameplay/SAffix.h"
 #include "TimerManager.h"
 #include "SHordeGameState.h"
 
@@ -48,7 +48,6 @@ void ASHordeGameMode::StartWave()
 
 void ASHordeGameMode::SpawnBotTimerElapsed()
 {
-
     SpawnNewBot();
     NumberBotsToSpawn--;
     if (NumberBotsToSpawn <= 0)
@@ -66,6 +65,9 @@ void ASHordeGameMode::EndWave()
 void ASHordeGameMode::PrepareForNextWave()
 {
     RestartDeadPlayers();
+
+    SpawnRandomAffix();
+
 
     // Game is finished, players win on waves
     if (CurrentWaveCount == NumberWaves && NumberWaves > 0)
@@ -152,13 +154,7 @@ void ASHordeGameMode::ApplyWaveAffixes()
     {
         return;
     }
-  
-    TSubclassOf<ASPowerupActor> Chosen = AllPossibleWaveAffixes[FMath::RandRange(0, AllPossibleWaveAffixes.Num() - 1)];
-    ASPowerupActor* PowerupActor = GetWorld()->SpawnActor<ASPowerupActor>(Chosen);
-    SpawnedAffixes.Add(Chosen, PowerupActor);
-    AllPossibleWaveAffixes.Remove(Chosen);
-
-
+ 
     ASTeam* HordeTeam = GS->HordeTeam;
     TArray<AActor*> HordeTeamPawns = GS->HordeTeam->GetActorsWithTag("WaveMob");
     
@@ -166,9 +162,29 @@ void ASHordeGameMode::ApplyWaveAffixes()
     {
         if (HordeWaveActor)
         {
-            PowerupActor->ActivatePowerup(HordeWaveActor);
+            ApplyWaveAffixesToActor(HordeWaveActor);
         }
     }
+}
 
-    
+void ASHordeGameMode::ApplyWaveAffixesToActor(AActor* Actor)
+{
+    if (!Actor) { return; }
+
+    for (ASAffix* Affix : SpawnedAffixes)
+    {
+        Affix->ApplyToActor(Actor);
+    }
+}
+
+ASAffix* ASHordeGameMode::SpawnRandomAffix()
+{
+    if (AllPossibleWaveAffixes.Num() <= 0) { return nullptr; }
+
+    TSubclassOf<ASAffix> Chosen = AllPossibleWaveAffixes[FMath::RandRange(0, AllPossibleWaveAffixes.Num() - 1)];
+    ASAffix* Affix = GetWorld()->SpawnActor<ASAffix>(Chosen);
+    SpawnedAffixes.Add(Affix);
+    AllPossibleWaveAffixes.Remove(Chosen);
+
+    return Affix;
 }
