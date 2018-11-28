@@ -8,7 +8,7 @@
 
 
 enum class EWaveState : uint8;
-class ASPowerupActor;
+class ASAffix;
 class UUserWidget;
 
 /**
@@ -27,9 +27,9 @@ public:
 protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "HordeMode")
-    TArray<TSubclassOf<ASPowerupActor>> AllPossibleWaveAffixes;
+    TArray<TSubclassOf<ASAffix>> AllPossibleWaveAffixes;
 
-    TMap<TSubclassOf<ASPowerupActor>, ASPowerupActor*> SpawnedAffixes;
+    TArray<ASAffix*> SpawnedAffixes;
 
     /** The number of waves designated before the players win the game. */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
@@ -75,6 +75,9 @@ protected:
     /** Changes the WaveState, calls upon SHordeGameState which then shows the change to clients . */
     void SetWaveState(EWaveState State);
 
+    UFUNCTION(BlueprintCallable, Category ="GameMode")
+    ASAffix* SpawnRandomAffix();
+
     /** Determines if there are any players or bots alive */
     UFUNCTION(BlueprintCallable, Category = "WaveState")
     void CheckWaveState();
@@ -83,4 +86,8 @@ protected:
 	
     UFUNCTION(BlueprintCallable, Category = "HordeWaveStateSpawningWoWGreatCategory")
     void ApplyWaveAffixes();
+
+    UFUNCTION(BlueprintCallable, Category = "HordeWaveStateSpawningWoWGreatCategory")
+    void ApplyWaveAffixesToActor(AActor* Actor);
+
 };
