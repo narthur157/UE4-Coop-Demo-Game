@@ -1,11 +1,12 @@
 #include "SWeaponComponent.h"
-#include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 #include "Blueprint/UserWidget.h"
 #include "CoopGame.h"
 #include "SWeaponWidget.h"
 #include "SWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "SCharacter.h"
+#include "TimerManager.h"
 
 USWeaponComponent::USWeaponComponent()
 {
@@ -26,7 +27,8 @@ void USWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
     DOREPLIFETIME(USWeaponComponent, AmmoInventory);
     DOREPLIFETIME(USWeaponComponent, CurrentWeapon);
-    DOREPLIFETIME(USWeaponComponent, WeaponInventory);
+	DOREPLIFETIME(USWeaponComponent, WeaponInventory);
+	DOREPLIFETIME(USWeaponComponent, bCanFire);
 }
 
 void USWeaponComponent::SpawnDefaultWeaponInventory()
@@ -76,6 +78,7 @@ void USWeaponComponent::EquipWeapon(ASWeapon* Weapon)
         CurrentWeapon->SetActorHiddenInGame(true);
     }
 
+	bCanFire = true;
     SetCurrentWeapon(Weapon);
 }
 
@@ -136,32 +139,44 @@ void USWeaponComponent::ChangeWeapon()
         return;
     }
 
-    if (!CurrentWeapon)
-    {
-        UE_LOG(LogTemp, Log, TEXT("No Current Weapon, Equipping First"));
-        EquipWeapon(WeaponInventory[0]);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Log, TEXT("WeaponSwap Success"));
-		GetCurrentWeapon()->CancelReload();
-        StopFire();
-        int32 CurrentWeaponIndex = WeaponInventory.Find(CurrentWeapon);
-        if (CurrentWeaponIndex == WeaponInventory.Num() - 1)
-        {
-            EquipWeapon(WeaponInventory[0]);
-        }
-        else if (CurrentWeaponIndex != INDEX_NONE)
-        {
-            CurrentWeaponIndex++;
-            EquipWeapon(WeaponInventory[CurrentWeaponIndex]);
-        }
-    }
+	ASCharacter* MyCharacter = Cast<ASCharacter>(GetOwner());
+
+	if (MyCharacter)
+	{
+		MyCharacter->OnWeaponChangeDelegate.Broadcast();
+	}
+
+	bCanFire = false;
+
+	FTimerHandle Handle;
+	GetWorld()->GetTimerManager().SetTimer(Handle, [&]() {
+		if (!CurrentWeapon)
+		{
+			UE_LOG(LogTemp, Log, TEXT("No Current Weapon, Equipping First"));
+			EquipWeapon(WeaponInventory[0]);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("WeaponSwap Success"));
+			GetCurrentWeapon()->CancelReload();
+			StopFire();
+			int32 CurrentWeaponIndex = WeaponInventory.Find(CurrentWeapon);
+			if (CurrentWeaponIndex == WeaponInventory.Num() - 1)
+			{
+				EquipWeapon(WeaponInventory[0]);
+			}
+			else if (CurrentWeaponIndex != INDEX_NONE)
+			{
+				CurrentWeaponIndex++;
+				EquipWeapon(WeaponInventory[CurrentWeaponIndex]);
+			}
+		}
+	}, ChangeWeaponDelay, false);
 }
 
 void USWeaponComponent::StartFire()
 {
-    if (CurrentWeapon)
+    if (CurrentWeapon && bCanFire)
     {
         CurrentWeapon->StartFire();
     }
@@ -180,8 +195,14 @@ USWeaponWidget* USWeaponComponent::DrawWeaponWidget(APlayerController* OwningCon
     if (OwningController)
     {
         WeaponWidget = CreateWidget<USWeaponWidget>(OwningController,WeaponsWidgetClass);
-        WeaponWidget->InitializeWeaponWidget(this, NumberWeaponSlots);
+    
+		if (WeaponWidget)
+		{
+			WeaponWidget->InitializeWeaponWidget(this, NumberWeaponSlots);
+			return WeaponWidget;
+		}
     }
 
-    return WeaponWidget;
+	UE_LOG(LogTemp, Error, TEXT("DrawWeaponWidget called without owning controller, this is confusing"));
+	return nullptr;
 }
