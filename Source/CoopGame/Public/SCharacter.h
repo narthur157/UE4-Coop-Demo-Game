@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -14,6 +12,8 @@ class USWeaponComponent;
 class UHealthComponent;
 class UTeamComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReload);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponChange);
 
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter, public IDamageDealer, public ITeamMember
@@ -88,6 +88,12 @@ protected:
 	void ServerSetZoom(bool bZoom);
 
 public:
+	UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
+	FOnReload OnReloadDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
+	FOnWeaponChange  OnWeaponChangeDelegate;
+
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "PlayerWeapon")
 	bool bWantsToZoom = false;
 
