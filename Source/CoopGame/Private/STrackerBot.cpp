@@ -161,7 +161,7 @@ void ASTrackerBot::SelfDestruct()
         UGameplayStatics::ApplyDamage(this, HealthComp->GetHealth(), GetController(), this, nullptr);
         
         // Give clients a chance to play effects
-        SetLifeSpan(1.0);
+        SetLifeSpan(4.0);
     }
 
 	MeshComp->SetCollisionResponseToAllChannels(ECR_Ignore);
