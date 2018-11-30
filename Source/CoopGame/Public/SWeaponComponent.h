@@ -36,6 +36,11 @@ class COOPGAME_API USWeaponComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	USWeaponComponent();
+	
+	// WeaponComp manages this, because there are things outside the weapon's control
+	// which cause it to not be allowed to fire - like switching weapons
+	UPROPERTY(VisibleAnywhere, Replicated, Category = "Weapon")
+	bool bCanFire = true;
 
 	USWeaponWidget* WeaponWidget = nullptr;
 
@@ -71,6 +76,10 @@ protected:
 
     UPROPERTY(ReplicatedUsing = OnRep_WeaponInventory)
     TArray<ASWeapon*> WeaponInventory;
+
+	// Delay before the weapon is swapped, this should match the animation
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Weapon")
+	float ChangeWeaponDelay = 0.17f;
 
     UPROPERTY(EditDefaultsOnly, Replicated, Category = "Weapon")
     TArray<FWeaponAmmoInventoryItem> AmmoInventory;
