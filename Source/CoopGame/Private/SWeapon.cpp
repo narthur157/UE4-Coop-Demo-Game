@@ -7,6 +7,7 @@
 #include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "SHitIndicatorWidget.h"
 #include "TimerManager.h"
+#include "SCharacter.h"
 
 ASWeapon::ASWeapon()
 {
@@ -31,6 +32,13 @@ void ASWeapon::Reload()
 	if (bIsReloading || AmmoInClip == MaxAmmo)
 	{
 		return;
+	}
+
+	ASCharacter* MyCharacter = Cast<ASCharacter>(GetOwner());
+	
+	if (MyCharacter)
+	{
+		MyCharacter->OnReloadDelegate.Broadcast();
 	}
 
 	// Start the reload animation client side
