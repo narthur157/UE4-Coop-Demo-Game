@@ -39,7 +39,6 @@ void USHealthComponent::BeginPlay()
         Health = MaxHealth;
         OnHealthChanged.Broadcast(this, Health, 0, nullptr, nullptr, nullptr);
     }
-
 }
 
 // This only runs on server because we are only binding to this delegate on server
@@ -48,16 +47,36 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
     //IsFriendly(DamagedActor, InstigatedBy->GetPawn())
     ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
 
+    // Find the ACTOR responsible for the damage which was dealt
+    // Why all the trouble? Controllers don't stay attached to pawns on death.
+    AActor* DamageInstigatorActor = DetermineDamageInstigatorActor(InstigatedBy, DamageCauser);
+
     // @TODO right now self damage is simply just enabled, because we need the trackerbot to be able to kill itself essentially
     // This is not correct.
-    if (Damage <= 0 || bIsDead || (!GM->bIsFriendlyFireEnabled && UTeamComponent::IsActorFriendly(DamagedActor, InstigatedBy->GetPawn()) && DamagedActor != InstigatedBy->GetPawn()))
+    if (Damage <= 0 || bIsDead || (!GM->bIsFriendlyFireEnabled && UTeamComponent::IsActorFriendly(DamagedActor, DamageInstigatorActor) && DamagedActor != DamageInstigatorActor))
     {
         return;
     }
 
+    // Broadcast that the instigator dealt damage
+    if (DamageInstigatorActor)
+    {
+        USHealthComponent* OtherHealthComponent = DamageInstigatorActor->FindComponentByClass<USHealthComponent>();
+        if (OtherHealthComponent)
+        {
+            OtherHealthComponent->OnDamageDealt.Broadcast(DamageInstigatorActor, GetOwner(), DamageCauser);
+        }
+    }
+
+    // Broadcast that we took damage
+    if ( DamageInstigatorActor)
+    {
+        OnDamageTaken.Broadcast(GetOwner(), DamageInstigatorActor, DamageCauser);
+    }
+
     Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
 
-    FString InstigatedByS = InstigatedBy && InstigatedBy->GetPawn() ? *InstigatedBy->GetPawn()->GetName() : NULLSTRING;
+    FString InstigatedByS = DamageInstigatorActor ? *DamageInstigatorActor->GetName() : NULLSTRING;
     FString DamageCauserS = DamageCauser ? *DamageCauser->GetName() : NULLSTRING;
     TRACE("%s inflicts %f damage on %s using %s . Current Health: %f",
         *InstigatedByS, 
@@ -70,10 +89,11 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
 
     if (Health <= 0 && !bIsDead)
     {
-        if (GM && InstigatedBy && InstigatedBy->GetPawn() && GetOwner())
+        OnKilled.Broadcast(GetOwner());
+        if (GM && DamageInstigatorActor && GetOwner())
         {
             TRACE("%s", *DamageCauser->GetName());
-            GM->OnActorKilled(GetOwner(), InstigatedBy->GetPawn(), DamageCauser);
+            GM->OnActorKilled(GetOwner(), DamageInstigatorActor, DamageCauser);
         }
         bIsDead = true;
     }
@@ -98,3 +118,20 @@ void USHealthComponent::Heal(float HealAmount)
     OnHealthChanged.Broadcast(this, Health, -HealAmount, nullptr, nullptr, nullptr);
 }
 
+// Attempts to find an actor responsible for the damage caused
+AActor* USHealthComponent::DetermineDamageInstigatorActor(AController* DamageInstigator, AActor* DamageCauser)
+{
+    if (DamageInstigator && DamageInstigator->GetPawn())
+    {
+        return DamageInstigator->GetPawn();
+    }
+    else if (DamageCauser && DamageCauser->GetOwner())
+    {
+         return DamageCauser->GetOwner();
+    }
+    else
+    {
+        // Occasionally the actor responsible is the actor itself (the case in any suicidal units)
+        return DamageCauser;
+    }
+}

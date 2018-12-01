@@ -4,6 +4,9 @@
 #include "GameFramework/Actor.h"
 #include "SWeapon.generated.h"
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponHit, AActor*, HitActor);
+
 class UDamageType;
 class UCameraShake;
 class UParticleSystem;
@@ -27,6 +30,35 @@ class COOPGAME_API ASWeapon : public AActor
 	
 public:	
 	ASWeapon();
+
+    UPROPERTY(BlueprintAssignable, Category = "Weapon")
+    FOnWeaponHit OnWeaponHit;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+    float TimeToReload = 1.5f;
+
+    UPROPERTY(Replicated, BlueprintReadOnly, Category = "Weapon")
+    bool bIsReloading;
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    EAmmoType GetAmmoType() { return AmmoType; }
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    UTexture2D* GetWeaponIcon() { return WeaponIcon; }
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    float GetAmmoInClip() { return AmmoInClip; }
+
+    virtual void BeginPlay() override;
+    virtual void Reload();
+    virtual void CancelReload();
+    virtual void OnHit(AActor* HitActor, bool bSkipCheck = false);
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    virtual void StartFire();
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    virtual void StopFire();
 
 protected:
 
@@ -55,10 +87,10 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	float TimeBetweenShots = 0.5f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "WeaponData")
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     EAmmoType AmmoType = EAmmoType::NONE;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponData")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	uint8 MaxAmmo = 20;
 
     UPROPERTY(Replicated)
@@ -88,30 +120,4 @@ protected:
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerFire();
 
-public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponData")
-	float TimeToReload = 1.5f;
-
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "PlayerWeapon")
-	bool bIsReloading;
-
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	EAmmoType GetAmmoType() { return AmmoType; }
-
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	UTexture2D* GetWeaponIcon() { return WeaponIcon; }
-
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	float GetAmmoInClip() { return AmmoInClip; }
-
-	virtual void BeginPlay() override;
-	virtual void Reload();
-	virtual void CancelReload();
-	virtual void OnHit(AActor* HitActor, bool bSkipCheck = false);
-
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    virtual void StartFire();
-
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    virtual void StopFire();	
 };

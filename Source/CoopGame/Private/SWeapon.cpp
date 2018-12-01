@@ -120,6 +120,7 @@ void ASWeapon::OnHit(AActor* HitActor, bool bSkipCheck)
 	if (bSkipCheck)
 	{
 		HitIndicatorWidget->PlayHitAnimation();
+        OnWeaponHit.Broadcast(HitActor);
 		return;
 	}
 
@@ -129,6 +130,7 @@ void ASWeapon::OnHit(AActor* HitActor, bool bSkipCheck)
 		if (HitIndicatorWidget && !UTeamComponent::IsActorFriendly(HitActor, GetOwner()))
 		{
 			HitIndicatorWidget->PlayHitAnimation();
+            OnWeaponHit.Broadcast(HitActor);
 		}
 	}
 }

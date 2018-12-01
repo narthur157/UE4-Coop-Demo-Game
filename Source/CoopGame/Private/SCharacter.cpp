@@ -23,15 +23,14 @@ ASCharacter::ASCharacter()
     SpringArmComp->SetupAttachment(RootComponent);
     SpringArmComp->bUsePawnControlRotation = true;
 
+    CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
+    CameraComp->SetupAttachment(SpringArmComp);
+
     HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComponent"));
     WeaponComp = CreateDefaultSubobject<USWeaponComponent>(TEXT("WeaponComponent"));
     TeamComp = CreateDefaultSubobject<UTeamComponent>(TEXT("TeamComponent"));
 
 	SetReplicates(true);
-
-    CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
-    CameraComp->SetupAttachment(SpringArmComp);
-
     GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
     ZoomedFOV = 65.0;

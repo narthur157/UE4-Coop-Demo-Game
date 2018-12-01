@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "DamageDealer.h"
 #include "ITeamMember.h"
+#include "Game/SPawn.h"
 #include "SCharacter.generated.h"
 
 class UCameraComponent;
@@ -16,13 +17,57 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReload);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponChange);
 
 UCLASS()
-class COOPGAME_API ASCharacter : public ACharacter, public IDamageDealer, public ITeamMember
+class COOPGAME_API ASCharacter : public ACharacter, public IDamageDealer, public ITeamMember, public ISPawn
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
 	ASCharacter();
+
+    UPROPERTY(Replicated, BlueprintReadWrite, Category = "PlayerWeapon")
+    bool bWantsToZoom = false;
+
+    virtual void Tick(float DeltaTime) override;
+
+    // Called to bind functionality to input
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+    virtual FVector GetPawnViewLocation() const override;
+
+    UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PlayerWeapon")
+    float GetReloadSpeed();
+
+    UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PlayerWeapon")
+    bool GetIsReloading();
+
+    /**  Weapon operations, calling these from character for now because we might want to play animations/whatever
+     *	 before firing/on changing weapons
+    */
+    UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
+    void StartFire();
+
+    UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
+    void StopFire();
+
+    void ChangeWeapon();
+
+    UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
+    FOnReload OnReloadDelegate;
+
+    UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
+    FOnWeaponChange  OnWeaponChangeDelegate;
+
+    /* Override so that we can stop firing when disabled */
+    virtual void DisableInput(APlayerController* PlayerController) override;
+
+    /** Implements IDamageDealer */
+    virtual float GetDamageModifier() override { return DamageModifier; }
+
+    /** Implements ITeamMember */
+    virtual uint8 GetTeamID() override;
+
+
 
 protected:
     // Called when the game starts or when spawned
@@ -86,49 +131,5 @@ protected:
 
 	UFUNCTION(Server, Unreliable, WithValidation)
 	void ServerSetZoom(bool bZoom);
-
-public:
-	UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
-	FOnReload OnReloadDelegate;
-
-	UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
-	FOnWeaponChange  OnWeaponChangeDelegate;
-
-	UPROPERTY(Replicated, BlueprintReadWrite, Category = "PlayerWeapon")
-	bool bWantsToZoom = false;
-
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-    virtual FVector GetPawnViewLocation() const override;
-
-    /** Implements IDamageDealer */
-    virtual float GetDamageModifier() override { return DamageModifier; }
-
-    /** Implements ITeamMember */ 
-    virtual uint8 GetTeamID() override;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PlayerWeapon")
-	float GetReloadSpeed();
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PlayerWeapon")
-	bool GetIsReloading();
-
-    /**  Weapon operations, calling these from character for now because we might want to play animations/whatever
-     *	 before firing/on changing weapons
-	*/
-    UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
-    void StartFire();
-
-    UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
-    void StopFire();
-
-    void ChangeWeapon();
-
-	/* Override so that we can stop firing when disabled */
-	virtual void DisableInput(APlayerController* PlayerController) override;
-
 
 };
