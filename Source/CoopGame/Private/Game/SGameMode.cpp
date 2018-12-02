@@ -23,39 +23,15 @@ void ASGameMode::StartPlay()
     OnStartPlay();
 }
 
-// Iterate over all the players, if none are alive then its a loss
-void ASGameMode::CheckPlayerState()
-{
-    bool bIsPlayerAlive = false;
-    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
-    {
-        APawn* PlayerPawn = It->Get()->GetPawn();
-        if (PlayerPawn)
-        {
-            USHealthComponent* HealthComp = PlayerPawn->FindComponentByClass<USHealthComponent>();
-            if (ensure(HealthComp) && HealthComp->GetHealth() > 0.0f)
-            {
-                bIsPlayerAlive = true;
-                break;
-            }
-        }
-    }
-
-    if (!bIsPlayerAlive)
-    {
-        GameOver(false);
-    }
-}
-
 // Called when the game has ended
-void ASGameMode::GameOver(bool bWasSuccessful)
+void ASGameMode::GameOver(ASTeam* WinningTeam)
 {
     ASGameState* GS = GetGameState<ASGameState>();
     if (ensureAlways(GS))
     {
-        GS->MulticastGameOver(bWasSuccessful);
+        GS->MulticastGameOver(WinningTeam);
     }
-    OnGameOver(bWasSuccessful);
+    OnGameOver(WinningTeam);
 }
 
 // Respawns dead players

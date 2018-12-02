@@ -37,13 +37,9 @@ public:
     
 protected:
 
-  
-    /** Determines if there are any players alive,  */
-    void CheckPlayerState();
-
     /** Begins the GameOver process, calling on an SGameState to broadcast that the victory condition was met for some team(s) */
     UFUNCTION(BlueprintCallable, Category = "GameMode")
-    void GameOver(bool bWasSuccessful);
+    void GameOver(ASTeam* WinningTeam);
 
     /** Restarts PlayerControllers with default pawns */
     void RestartDeadPlayers();
