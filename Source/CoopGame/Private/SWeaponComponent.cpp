@@ -60,29 +60,39 @@ void USWeaponComponent::SpawnDefaultWeaponInventory()
         {
             OnRep_WeaponInventory();
         }
-    }   
+    }
 }
 
-// Only want to setcurrentweapon on the server
+// Only want to SetCurrentWeapon on the server
 void USWeaponComponent::EquipWeapon(ASWeapon* Weapon)
 {
-    // Only run on server
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->OnReload.Unbind();
+		CurrentWeapon->SetActorHiddenInGame(true);
+	}
+
+	// Proxy our current weapon's reload delegate
+	Weapon->OnReload.BindLambda([&]() {
+		MulticastReloadAnim();
+	});
+
     if (GetOwnerRole() < ROLE_Authority)
     {
         ServerEquipWeapon(Weapon);
         return;
     }
 
-    if (CurrentWeapon)
-    {
-        CurrentWeapon->SetActorHiddenInGame(true);
-    }
-
-	bCanFire = true;
     SetCurrentWeapon(Weapon);
 }
 
-// Changes weapon
+void USWeaponComponent::ServerSetCanFire_Implementation(bool bCan)
+{
+	bCanFire = bCan;
+}
+
+bool USWeaponComponent::ServerSetCanFire_Validate(bool bCan) { return true; }
+
 void USWeaponComponent::SetCurrentWeapon(ASWeapon* Weapon)
 {
     if (Weapon)
@@ -121,6 +131,42 @@ void USWeaponComponent::OnRep_WeaponInventory()
 	}
 }
 
+void USWeaponComponent::MulticastReloadAnim_Implementation()
+{
+	OnReload.Broadcast();
+}
+
+bool USWeaponComponent::MulticastReloadAnim_Validate()
+{
+	return true;
+}
+
+void USWeaponComponent::MulticastChangeWeaponAnim_Implementation()
+{
+	ACharacter* MyCharacter = Cast<ACharacter>(GetOwner());
+	if (MyCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	OnWeaponChange.Broadcast();
+}
+
+bool USWeaponComponent::MulticastChangeWeaponAnim_Validate()
+{
+	return true;
+}
+
+void USWeaponComponent::ServerChangeWeaponAnim_Implementation()
+{
+	MulticastChangeWeaponAnim();
+}
+
+bool USWeaponComponent::ServerChangeWeaponAnim_Validate()
+{
+	return true;
+}
+
 void USWeaponComponent::ServerEquipWeapon_Implementation(ASWeapon* Weapon)
 {
     EquipWeapon(Weapon);
@@ -141,15 +187,17 @@ void USWeaponComponent::ChangeWeapon()
 
 	ASCharacter* MyCharacter = Cast<ASCharacter>(GetOwner());
 
-	if (MyCharacter)
-	{
-		MyCharacter->OnWeaponChangeDelegate.Broadcast();
-	}
+	OnWeaponChange.Broadcast();
+	ServerChangeWeaponAnim();
 
 	bCanFire = false;
+	ServerSetCanFire(false);
 
 	FTimerHandle Handle;
 	GetWorld()->GetTimerManager().SetTimer(Handle, [&]() {
+		bCanFire = true;
+		ServerSetCanFire(true);
+
 		if (!CurrentWeapon)
 		{
 			UE_LOG(LogTemp, Log, TEXT("No Current Weapon, Equipping First"));

@@ -16,6 +16,7 @@ void ASProjectileWeapon::Fire()
 {
     LastFireTime = GetWorld()->TimeSeconds;
     UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+	AmmoInClip--;
 
     if (Role < ROLE_Authority)
     {
@@ -23,7 +24,6 @@ void ASProjectileWeapon::Fire()
         return;
     }
 
-	AmmoInClip--;
 
     if (ProjectileClass && GetOwner())
     {

@@ -12,9 +12,7 @@ class USpringArmComponent;
 class USWeaponComponent;
 class UHealthComponent;
 class UTeamComponent;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReload);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponChange);
+class UAnimMontage;
 
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter, public IDamageDealer, public ITeamMember, public ISPawn
@@ -52,12 +50,6 @@ public:
 
     void ChangeWeapon();
 
-    UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
-    FOnReload OnReloadDelegate;
-
-    UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
-    FOnWeaponChange  OnWeaponChangeDelegate;
-
     /* Override so that we can stop firing when disabled */
     virtual void DisableInput(APlayerController* PlayerController) override;
 
@@ -66,8 +58,6 @@ public:
 
     /** Implements ITeamMember */
     virtual uint8 GetTeamID() override;
-
-
 
 protected:
     // Called when the game starts or when spawned
@@ -131,5 +121,4 @@ protected:
 
 	UFUNCTION(Server, Unreliable, WithValidation)
 	void ServerSetZoom(bool bZoom);
-
 };

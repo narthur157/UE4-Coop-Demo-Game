@@ -4,7 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "SWeapon.generated.h"
 
-
+DECLARE_DELEGATE(FOnWeaponReload);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponHit, AActor*, HitActor);
 
 class UDamageType;
@@ -30,6 +30,8 @@ class COOPGAME_API ASWeapon : public AActor
 	
 public:	
 	ASWeapon();
+
+	FOnWeaponReload OnReload;
 
     UPROPERTY(BlueprintAssignable, Category = "Weapon")
     FOnWeaponHit OnWeaponHit;
