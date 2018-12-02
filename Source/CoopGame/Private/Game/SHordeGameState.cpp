@@ -14,7 +14,7 @@ void ASHordeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
     DOREPLIFETIME(ASHordeGameState, PlayerTeam);
     DOREPLIFETIME(ASHordeGameState, HordeTeam);
-
+    DOREPLIFETIME(ASHordeGameState, CurrentWaveNumber);
     DOREPLIFETIME(ASHordeGameState, WaveState);
     DOREPLIFETIME(ASHordeGameState, NextWaveStartTime);
 }
@@ -47,3 +47,10 @@ void ASHordeGameState::SetWaveState(EWaveState NewState)
     }
 }
 
+void ASHordeGameState::SetCurrentWaveNumber(int32 WaveNumber)
+{
+    if (HasAuthority())
+    {
+        CurrentWaveNumber = WaveNumber;
+    }
+}

@@ -8,6 +8,8 @@
 
 class UUserWidget;
 class USGameEventWidget;
+class ASTeam;
+
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerPawnChanged, APawn*, NewPawn);
 
@@ -49,10 +51,10 @@ public:
     virtual void SetupInputComponent() override;
 
     UFUNCTION(BlueprintCallable, Category = "GameOver")
-    void RecieveGameOver(bool bWasSuccessful);
+    void RecieveGameOver(ASTeam* WinningTeam);
 	
     UFUNCTION(BlueprintImplementableEvent, Category = "GameOver")
-    void OnRecieveGameOver(bool bWasSuccessful);
+    void OnRecieveGameOver(ASTeam* WinningTeam);
 
     void SetPawn(APawn* InPawn) override;
 

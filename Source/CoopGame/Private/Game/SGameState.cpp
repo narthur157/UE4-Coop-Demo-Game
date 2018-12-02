@@ -2,6 +2,7 @@
 
 #include "SGameState.h"
 #include "STeamManager.h"
+#include "STeam.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 
@@ -18,10 +19,10 @@ void ASGameState::PreInitializeComponents()
     TeamManager = GetWorld()->SpawnActor<ASTeamManager>(ASTeamManager::StaticClass());
 }
 
-void ASGameState::MulticastGameOver_Implementation(bool bWasSuccessful)
+void ASGameState::MulticastGameOver_Implementation(ASTeam* WinningTeam)
 {
 
-    OnGameOver.Broadcast(bWasSuccessful);
+    OnTeamGameOver.Broadcast(WinningTeam);
 }
 
 void ASGameState::MulticastActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser)
