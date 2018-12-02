@@ -6,16 +6,15 @@
 #include "GameFramework/GameStateBase.h"
 #include "SGameState.generated.h"
 
-
+class ASTeamManager;
+class ASTeam;
 
 /** Broadcasts when an actor has been killed */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FGameStateActorKilled, AActor*, KilledActor, AActor*, KillerActor, AActor*, DamageCauser);
 
-/** Broadcasts when the game has ended */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameStateGameOver, bool, bWasSuccessful);
+/** Delegate to use when dealing with team modes and wishing to send a game over event */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTeamGameOver, ASTeam*, WinningTeam);
 
-
-class ASTeamManager;
 
 /**
  * Base GameState type. Simply broadcasts general events such as GameOver/Actor killed to clients. Specific GameStates should be derived from here.
@@ -33,7 +32,7 @@ public:
     ASTeamManager* GetTeamManager();
 
     UFUNCTION(NetMulticast, Reliable)
-    void MulticastGameOver(bool bWasSuccessful);
+    void MulticastGameOver(ASTeam* WinningTeam);
 
     UFUNCTION(NetMulticast, Reliable)
     void MulticastActorKilled(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser);
@@ -42,7 +41,7 @@ public:
     FGameStateActorKilled OnActorKilledGameState;
 
     UPROPERTY(BlueprintAssignable, Category = "GameEvent")
-    FGameStateGameOver OnGameOver;
+    FOnTeamGameOver OnTeamGameOver;
 
     virtual void PreInitializeComponents() override;
 
@@ -51,5 +50,4 @@ protected:
     UPROPERTY(VisibleAnywhere, Category = "Team")
     ASTeamManager* TeamManager = nullptr;
 
-   
 };

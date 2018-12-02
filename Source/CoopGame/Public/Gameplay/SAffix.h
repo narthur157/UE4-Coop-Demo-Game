@@ -21,6 +21,12 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Affix")
     void ApplyToActor(AActor* Actor);
 
+    UFUNCTION(BlueprintCallable, Category = "Affix")
+    FText GetAffixDescription() { return AffixDescription; }
+
+    UFUNCTION(BlueprintCallable, Category = "Affix")
+    UTexture2D* GetAffixIcon() { return AffixIcon; }
+
 protected:
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Affix")
@@ -36,11 +42,13 @@ protected:
     void Disable();
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Affix")
-     void OnDisabled();
+    void OnDisabled();
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Affix")
+    UTexture2D* AffixIcon;
 
-    /////////////////////////
-    //
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Affix")
+    FText AffixDescription;
 
     UPROPERTY(BlueprintReadOnly, Category = "Affix")
     TArray<AActor*> ActorsActivatedFor;
