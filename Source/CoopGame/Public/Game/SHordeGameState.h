@@ -29,6 +29,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerTeamChanged, const ASTeam*,
 /** Broadcasts when the wave state has changed */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGameStateWaveChanged, EWaveState, OldState, EWaveState, NewWaveState);
 
+
+
+
 /**
  * SHordeGameState - Replicated values and events which clients must be aware of. Intentionally very tightly coupled to 
  * SHordeGameMode. Should not be used with other types of GameModes, rather a new GameState derived from SGameState should be created.
@@ -58,10 +61,16 @@ public:
     void SetWaveState(EWaveState NewState);
 
     UFUNCTION(BlueprintCallable, Category = "WaveState")
+    void SetCurrentWaveNumber(int32 WaveNumber);
+
+    UFUNCTION(BlueprintCallable, Category = "WaveState")
     void SetNextWaveStartTime(float NewNextWaveStartTime) { NextWaveStartTime = NewNextWaveStartTime; }
 
     UFUNCTION(BlueprintPure, Category = "WaveState")
     float GetNextWaveStartTime() { return NextWaveStartTime; }
+
+    UFUNCTION(BlueprintPure, Category = "WaveState")
+    int32 GetCurrentWaveNumber() { return CurrentWaveNumber; }
 
     /** Broadcasts when the wave state has changed */
     UPROPERTY(BlueprintAssignable, Category = "WaveState")
@@ -76,6 +85,8 @@ public:
 
 protected:
 
+    UPROPERTY(Replicated)
+    int32 CurrentWaveNumber =  0;
 
     /** Replicated value that determines when the next wave will spawn as specified by the gamestate */
     UPROPERTY(BlueprintReadOnly, Replicated, Category = "WaveState")

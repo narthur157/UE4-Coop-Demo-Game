@@ -82,6 +82,9 @@ protected:
     UFUNCTION(BlueprintCallable, Category = "WaveState")
     void CheckWaveState();
 
+    UFUNCTION(BlueprintCallable, Category = "WaveState")
+    void CheckPlayerState();
+
     virtual void OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser) override;
 	
     UFUNCTION(BlueprintCallable, Category = "HordeWaveStateSpawningWoWGreatCategory")

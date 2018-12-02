@@ -40,9 +40,15 @@ void ASHordeGameMode::StartPlay()
 
 void ASHordeGameMode::StartWave()
 {
-    SetWaveState(EWaveState::WaitingToComplete);
+
+    // Update the current wave count
+    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
+    if (!GS) { return; }
     CurrentWaveCount++;
-    NumberBotsToSpawn = 6 * CurrentWaveCount;
+    GS->SetCurrentWaveNumber(CurrentWaveCount);
+
+    SetWaveState(EWaveState::WaitingToComplete);
+    NumberBotsToSpawn = 2 * CurrentWaveCount;
     GetWorldTimerManager().SetTimer(TimerHandle_BotSpawner, this, &ASHordeGameMode::SpawnBotTimerElapsed, 1.0f, true, 0.0f);
 }
 
@@ -68,11 +74,11 @@ void ASHordeGameMode::PrepareForNextWave()
 
     SpawnRandomAffix();
 
-
     // Game is finished, players win on waves
+    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
     if (CurrentWaveCount == NumberWaves && NumberWaves > 0)
     {
-        GameOver(true);
+        GameOver(GS->PlayerTeam);
         return;
     }
 
@@ -120,11 +126,23 @@ void ASHordeGameMode::CheckWaveState()
     TArray<AActor*> WaveMobsAlive = HordeTeam->GetActorsWithTag("WaveMob");
     if (WaveMobsAlive.Num() <= 0)
     {
-        PrepareForNextWave();
         HordeTeam->ClearTeam();
+
+        PrepareForNextWave();
         return;
     }
+}
 
+void ASHordeGameMode::CheckPlayerState()
+{
+    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
+    if (!GS) { return; }
+
+    TArray<AActor*> PlayerTeamActors = GS->PlayerTeam->GetActorsWithTag("WaveRelevant");
+    if (PlayerTeamActors.Num() == 0)
+    {
+        GS->MulticastGameOver(GS->HordeTeam);
+    }
 }
 
 // Changes the state of the wave spawner

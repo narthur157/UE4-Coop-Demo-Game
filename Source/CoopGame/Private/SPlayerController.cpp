@@ -27,7 +27,7 @@ void ASPlayerController::BeginPlay()
     ASGameState* GS = GetWorld()->GetGameState<ASGameState>();
     if (ensureAlways(GS))
     {
-        GS->OnGameOver.AddDynamic(this, &ASPlayerController::RecieveGameOver);
+        GS->OnTeamGameOver.AddDynamic(this, &ASPlayerController::RecieveGameOver);
     }
 
     // Update our player state when we possess a new pawn
@@ -46,14 +46,14 @@ void ASPlayerController::SetupInputComponent()
     InputComponent->BindAction("ToggleMenu", IE_Pressed, this, &ASPlayerController::ToggleMenu);
 }
 
-void ASPlayerController::RecieveGameOver(bool bWasSuccessful)
+void ASPlayerController::RecieveGameOver(ASTeam* WinningTeam)
 {
    UE_LOG(LogTemp, Warning, TEXT("GameOver"));
    if (GetPawn())
    {
        GetPawn()->DisableInput(this);
    }
-   OnRecieveGameOver(bWasSuccessful);
+   OnRecieveGameOver(WinningTeam);
 }
 
 void ASPlayerController::ToggleMenu()
