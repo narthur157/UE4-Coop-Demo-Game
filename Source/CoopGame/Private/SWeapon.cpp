@@ -7,7 +7,6 @@
 #include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "SHitIndicatorWidget.h"
 #include "TimerManager.h"
-#include "SCharacter.h"
 
 ASWeapon::ASWeapon()
 {
@@ -34,15 +33,8 @@ void ASWeapon::Reload()
 		return;
 	}
 
-	ASCharacter* MyCharacter = Cast<ASCharacter>(GetOwner());
-	
-	if (MyCharacter)
-	{
-		MyCharacter->OnReloadDelegate.Broadcast();
-	}
+	OnReload.ExecuteIfBound();
 
-	// Start the reload animation client side
-	bIsReloading = true;
 	ServerReload();
 }
 
@@ -60,6 +52,8 @@ void ASWeapon::CancelReload()
 void ASWeapon::ServerReload_Implementation()
 {
 	bIsReloading = true;
+
+	OnReload.ExecuteIfBound();
 
 	GetWorldTimerManager().SetTimer(TimerHandle_ReloadTimer, [&]() {
 		AmmoInClip = MaxAmmo;

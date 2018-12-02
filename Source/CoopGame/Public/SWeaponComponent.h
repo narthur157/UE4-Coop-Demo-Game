@@ -1,10 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "SWeaponComponent.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReload);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponChange);
 
 class USWeaponWidget;
 class ASWeapon;
@@ -28,7 +29,7 @@ struct FWeaponAmmoInventoryItem
 
 };
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(COOP), meta=(BlueprintSpawnableComponent))
 class COOPGAME_API USWeaponComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -36,6 +37,12 @@ class COOPGAME_API USWeaponComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	USWeaponComponent();
+
+	UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
+	FOnReload OnReload;
+
+	UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
+	FOnWeaponChange  OnWeaponChange;
 	
 	// WeaponComp manages this, because there are things outside the weapon's control
 	// which cause it to not be allowed to fire - like switching weapons
@@ -96,6 +103,9 @@ protected:
     /** [Server] **/
     void EquipWeapon(ASWeapon* Weapon);
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSetCanFire(bool bCan);
+
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerEquipWeapon(ASWeapon* Weapon);
 
@@ -108,4 +118,13 @@ protected:
     UFUNCTION()
     void OnRep_WeaponInventory();
 
+private:
+	UFUNCTION(Server, Unreliable, WithValidation)
+	void ServerChangeWeaponAnim();
+
+	UFUNCTION(NetMulticast, Unreliable, WithValidation)
+	void MulticastChangeWeaponAnim();
+
+	UFUNCTION(NetMulticast, Unreliable, WithValidation)
+	void MulticastReloadAnim();
 };
