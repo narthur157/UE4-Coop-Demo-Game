@@ -19,6 +19,7 @@ enum class EWaveState : uint8
 };
 
 class ASTeam;
+class ASAffix;
 
 /** Broadcasts that the horde team was set */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHordeTeamChanged, const ASTeam*, HordeTeam);
@@ -29,7 +30,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerTeamChanged, const ASTeam*,
 /** Broadcasts when the wave state has changed */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGameStateWaveChanged, EWaveState, OldState, EWaveState, NewWaveState);
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAffixEvent, ASAffix*, Affix);
 
 
 /**
@@ -43,7 +44,18 @@ class COOPGAME_API ASHordeGameState : public ASGameState
 	
 public:
 
+    UPROPERTY(BlueprintAssignable, Category = "Affix")
+    FAffixEvent OnNewAffix;
 
+    UFUNCTION(NetMulticast, Reliable, Category = "Affix")
+    void MulticastAffixAdded(ASAffix* AffixAdded);
+
+    UFUNCTION(BlueprintCallable, Category = "Affix")
+    const TArray<ASAffix*> GetCurrentlyAppliedAffixes() { return CurrentlyAppliedAffixes; }
+
+    /** Server Only */
+    UFUNCTION(BlueprintCallable, Category = "Affix")
+    void AddAffix(ASAffix* AffixToAdd);
 
     UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_HordeTeam, Category = "TeamStates")
     ASTeam* HordeTeam = nullptr;
@@ -86,6 +98,9 @@ public:
 protected:
 
     UPROPERTY(Replicated)
+    TArray<ASAffix*> CurrentlyAppliedAffixes;
+
+    UPROPERTY(Replicated)
     int32 CurrentWaveNumber =  0;
 
     /** Replicated value that determines when the next wave will spawn as specified by the gamestate */
@@ -102,5 +117,7 @@ protected:
 
     UFUNCTION()
     void OnRep_PlayerTeam();
+
+
 };
 
