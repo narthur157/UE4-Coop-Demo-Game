@@ -26,9 +26,10 @@ class COOPGAME_API ISPawn
 public:
 
     UFUNCTION(BlueprintCallable, Category = "SPawn")
-    virtual void IncreaseMovespeed(float PercentIncrease) {};
+    virtual void IncreaseMovespeed(float PercentIncrease) { ensure(false); };
     UFUNCTION(BlueprintCallable, Category = "SPawn")
-    virtual void IncreaseDamage(float PercentIncrease) {};
-
+    virtual void IncreaseDamage(float PercentIncrease) { ensure(false); };
+    UFUNCTION(BlueprintCallable, Category = "SPawn")
+    virtual FVector GetSize() { ensure(false); return FVector::ZeroVector; };
 	
 };

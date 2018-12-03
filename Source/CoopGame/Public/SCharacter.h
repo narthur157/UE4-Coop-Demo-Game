@@ -59,6 +59,9 @@ public:
     /** Implements ITeamMember */
     virtual uint8 GetTeamID() override;
 
+    /** Implements ISPawn */
+    virtual FVector GetSize();
+
 protected:
     // Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -172,6 +172,14 @@ uint8 ASCharacter::GetTeamID()
     return TeamComp->GetTeamID();
 }
 
+FVector ASCharacter::GetSize()
+{
+    return FVector(
+        GetCapsuleComponent()->GetScaledCapsuleRadius(),
+        GetCapsuleComponent()->GetScaledCapsuleRadius(),
+        GetCapsuleComponent()->GetScaledCapsuleHalfHeight()*2);
+}
+
 float ASCharacter::GetReloadSpeed()
 {
 	if (WeaponComp && WeaponComp->GetCurrentWeapon())
