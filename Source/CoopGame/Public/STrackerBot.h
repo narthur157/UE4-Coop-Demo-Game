@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -20,17 +18,15 @@ class COOPGAME_API ASTrackerBot : public APawn, public IDamageDealer, public ITe
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this pawn's properties
 	ASTrackerBot();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     UStaticMeshComponent* MeshComp = nullptr;
 
-    UPROPERTY(VisibleDefaultsOnly, Category = "Components")
+    UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
     USHealthComponent* HealthComp = nullptr;
 
     UPROPERTY(VisibleAnywhere, Category = "Components")
@@ -135,8 +131,6 @@ protected:
     UFUNCTION()
     void RefreshPath();
 public:	
-
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
     // IDamageDealer
