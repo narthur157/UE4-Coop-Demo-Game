@@ -6,6 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "DamageDealer.h"
 #include "ITeamMember.h"
+#include "SPawn.h"
 #include "STrackerBot.generated.h"
 
 class USHealthComponent;
@@ -15,7 +16,7 @@ class UTeamComponent;
 class USoundCue;
 
 UCLASS()
-class COOPGAME_API ASTrackerBot : public APawn, public IDamageDealer, public ITeamMember
+class COOPGAME_API ASTrackerBot : public APawn, public ISPawn, public IDamageDealer, public ITeamMember
 {
 	GENERATED_BODY()
 
@@ -145,4 +146,7 @@ public:
     // ITeamMember 
     virtual uint8 GetTeamID() override;
 	
+    // ISPawn
+    virtual FVector GetSize() override;
+
 };
