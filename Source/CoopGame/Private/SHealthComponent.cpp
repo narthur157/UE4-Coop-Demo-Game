@@ -20,7 +20,7 @@ void USHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(USHealthComponent, Health);
-
+    DOREPLIFETIME(USHealthComponent, MaxHealth);
 }
 
 // Called when the game starts
@@ -104,6 +104,11 @@ void USHealthComponent::OnRep_Health(float OldHealth)
     float Damage = OldHealth - Health;
     TRACE("%s Health changed. Current Health: %f. Damage: %f", *GetOwner()->GetName(), Health, Damage);
     OnHealthChanged.Broadcast(this, Health, Damage, nullptr, nullptr, nullptr);
+}
+
+void USHealthComponent::OnRep_MaxHealth()
+{
+    OnHealthChanged_Minimal.Broadcast(this);
 }
 
 void USHealthComponent::Heal(float HealAmount)

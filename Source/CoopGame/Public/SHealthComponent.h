@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "SHealthComponent.generated.h"
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, USHealthComponent*, HealthComponent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FOnHealthChangedSignature, USHealthComponent*, HealthComp, float, Health, float, HealthDelta, const class UDamageType*, DamageType, class AController*, InstigatedBy, AActor*, DamageCauser);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilled, AActor*, KilledActor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnDealtDamage, AActor*, DamageDealer, AActor*, DamageReciever, AActor*, DamageCauser);
@@ -23,6 +23,9 @@ public:
 
     UPROPERTY(EditDefaultsOnly, Replicated, BlueprintReadOnly, Category = "HealthComponent")
     bool bDamageSelf = true;
+
+    UPROPERTY(BlueprintAssignable, Category = "HealthComponent")
+    FOnHealthChanged OnHealthChanged_Minimal;
 
     UPROPERTY(BlueprintAssignable, Category = "HealthComponentEvents")
     FOnHealthChangedSignature OnHealthChanged;
@@ -48,10 +51,14 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-    UPROPERTY(ReplicatedUsing=OnRep_Health, BlueprintReadOnly, Category = "HealthComponent")
+
+    // Okay so I hacked this in. There needs to be an increase health method that gets the percentage 
+    // that the actor getting the health increase was at and then sets the new health to that percentage
+    // after max health was increased
+    UPROPERTY(ReplicatedUsing=OnRep_Health, BlueprintReadWrite, Category = "HealthComponent")
     float Health;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthComponent")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_MaxHealth, Category = "HealthComponent")
     float MaxHealth = 100.0f;
 
     UFUNCTION()
@@ -59,6 +66,9 @@ protected:
 
     UFUNCTION()
     void OnRep_Health(float OldHealth);
+
+    UFUNCTION()
+    void OnRep_MaxHealth();
 
     bool bIsDead = false;
 

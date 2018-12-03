@@ -198,11 +198,17 @@ void ASHordeGameMode::ApplyWaveAffixesToActor(AActor* Actor)
 ASAffix* ASHordeGameMode::SpawnRandomAffix()
 {
     if (AllPossibleWaveAffixes.Num() <= 0) { return nullptr; }
+    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
+    if (!GS) { return nullptr; }
+
 
     TSubclassOf<ASAffix> Chosen = AllPossibleWaveAffixes[FMath::RandRange(0, AllPossibleWaveAffixes.Num() - 1)];
     ASAffix* Affix = GetWorld()->SpawnActor<ASAffix>(Chosen);
     SpawnedAffixes.Add(Affix);
     AllPossibleWaveAffixes.Remove(Chosen);
+
+    GS->AddAffix(Affix);
+    
 
     return Affix;
 }
