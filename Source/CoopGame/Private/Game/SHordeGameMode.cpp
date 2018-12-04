@@ -48,7 +48,7 @@ void ASHordeGameMode::StartWave()
     GS->SetCurrentWaveNumber(CurrentWaveCount);
 
     SetWaveState(EWaveState::WaitingToComplete);
-    NumberBotsToSpawn = 2 * CurrentWaveCount;
+    NumberBotsToSpawn = NumberBotsPerWave * CurrentWaveCount;
     GetWorldTimerManager().SetTimer(TimerHandle_BotSpawner, this, &ASHordeGameMode::SpawnBotTimerElapsed, 1.0f, true, 0.0f);
 }
 

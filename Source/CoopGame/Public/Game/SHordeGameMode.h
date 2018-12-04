@@ -36,6 +36,9 @@ protected:
     int32 NumberWaves = 1;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
+    int32 NumberBotsPerWave = 6;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
     uint8 PlayerTeamNumber = 0;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
