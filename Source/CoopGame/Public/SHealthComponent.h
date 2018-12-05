@@ -9,8 +9,8 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, USHealthComponent*, HealthComponent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FOnHealthChangedSignature, USHealthComponent*, HealthComp, float, Health, float, HealthDelta, const class UDamageType*, DamageType, class AController*, InstigatedBy, AActor*, DamageCauser);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilled, AActor*, KilledActor);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnDealtDamage, AActor*, DamageDealer, AActor*, DamageReciever, AActor*, DamageCauser);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnDamageTaken, AActor*, DamageReciever, AActor*, DamageDealer, AActor*, DamageCauser);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnDealtDamage, AActor*, DamageDealer, AActor*, DamageReciever, AActor*, DamageCauser, float, Damage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnDamageTaken, AActor*, DamageReciever, AActor*, DamageDealer, AActor*, DamageCauser, float, Damage);
 
 
 UCLASS( ClassGroup=(COOP), meta=(BlueprintSpawnableComponent) )
