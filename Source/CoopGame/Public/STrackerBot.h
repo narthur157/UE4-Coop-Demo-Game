@@ -135,6 +135,10 @@ protected:
 
     UFUNCTION()
     void RefreshPath();
+
+    UPROPERTY(EditDefaultsOnly, Category = "Scoring")
+    float OnKillPoints = 0.0f;
+
 public:	
 
 	// Called every frame
@@ -149,4 +153,5 @@ public:
     // ISPawn
     virtual FVector GetSize() override;
 
+    virtual float GetOnKillScore() override { return OnKillPoints; }
 };

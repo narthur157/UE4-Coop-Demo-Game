@@ -4,6 +4,7 @@
 #include "SGameMode.h"
 #include "SGameState.h"
 #include "CoopGame.h"
+#include "SPlayerState.h"
 #include "Engine/Engine.h"
 #include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -64,14 +65,27 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
         USHealthComponent* OtherHealthComponent = DamageInstigatorActor->FindComponentByClass<USHealthComponent>();
         if (OtherHealthComponent)
         {
-            OtherHealthComponent->OnDamageDealt.Broadcast(DamageInstigatorActor, GetOwner(), DamageCauser);
+            OtherHealthComponent->OnDamageDealt.Broadcast(DamageInstigatorActor, GetOwner(), DamageCauser, Damage);
+
         }
     }
 
-    // Broadcast that we took damage
-    if ( DamageInstigatorActor)
+    
+    OnDamageTaken.Broadcast(GetOwner(), DamageInstigatorActor, DamageCauser, Damage);
+    
+    // Update damage and damage taken stats
+    APawn* Damaged = Cast<APawn>(GetOwner());
+    APawn* Damager = Cast<APawn>(DamageInstigatorActor);
+    if (Damaged && Damaged->PlayerState)
     {
-        OnDamageTaken.Broadcast(GetOwner(), DamageInstigatorActor, DamageCauser);
+        ASPlayerState* PS = Cast<ASPlayerState>(Damaged->PlayerState);
+        PS->AddDamageTaken(Damage);
+    }
+
+    if (Damager && Damager->PlayerState)
+    {
+        ASPlayerState* PS = Cast<ASPlayerState>(Damager->PlayerState);
+        PS->AddDamage(Damage);
     }
 
     Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);

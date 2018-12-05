@@ -62,6 +62,8 @@ public:
     /** Implements ISPawn */
     virtual FVector GetSize();
 
+    virtual float GetOnKillScore() override { return KillPoints; }
+
 protected:
     // Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -124,4 +126,7 @@ protected:
 
 	UFUNCTION(Server, Unreliable, WithValidation)
 	void ServerSetZoom(bool bZoom);
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Scoring")
+    float KillPoints = 0.0f;
 };

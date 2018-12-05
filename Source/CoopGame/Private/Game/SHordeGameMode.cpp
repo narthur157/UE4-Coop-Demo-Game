@@ -9,6 +9,7 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "STeam.h"
+#include "SPawn.h"
 #include "Gameplay/SAffix.h"
 #include "TimerManager.h"
 #include "SHordeGameState.h"
@@ -160,6 +161,27 @@ void ASHordeGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* 
 {
     Super::OnActorKilled_Implementation(KilledActor, KillerActor, DamageCauser);
    
+    if (KilledActor != KillerActor)
+    {
+        APawn* Killer = Cast<APawn>(KillerActor);
+        ISPawn* Killed = Cast<ISPawn>(KilledActor);
+        if (Killer && Killed && Killer->PlayerState)
+        {
+            ASPlayerState* PS = Cast<ASPlayerState>(Killer->PlayerState);
+            PS->AddScore(Killed->GetOnKillScore());
+        }
+    }
+    
+    APawn* Killed = Cast<APawn>(KilledActor);
+    if (Killed && Killed->PlayerState)
+    {
+        ASPlayerState* PS = Cast<ASPlayerState>(Killed->PlayerState);
+        if (PS)
+        {
+            PS->AddDeaths(1);
+        }
+    }
+
     CheckWaveState();
     CheckPlayerState();
 }
