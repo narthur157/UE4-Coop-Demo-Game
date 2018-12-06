@@ -12,6 +12,7 @@ void ASHordeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+    DOREPLIFETIME(ASHordeGameState, NewAffix);
     DOREPLIFETIME(ASHordeGameState, CurrentlyAppliedAffixes);
     DOREPLIFETIME(ASHordeGameState, PlayerTeam);
     DOREPLIFETIME(ASHordeGameState, HordeTeam);
@@ -38,6 +39,11 @@ void ASHordeGameState::OnRep_PlayerTeam()
     OnPlayerTeamChanged.Broadcast(PlayerTeam);
 }
 
+void ASHordeGameState::OnRep_NewAffix()
+{
+    OnNewAffix.Broadcast(NewAffix);
+}
+
 void ASHordeGameState::MulticastAffixAdded_Implementation(ASAffix* AffixAdded)
 {
     OnNewAffix.Broadcast(AffixAdded);
@@ -48,7 +54,7 @@ void ASHordeGameState::AddAffix(ASAffix* AffixToAdd)
     if (!HasAuthority()) { return; }
 
     CurrentlyAppliedAffixes.Add(AffixToAdd);
-    MulticastAffixAdded(AffixToAdd);
+    NewAffix = AffixToAdd;
 }
 
 void ASHordeGameState::SetWaveState(EWaveState NewState)

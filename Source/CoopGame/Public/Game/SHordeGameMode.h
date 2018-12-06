@@ -8,8 +8,8 @@
 
 
 enum class EWaveState : uint8;
+class ASHordeGameState;
 class ASAffix;
-class UUserWidget;
 
 /**
  * The base gamemode for Horde and other Wave-Spawning type GameModes. Should be used in conjunction with a SHordeGameState varient in order to
@@ -26,6 +26,9 @@ public:
 
 protected:
 
+    UPROPERTY(BlueprintReadOnly, Category = "HordeMode")
+    ASHordeGameState* GameStateCache = nullptr;
+
     UPROPERTY(EditDefaultsOnly, Category = "HordeMode")
     TArray<TSubclassOf<ASAffix>> AllPossibleWaveAffixes;
 
@@ -34,6 +37,9 @@ protected:
     /** The number of waves designated before the players win the game. */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
     int32 NumberWaves = 1;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
+    int32 NumberBotsPerWave = 6;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
     uint8 PlayerTeamNumber = 0;
@@ -65,7 +71,7 @@ protected:
 
     /** Starts the spawning of the current wave. */
     void StartWave();
-
+    
     /**Stops the spawning of the current wave. */
     void EndWave();
 

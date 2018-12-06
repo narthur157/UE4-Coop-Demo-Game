@@ -4,24 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "ITeamMember.h"
 #include "DefenseObjective.generated.h"
 
 class USHealthComponent;
 class UTeamComponent;
 
 UCLASS()
-class COOPGAME_API ADefenseObjective : public AActor, public ITeamMember
+class COOPGAME_API ADefenseObjective : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
 	ADefenseObjective();
-
-    // ITeamMember
-    UFUNCTION(BlueprintCallable, Category = "Team")
-    virtual uint8 GetTeamID() override;
 
 protected:
 

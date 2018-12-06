@@ -8,9 +8,10 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, USHealthComponent*, HealthComponent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FOnHealthChangedSignature, USHealthComponent*, HealthComp, float, Health, float, HealthDelta, const class UDamageType*, DamageType, class AController*, InstigatedBy, AActor*, DamageCauser);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilled, AActor*, KilledActor);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnDealtDamage, AActor*, DamageDealer, AActor*, DamageReciever, AActor*, DamageCauser);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnDamageTaken, AActor*, DamageReciever, AActor*, DamageDealer, AActor*, DamageCauser);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnDealtDamage, AActor*, DamageDealer, AActor*, DamageReciever, AActor*, DamageCauser, float, Damage);
+
 
 UCLASS( ClassGroup=(COOP), meta=(BlueprintSpawnableComponent) )
 class COOPGAME_API USHealthComponent : public UActorComponent
@@ -21,6 +22,7 @@ public:
 	// Sets default values for this component's properties
 	USHealthComponent();
 
+    /** Should the actor which this component is attached to be allowed to damage itself? */
     UPROPERTY(EditDefaultsOnly, Replicated, BlueprintReadOnly, Category = "HealthComponent")
     bool bDamageSelf = true;
 
@@ -44,17 +46,10 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "DamageEventDelegates")
     FOnDealtDamage OnDamageDealt;
 
-    UPROPERTY(BlueprintAssignable, Category = "DamageEventDelegates")
-    FOnDamageTaken OnDamageTaken;
-
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-
-    // Okay so I hacked this in. There needs to be an increase health method that gets the percentage 
-    // that the actor getting the health increase was at and then sets the new health to that percentage
-    // after max health was increased
     UPROPERTY(ReplicatedUsing=OnRep_Health, BlueprintReadWrite, Category = "HealthComponent")
     float Health;
 
@@ -65,6 +60,9 @@ protected:
     void HandleTakeDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
     UFUNCTION()
+    void BroadcastRelevantDamageEvents(AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor* DamageInstigatorActor, AActor * DamageCauser);
+
+    UFUNCTION()
     void OnRep_Health(float OldHealth);
 
     UFUNCTION()
@@ -72,6 +70,9 @@ protected:
 
     bool bIsDead = false;
 
+    /** Used to determine who is responsible for damage. 
+        Basically just picks one of DamageInstigator->GetPawn(), DamagerCauser->GetOwner(), DamageCauser based on which is valid
+        trying each in that order. */
     AActor * DetermineDamageInstigatorActor(AController * DamageInstigator, AActor * DamageCauser);
     
 };

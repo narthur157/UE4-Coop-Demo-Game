@@ -167,9 +167,12 @@ void ASCharacter::EndSprint()
     //GetCharacterMovement()->MaxWalkSpeed -= SprintSpeed;
 }
 
-uint8 ASCharacter::GetTeamID()
+FVector ASCharacter::GetSize()
 {
-    return TeamComp->GetTeamID();
+    return FVector(
+        GetCapsuleComponent()->GetScaledCapsuleRadius(),
+        GetCapsuleComponent()->GetScaledCapsuleRadius(),
+        GetCapsuleComponent()->GetScaledCapsuleHalfHeight()*2);
 }
 
 float ASCharacter::GetReloadSpeed()
