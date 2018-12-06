@@ -45,6 +45,5 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Team")
     static bool IsActorFriendly(AActor* ActorOne, AActor* ActorTwo);
-    //static bool IsPlayerFriendly(AController* ControllerOne, AController* ControllerTwo);
 	
 };

@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "DamageDealer.h"
-#include "ITeamMember.h"
 #include "Game/SPawn.h"
 #include "SCharacter.generated.h"
 
@@ -15,7 +14,7 @@ class UTeamComponent;
 class UAnimMontage;
 
 UCLASS()
-class COOPGAME_API ASCharacter : public ACharacter, public IDamageDealer, public ITeamMember, public ISPawn
+class COOPGAME_API ASCharacter : public ACharacter, public IDamageDealer, public ISPawn
 {
 	GENERATED_BODY()
 
@@ -55,9 +54,6 @@ public:
 
     /** Implements IDamageDealer */
     virtual float GetDamageModifier() override { return DamageModifier; }
-
-    /** Implements ITeamMember */
-    virtual uint8 GetTeamID() override;
 
     /** Implements ISPawn */
     virtual FVector GetSize();

@@ -14,6 +14,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMemberJoined, const ASTeam*, Team,
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMemberLeft, const ASTeam*, Team, const APlayerState*, OldMember);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FActorJoined, const ASTeam*, Team, const AActor*, Actor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FActorLeft, const ASTeam*, Team, const AActor*, Actor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTeamScoreChanged, const ASTeam*, Team, float, NewScore);
 
 /**
  * 
@@ -26,6 +27,8 @@ class COOPGAME_API ASTeam : public AActor
 
 public:
     ASTeam();
+
+    /** Team Events */
 
     /** Broadcasted when an actor joins the team */
     UPROPERTY(BlueprintAssignable, Category = "Team")
@@ -43,6 +46,19 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "Team")
     FTeamUpdated OnTeamUpdated;
 
+    /** Broadcasted when a team's score changes */
+    UPROPERTY(BlueprintAssignable, Category = "Team")
+    FTeamScoreChanged OnTeamScoreChanged;
+
+
+    /** Getters/Setters */
+
+    UFUNCTION(BlueprintCallable, Category = "TeamStats")
+    void AddScore(float ScoreDelta);
+
+    UFUNCTION(BlueprintCallable, Category = "TeamStats")
+    float GetScore();
+
     /** Changes a team ID */
     UFUNCTION(BlueprintCallable, Category = "Team")
     void SetTeamID(uint8 NewTeamID);
@@ -50,6 +66,9 @@ public:
     /** Retrieves a team's ID */
     UFUNCTION(BlueprintCallable, Category = "Team")
     uint8 GetTeamID() { return TeamID; }
+
+
+    /** Team Join/Leave operations */
 
     /** Adds a controller to a team, also attempts to add a the playerstate associated with the team */
     UFUNCTION(BlueprintCallable, Category = "Team")
@@ -65,9 +84,9 @@ public:
 
     /** Completely clear out a team, useful for a reset */
     UFUNCTION(BlueprintCallable, Category = "Team")
-    void ClearTeam() { MemberActors.Empty(); MemberStates.Empty(); Members.Empty(); }
+    void ClearTeam();
 
-    //////////////
+    //////////////////////////////////
     // Querying
 
     /** Get the member's playerstates */
@@ -96,7 +115,10 @@ public:
 
 protected:
 
-    UPROPERTY(Replicated)
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_TeamScore, Category = "TeamStats")
+    float TeamScore = 0.0f;
+
+    UPROPERTY(BlueprintReadOnly, Replicated, Category = "Team")
     uint8 TeamID;
 
     /** Used so we can access team members on server. This will be null on clients */
@@ -110,11 +132,16 @@ protected:
     TArray<AActor*> MemberActors;
 
     UFUNCTION()
+    void OnRep_TeamScore();
+
+    UFUNCTION()
     void OnRep_MemberActors() {}
 
     UFUNCTION()
     void OnRep_MemberStates() {}
 
+    // Cannot get around multicasting here, simply replicatiing the arrays is not enough as
+    // it would be a pain to determine whether or not an actor left or joined based solely on an onrep
     UFUNCTION(NetMulticast, Reliable, WithValidation)
     void PlayerJoinedTeam(APlayerState* Player);
 
@@ -124,4 +151,5 @@ protected:
     UFUNCTION(NetMulticast, Reliable, WithValidation)
     void ActorLeftTeam(AActor* Actor);
 
+    
 };

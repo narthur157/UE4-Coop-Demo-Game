@@ -303,11 +303,6 @@ bool ASTrackerBot::AttachBotToActor(APawn* OtherPawn)
 	return false;
 }
 
-uint8 ASTrackerBot::GetTeamID()
-{
-    return TeamComp->GetTeamID();
-}
-
 FVector ASTrackerBot::GetSize()
 {
     return FVector(MeshComp->Bounds.SphereRadius, MeshComp->Bounds.SphereRadius, MeshComp->Bounds.SphereRadius);

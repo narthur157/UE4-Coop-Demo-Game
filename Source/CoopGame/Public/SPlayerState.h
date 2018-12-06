@@ -18,6 +18,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerDamageTakenChanged, ASPlay
 
 
 class ASTeam;
+class UTeamComponent;
 
 /**
  * 
@@ -29,20 +30,12 @@ class COOPGAME_API ASPlayerState : public APlayerState
 
 
 public:
-   
-    UFUNCTION(BlueprintCallable, Category = "Team")
-    ASTeam* GetTeam() { return Team; }
+
+    ASPlayerState();
 
     /** [Server Only] */
     UFUNCTION(BlueprintCallable, Category = "Player")
     void SetCurrentPawn(APawn* CurrentPawn);
-
-
-    UPROPERTY(BlueprintAssignable, Category = "Player")
-    FOnCurrentPawnChanged OnCurrentPawnChanged;
-
-    UPROPERTY(BlueprintAssignable, Category = "Player")
-    FOnTeamChanged OnTeamChanged;
 
     /** Stat Modifiers */
     UFUNCTION(BlueprintCallable, Category = "Score")
@@ -67,12 +60,16 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "PlayerStats")
     FOnPlayerDamageTakenChanged OnDamageTakenChanged;
 
+    UPROPERTY(BlueprintAssignable, Category = "Player")
+    FOnCurrentPawnChanged OnCurrentPawnChanged;
+
+    UPROPERTY(BlueprintAssignable, Category = "Player")
+    FOnTeamChanged OnTeamChanged;
+
 protected:
 
-    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Team, Category = "Team")
-    ASTeam* Team = nullptr;
-    UFUNCTION()
-    void OnRep_Team();
+    UPROPERTY(VisibleAnywhere, Category = "Team")
+    UTeamComponent* TeamComponent = nullptr;
 
     UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentPawn, Category = "Player")
     APawn* CurrentPawn = nullptr;
@@ -86,6 +83,7 @@ protected:
     float DamageDone = 0.0f;
     UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_DamageTaken, Category = "PlayerStats")
     float DamageTaken = 0.0f;
+
     /** Player Stats OnRep */
     void OnRep_Score();
     UFUNCTION()

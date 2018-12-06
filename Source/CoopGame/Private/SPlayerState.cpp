@@ -3,29 +3,30 @@
 #include "SPlayerState.h"
 #include "SHealthComponent.h"
 #include "GameFramework/Pawn.h"
+#include "TeamComponent.h"
 #include "Net/UnrealNetwork.h"
 
+ASPlayerState::ASPlayerState()
+{
+    TeamComponent = CreateDefaultSubobject<UTeamComponent>(TEXT("Team Component"));
+}
 
 void ASPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(ASPlayerState, CurrentPawn)
-    DOREPLIFETIME(ASPlayerState, Team);
-
 }
 
 void ASPlayerState::SetCurrentPawn(APawn * NewCurrentPawn)
 {
     if (Role < ROLE_Authority) { return; }
 
-    // God the playerstate should really not care about whether or not the pawn it is attached to
-    // is using a health component
-
-
+    CurrentPawn = NewCurrentPawn;
     OnRep_CurrentPawn();
 }
 
+/** It sure would be nice if we could just bind to our current pawn here but instead we are bound by the laws of amazinng race conditions and i am far too lazy to set up a delegate in every pawn that is possible to be controlled to alert this playerstate of when we are freed from the constraints of the race condition gods*/
 void ASPlayerState::OnCurrentPawnDamageDone(AActor* DamageInstigatorActor, AActor* DamagedActor, AActor* DamageCauser, float Damage)
 {
     AddDamage(Damage);
@@ -40,6 +41,7 @@ void ASPlayerState::OnRep_CurrentPawn()
 {
     OnCurrentPawnChanged.Broadcast(this, CurrentPawn);
 }
+
 
 //////////////////////////////////
 /** PlayerStats Modifiers */
@@ -89,9 +91,4 @@ void ASPlayerState::OnRep_DamageDone()
 void ASPlayerState::OnRep_DamageTaken()
 {
     OnDamageTakenChanged.Broadcast(this, DamageTaken);
-}
-
-void ASPlayerState::OnRep_Team()
-{
-    OnTeamChanged.Broadcast(this, Team);
 }
