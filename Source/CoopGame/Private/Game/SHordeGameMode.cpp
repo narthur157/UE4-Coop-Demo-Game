@@ -1,16 +1,13 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project SettinGameStateCache.
 
 #include "SHordeGameMode.h"
 #include "CoopGame.h"
-#include "Blueprint/UserWidget.h"
-#include "SHealthComponent.h"
 #include "SPlayerState.h"
 #include "STeamManager.h"
-#include "Engine/Engine.h"
-#include "Engine/World.h"
 #include "STeam.h"
+#include "TeamComponent.h"
+#include "SPawn.h"
 #include "Gameplay/SAffix.h"
-#include "TimerManager.h"
 #include "SHordeGameState.h"
 
 
@@ -25,14 +22,14 @@ void ASHordeGameMode::StartPlay()
 {
     Super::StartPlay();
 
-    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
-    if (!GS) { return; }
+    GameStateCache = GetGameState<ASHordeGameState>();
+    ensure(GameStateCache);
 
-    GS->GetTeamManager()->CreateTeam(PlayerTeamNumber);
-    GS->PlayerTeam = GS->GetTeamManager()->GetTeam(PlayerTeamNumber);
-    GS->GetTeamManager()->CreateTeam(HordeTeamNumber);
-    GS->HordeTeam = GS->GetTeamManager()->GetTeam(HordeTeamNumber);
-    GS->OnRep_HordeTeam();
+    GameStateCache->GetTeamManager()->CreateTeam(PlayerTeamNumber);
+    GameStateCache->PlayerTeam = GameStateCache->GetTeamManager()->GetTeam(PlayerTeamNumber);
+    GameStateCache->GetTeamManager()->CreateTeam(HordeTeamNumber);
+    GameStateCache->HordeTeam = GameStateCache->GetTeamManager()->GetTeam(HordeTeamNumber);
+    GameStateCache->OnRep_HordeTeam();
     
     PrepareForNextWave();
 }
@@ -40,15 +37,14 @@ void ASHordeGameMode::StartPlay()
 
 void ASHordeGameMode::StartWave()
 {
-
     // Update the current wave count
-    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
-    if (!GS) { return; }
+    ensure(GameStateCache);
+
     CurrentWaveCount++;
-    GS->SetCurrentWaveNumber(CurrentWaveCount);
+    GameStateCache->SetCurrentWaveNumber(CurrentWaveCount);
 
     SetWaveState(EWaveState::WaitingToComplete);
-    NumberBotsToSpawn = 2 * CurrentWaveCount;
+    NumberBotsToSpawn = NumberBotsPerWave * CurrentWaveCount;
     GetWorldTimerManager().SetTimer(TimerHandle_BotSpawner, this, &ASHordeGameMode::SpawnBotTimerElapsed, 1.0f, true, 0.0f);
 }
 
@@ -70,15 +66,14 @@ void ASHordeGameMode::EndWave()
 
 void ASHordeGameMode::PrepareForNextWave()
 {
-    RestartDeadPlayers();
+    ensure(GameStateCache);
 
+    RestartDeadPlayers();
     SpawnRandomAffix();
 
-    // Game is finished, players win on waves
-    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
     if (CurrentWaveCount == NumberWaves && NumberWaves > 0)
     {
-        GameOver(GS->PlayerTeam);
+        GameOver(GameStateCache->PlayerTeam);
         return;
     }
 
@@ -91,11 +86,7 @@ void ASHordeGameMode::PrepareForNextWave()
     {
         // Spawn the next wave on a delay
         GetWorldTimerManager().SetTimer(TimerHandle_NextWaveStart, this, &ASHordeGameMode::StartWave, TimeBetweenWaves, false);
-        ASHordeGameState* GS = GetGameState<ASHordeGameState>();
-        if (ensureAlways(GS))
-        {
-            GS->SetNextWaveStartTime(GetWorld()->TimeSeconds + TimeBetweenWaves);
-        }
+        GameStateCache->SetNextWaveStartTime(GetWorld()->TimeSeconds + TimeBetweenWaves);
     }
 
     SetWaveState(EWaveState::WaitingToStart);
@@ -105,22 +96,15 @@ void ASHordeGameMode::PrepareForNextWave()
 // This should really be generalized more into a team format somehow? broadcast win/lose conditions based on teamID
 void ASHordeGameMode::CheckWaveState()
 {
+    ensure(GameStateCache);
 
     if (NumberBotsToSpawn > 0 || GetWorldTimerManager().IsTimerActive(TimerHandle_NextWaveStart))
     {
         return;
     }
 
-    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
-    if (!GS)
-    {
-        return;
-    }
-    ASTeam* HordeTeam = GS->GetTeamManager()->GetTeam(HordeTeamNumber);
-    if (!HordeTeam)
-    {
-        return;
-    }
+    ASTeam* HordeTeam = GameStateCache->GetTeamManager()->GetTeam(HordeTeamNumber);
+    if (!HordeTeam) { return; }
 
     // Perhaps in the future its best to have an interface for mobs that can be wave mobs.
     TArray<AActor*> WaveMobsAlive = HordeTeam->GetActorsWithTag("WaveMob");
@@ -135,24 +119,22 @@ void ASHordeGameMode::CheckWaveState()
 
 void ASHordeGameMode::CheckPlayerState()
 {
-    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
-    if (!GS) { return; }
+    ensure(GameStateCache);
 
-    TArray<AActor*> PlayerTeamActors = GS->PlayerTeam->GetActorsWithTag("WaveRelevant");
+    TArray<AActor*> PlayerTeamActors = GameStateCache->PlayerTeam->GetActorsWithTag("WaveRelevant");
     if (PlayerTeamActors.Num() == 0)
     {
-        GS->MulticastGameOver(GS->HordeTeam);
+        GameStateCache->MulticastGameOver(GameStateCache->HordeTeam);
     }
 }
 
 // Changes the state of the wave spawner
 void ASHordeGameMode::SetWaveState(EWaveState State)
 {
-    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
-    if (ensureAlways(GS))
-    {
-        GS->SetWaveState(State);
-    }
+    ensure(GameStateCache);
+
+    GameStateCache->SetWaveState(State);
+   
 }
 
 // Called when a player has died, used in order to avoid using tick to check player/wave state
@@ -160,6 +142,39 @@ void ASHordeGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* 
 {
     Super::OnActorKilled_Implementation(KilledActor, KillerActor, DamageCauser);
    
+    // Update the involved players scores
+    if (KilledActor != KillerActor)
+    {
+        // fix this
+        APawn* Killer = Cast<APawn>(KillerActor);
+        ISPawn* Killed = Cast<ISPawn>(KilledActor);
+        if (Killer && Killed && Killer->PlayerState)
+        {
+            // Score for the player
+            ASPlayerState* PS = Cast<ASPlayerState>(Killer->PlayerState);
+            PS->AddScore(Killed->GetOnKillScore());
+            
+            // Score for the team
+            UTeamComponent* PSTeamComp = PS->FindComponentByClass<UTeamComponent>();
+            if (PSTeamComp && PSTeamComp->GetTeam())
+            {
+                PSTeamComp->GetTeam()->AddScore(Killed->GetOnKillScore());
+            }
+        }
+    }
+    
+    // If the killed actor was controlled by something, increase death count on the playerstate
+    APawn* Killed = Cast<APawn>(KilledActor);
+    if (Killed && Killed->PlayerState)
+    {
+        ASPlayerState* PS = Cast<ASPlayerState>(Killed->PlayerState);
+        if (PS)
+        {
+            PS->AddDeaths(1);
+        }
+    }
+
+    // Determine if the game/wave should end by checking Horde/Player teams
     CheckWaveState();
     CheckPlayerState();
 }
@@ -167,14 +182,15 @@ void ASHordeGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* 
 
 void ASHordeGameMode::ApplyWaveAffixes()
 {
-    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
-    if (!GS || AllPossibleWaveAffixes.Num() <= 0)
+    ensure(GameStateCache);
+
+    if (AllPossibleWaveAffixes.Num() <= 0)
     {
         return;
     }
- 
-    ASTeam* HordeTeam = GS->HordeTeam;
-    TArray<AActor*> HordeTeamPawns = GS->HordeTeam->GetActorsWithTag("WaveMob");
+
+    ASTeam* HordeTeam = GameStateCache->HordeTeam;
+    TArray<AActor*> HordeTeamPawns = GameStateCache->HordeTeam->GetActorsWithTag("WaveMob");
     
     for (AActor* HordeWaveActor : HordeTeamPawns)
     {
@@ -197,18 +213,16 @@ void ASHordeGameMode::ApplyWaveAffixesToActor(AActor* Actor)
 
 ASAffix* ASHordeGameMode::SpawnRandomAffix()
 {
-    if (AllPossibleWaveAffixes.Num() <= 0) { return nullptr; }
-    ASHordeGameState* GS = GetGameState<ASHordeGameState>();
-    if (!GS) { return nullptr; }
+    ensure(GameStateCache);
 
+    if (AllPossibleWaveAffixes.Num() <= 0) { return nullptr; }
 
     TSubclassOf<ASAffix> Chosen = AllPossibleWaveAffixes[FMath::RandRange(0, AllPossibleWaveAffixes.Num() - 1)];
     ASAffix* Affix = GetWorld()->SpawnActor<ASAffix>(Chosen);
     SpawnedAffixes.Add(Affix);
     AllPossibleWaveAffixes.Remove(Chosen);
 
-    GS->AddAffix(Affix);
-    
+    GameStateCache->AddAffix(Affix);
 
     return Affix;
 }

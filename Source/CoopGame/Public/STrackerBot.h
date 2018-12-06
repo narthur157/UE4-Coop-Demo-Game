@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "DamageDealer.h"
-#include "ITeamMember.h"
+#include "SPawn.h"
 #include "STrackerBot.generated.h"
 
 class USHealthComponent;
@@ -13,7 +13,7 @@ class UTeamComponent;
 class USoundCue;
 
 UCLASS()
-class COOPGAME_API ASTrackerBot : public APawn, public IDamageDealer, public ITeamMember
+class COOPGAME_API ASTrackerBot : public APawn, public ISPawn, public IDamageDealer
 {
 	GENERATED_BODY()
 
@@ -130,13 +130,18 @@ protected:
 
     UFUNCTION()
     void RefreshPath();
+
+    UPROPERTY(EditDefaultsOnly, Category = "Scoring")
+    float OnKillPoints = 0.0f;
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 
     // IDamageDealer
     virtual float GetDamageModifier() override { return DamageModifier; }
 
-    // ITeamMember 
-    virtual uint8 GetTeamID() override;
-	
+    // ISPawn
+    virtual FVector GetSize() override;
+
+    virtual float GetOnKillScore() override { return OnKillPoints; }
 };

@@ -4,6 +4,7 @@
 #include "SGameMode.h"
 #include "SGameState.h"
 #include "CoopGame.h"
+#include "SPlayerState.h"
 #include "Engine/Engine.h"
 #include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -44,38 +45,23 @@ void USHealthComponent::BeginPlay()
 // This only runs on server because we are only binding to this delegate on server
 void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
-    //IsFriendly(DamagedActor, InstigatedBy->GetPawn())
     ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
 
     // Find the ACTOR responsible for the damage which was dealt
-    // Why all the trouble? Controllers don't stay attached to pawns on death.
+    // Why all the trouble? Controllers don't stay attached to pawns on death, thus on occasion InstigatedBy->GetPawn is invalid
     AActor* DamageInstigatorActor = DetermineDamageInstigatorActor(InstigatedBy, DamageCauser);
 
-    // @TODO right now self damage is simply just enabled, because we need the trackerbot to be able to kill itself essentially
-    // This is not correct.
-    if (Damage <= 0 || bIsDead || (!GM->bIsFriendlyFireEnabled && UTeamComponent::IsActorFriendly(DamagedActor, DamageInstigatorActor) && DamagedActor != DamageInstigatorActor))
+    if ( Damage <= 0 
+        || bIsDead 
+        || (!(DamageCauser == DamageInstigatorActor) && !GM->bIsFriendlyFireEnabled && UTeamComponent::IsActorFriendly(DamagedActor, DamageInstigatorActor))
+        || (!bDamageSelf && DamageCauser == DamageInstigatorActor))
     {
         return;
     }
 
-    // Broadcast that the instigator dealt damage
-    if (DamageInstigatorActor)
-    {
-        USHealthComponent* OtherHealthComponent = DamageInstigatorActor->FindComponentByClass<USHealthComponent>();
-        if (OtherHealthComponent)
-        {
-            OtherHealthComponent->OnDamageDealt.Broadcast(DamageInstigatorActor, GetOwner(), DamageCauser);
-        }
-    }
-
-    // Broadcast that we took damage
-    if ( DamageInstigatorActor)
-    {
-        OnDamageTaken.Broadcast(GetOwner(), DamageInstigatorActor, DamageCauser);
-    }
-
     Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
 
+    // @DEBUGLOG Damage 
     FString InstigatedByS = DamageInstigatorActor ? *DamageInstigatorActor->GetName() : NULLSTRING;
     FString DamageCauserS = DamageCauser ? *DamageCauser->GetName() : NULLSTRING;
     TRACE("%s inflicts %f damage on %s using %s . Current Health: %f",
@@ -85,7 +71,8 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
         *DamageCauserS,
         Health);
 
-    OnHealthChanged.Broadcast(this, Health, Damage, DamageType, InstigatedBy, DamageCauser);
+
+    BroadcastRelevantDamageEvents(DamagedActor, Damage, DamageType, InstigatedBy, DamageInstigatorActor, DamageCauser);
 
     if (Health <= 0 && !bIsDead)
     {
@@ -96,6 +83,38 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
             GM->OnActorKilled(GetOwner(), DamageInstigatorActor, DamageCauser);
         }
         bIsDead = true;
+    }
+
+}
+
+
+void USHealthComponent::BroadcastRelevantDamageEvents(AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor* DamageInstigatorActor, AActor * DamageCauser)
+{
+    OnHealthChanged.Broadcast(this, Health, Damage, DamageType, InstigatedBy, DamageCauser);
+
+    // Tell the other actor that it successfully applied damage
+    if (DamageInstigatorActor)
+    {
+        USHealthComponent* OtherHealthComponent = DamageInstigatorActor->FindComponentByClass<USHealthComponent>();
+        if (OtherHealthComponent)
+        {
+            OtherHealthComponent->OnDamageDealt.Broadcast(DamageInstigatorActor, GetOwner(), DamageCauser, Damage);
+        }
+    }
+
+    // Update damage and damage taken stats
+    APawn* Damaged = Cast<APawn>(GetOwner());
+    APawn* Damager = Cast<APawn>(DamageInstigatorActor);
+    if (Damaged && Damaged->PlayerState)
+    {
+        ASPlayerState* PS = Cast<ASPlayerState>(Damaged->PlayerState);
+        PS->AddDamageTaken(Damage);
+    }
+
+    if (Damager && Damager->PlayerState)
+    {
+        ASPlayerState* PS = Cast<ASPlayerState>(Damager->PlayerState);
+        PS->AddDamage(Damage);
     }
 }
 

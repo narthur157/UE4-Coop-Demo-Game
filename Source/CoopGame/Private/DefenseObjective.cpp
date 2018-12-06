@@ -28,11 +28,6 @@ void ADefenseObjective::BeginPlay()
     HealthComp->OnHealthChanged.AddDynamic(this, &ADefenseObjective::OnHealthComponentTakeDamage);
 }
 
-uint8 ADefenseObjective::GetTeamID()
-{
-    return TeamComp->GetTeamID();
-}
-
 void ADefenseObjective::OnRep_ObjectiveDestroyed()
 {
     OnObjectiveDestroyed();
