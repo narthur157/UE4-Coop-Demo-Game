@@ -1,0 +1,13 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UE4Editor-AdvancedSessions.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:\Users\morde\Documents\Unreal Projects\PluginExpProject\Intermediate\Build\Win64\VRExpPluginExampleEditor\Development\Engine\SharedPCH.Engine.h.obj"
+"C:\Users\morde\Documents\Unreal Projects\PluginExpProject\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\UE4Editor\Development\AdvancedSessions\Module.AdvancedSessions.cpp.obj"
+"C:\Users\morde\Documents\Unreal Projects\PluginExpProject\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\UE4Editor\Development\AdvancedSessions\Module.AdvancedSessions.gen.cpp.obj"
+"C:\Users\morde\Documents\Unreal Projects\PluginExpProject\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\UE4Editor\Development\AdvancedSessions\PCLaunch.rc.res"
+/OUT:"C:\Users\morde\Documents\Unreal Projects\PluginExpProject\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\UE4Editor\Development\AdvancedSessions\UE4Editor-AdvancedSessions.lib"
