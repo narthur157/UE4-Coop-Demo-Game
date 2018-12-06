@@ -167,11 +167,6 @@ void ASCharacter::EndSprint()
     //GetCharacterMovement()->MaxWalkSpeed -= SprintSpeed;
 }
 
-uint8 ASCharacter::GetTeamID()
-{
-    return TeamComp->GetTeamID();
-}
-
 FVector ASCharacter::GetSize()
 {
     return FVector(

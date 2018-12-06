@@ -24,12 +24,28 @@ void ASTeam::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePr
     DOREPLIFETIME(ASTeam, TeamID);
 }
 
+//////////////////////////////////
+/** Getters/Setters */
+
+void ASTeam::AddScore(float ScoreDelta)
+{
+    TeamScore += ScoreDelta;
+    OnRep_TeamScore();
+}
+
+float ASTeam::GetScore()
+{
+    return TeamScore;
+}
+
 void ASTeam::SetTeamID(uint8 NewTeamID)
 {
     TeamID = NewTeamID;
     OnTeamUpdated.Broadcast(this);
 }
 
+//////////////////////////////////
+/** Team Add/Remove Operations */
 void ASTeam::AddToTeam(AController* Controller)
 {
 
@@ -82,7 +98,6 @@ void ASTeam::ActorLeftTeam_Implementation(AActor* Actor)
 
 bool ASTeam::ActorLeftTeam_Validate(AActor* Actor) { return true; }
 
-
 void ASTeam::PlayerJoinedTeam_Implementation(APlayerState* Player)
 {
     OnMemberJoined.Broadcast(this, Player);
@@ -90,6 +105,16 @@ void ASTeam::PlayerJoinedTeam_Implementation(APlayerState* Player)
 
 bool ASTeam::PlayerJoinedTeam_Validate(APlayerState* Player) { return true; }
 
+
+void ASTeam::ClearTeam()
+{
+    MemberActors.Empty(); 
+    MemberStates.Empty(); 
+    Members.Empty(); 
+}
+
+//////////////////////////////////
+/** Query Operations */
 TArray<AActor*> ASTeam::GetActorsOfClass(TSubclassOf<AActor> ActorClass)
 {
     TArray<AActor*> FoundActors;
@@ -143,4 +168,9 @@ TArray<AActor*> ASTeam::GetActorsWithTag(FName Tag)
         }
     }
     return FoundActors;
+}
+
+void ASTeam::OnRep_TeamScore()
+{
+    OnTeamScoreChanged.Broadcast(this, TeamScore);
 }

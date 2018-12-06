@@ -33,6 +33,6 @@ public:
     virtual FVector GetSize() { ensure(false); return FVector::ZeroVector; };
 	UFUNCTION(BlueprintCallable, Category = "SPawn")
     virtual float GetOnKillScore() { return 0.0f; }
-
+    
 
 };

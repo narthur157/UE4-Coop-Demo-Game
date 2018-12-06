@@ -97,6 +97,11 @@ public:
 
 protected:
 
+    // Don't really want to have to do this honestly, however there is a race condition involving spawnning a new actor and
+    // immediately RPCing it. The clients will not have the actor 
+    UPROPERTY(ReplicatedUsing = OnRep_NewAffix)
+    ASAffix* NewAffix = nullptr;
+
     UPROPERTY(Replicated)
     TArray<ASAffix*> CurrentlyAppliedAffixes;
 
@@ -118,6 +123,8 @@ protected:
     UFUNCTION()
     void OnRep_PlayerTeam();
 
+    UFUNCTION()
+    void OnRep_NewAffix();
 
 };
 
