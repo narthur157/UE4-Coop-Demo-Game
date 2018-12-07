@@ -14,10 +14,9 @@
 #include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "TimerManager.h"
-#include "Game/SGameState.h"
+#include "Game/Modes/SGameState.h"
 #include "Engine/Engine.h"
 #include "Net/UnrealNetwork.h"
-#include "DrawDebugHelpers.h"
 
 static int32 DebugTrackerBotNavigation = 0;
 FAutoConsoleVariableRef CVARDebugTrackerBotNavigation(
