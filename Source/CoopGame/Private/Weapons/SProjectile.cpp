@@ -10,20 +10,19 @@
 #include "DamageDealer.h"
 #include "Net/UnrealNetwork.h"
 #include "SWeapon.h"
+#include "TimerManager.h"
 
 ASProjectile::ASProjectile()
 {
-    CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
-    SetRootComponent(CollisionComp);
 
     MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
     MeshComp->SetNotifyRigidBodyCollision(true);
     MeshComp->SetVisibility(true);
-    MeshComp->SetupAttachment(CollisionComp);
+    SetRootComponent(MeshComp);
 
     MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
     MovementComp->bAutoActivate = true;
-    MovementComp->SetUpdatedComponent(CollisionComp);
+    MovementComp->SetUpdatedComponent(MeshComp);
 	MovementComp->InitialSpeed = ProjectileSpeed;
 	MovementComp->MaxSpeed = 5000.0f;
 
@@ -74,7 +73,7 @@ void ASProjectile::OnProjectileExpire()
 
 void ASProjectile::OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVector NormalImpulse, const FHitResult & Hit)
 {
-	if (OtherActor == Instigator)
+	if (OtherActor == Instigator || (OtherActor && OtherActor->GetOwner() == Instigator))
 	{
 		return;
 	}

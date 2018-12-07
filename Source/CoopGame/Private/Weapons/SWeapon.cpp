@@ -7,6 +7,8 @@
 #include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "SHitIndicatorWidget.h"
 #include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 ASWeapon::ASWeapon()
 {
@@ -31,6 +33,11 @@ void ASWeapon::Reload()
 	if (bIsReloading || AmmoInClip == MaxAmmo)
 	{
 		return;
+	}
+
+	if (ReloadSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ReloadSound, GetActorLocation());
 	}
 
 	OnReload.ExecuteIfBound();
