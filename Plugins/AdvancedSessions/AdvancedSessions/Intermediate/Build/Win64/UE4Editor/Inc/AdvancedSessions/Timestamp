@@ -1,20 +1,20 @@
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\AdvancedExternalUILibrary.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\AdvancedFriendsGameInstance.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\AdvancedFriendsInterface.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\AdvancedFriendsLibrary.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\AdvancedIdentityLibrary.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\AdvancedSessionsLibrary.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\AdvancedVoiceLibrary.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\BlueprintDataDefinitions.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\CancelFindSessionsCallbackProxy.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\CreateSessionCallbackProxyAdvanced.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\EndSessionCallbackProxy.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\FindFriendSessionCallbackProxy.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\FindSessionsCallbackProxyAdvanced.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\GetFriendsCallbackProxy.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\GetRecentPlayersCallbackProxy.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\GetUserPrivilegeCallbackProxy.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\LoginUserCallbackProxy.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\LogoutUserCallbackProxy.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\SendFriendInviteCallbackProxy.h
-C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\UpdateSessionCallbackProxyAdvanced.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\AdvancedExternalUILibrary.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\AdvancedFriendsGameInstance.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\AdvancedFriendsInterface.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\AdvancedFriendsLibrary.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\AdvancedIdentityLibrary.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\AdvancedSessionsLibrary.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\AdvancedVoiceLibrary.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\BlueprintDataDefinitions.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\CancelFindSessionsCallbackProxy.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\CreateSessionCallbackProxyAdvanced.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\EndSessionCallbackProxy.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\FindFriendSessionCallbackProxy.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\FindSessionsCallbackProxyAdvanced.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\GetFriendsCallbackProxy.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\GetRecentPlayersCallbackProxy.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\GetUserPrivilegeCallbackProxy.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\LoginUserCallbackProxy.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\LogoutUserCallbackProxy.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\SendFriendInviteCallbackProxy.h
+C:\Projects\Unreal\Coop-game-Demo\Plugins\AdvancedSessions\AdvancedSessions\Source\AdvancedSessions\Classes\UpdateSessionCallbackProxyAdvanced.h
