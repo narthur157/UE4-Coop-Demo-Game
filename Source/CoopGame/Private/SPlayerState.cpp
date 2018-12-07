@@ -15,7 +15,11 @@ void ASPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-    DOREPLIFETIME(ASPlayerState, CurrentPawn)
+    DOREPLIFETIME(ASPlayerState, CurrentPawn);
+    DOREPLIFETIME(ASPlayerState, DamageDone);
+    DOREPLIFETIME(ASPlayerState, Deaths);
+    DOREPLIFETIME(ASPlayerState, DamageTaken);
+
 }
 
 void ASPlayerState::SetCurrentPawn(APawn * NewCurrentPawn)
