@@ -2,7 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine.h"
-
+#include "UnrealNetwork.h"
+#include "Online.h"
 
 #define MAX_NAME_LENGTH             15
 

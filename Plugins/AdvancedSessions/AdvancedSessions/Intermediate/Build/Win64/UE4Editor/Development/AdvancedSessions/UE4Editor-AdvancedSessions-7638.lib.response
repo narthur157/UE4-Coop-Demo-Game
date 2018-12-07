@@ -1,0 +1,13 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UE4Editor-AdvancedSessions-7638.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Intermediate\Build\Win64\CoopGameEditor\Development\Engine\SharedPCH.Engine.h.obj"
+"C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\UE4Editor\Development\AdvancedSessions\Module.AdvancedSessions.cpp.obj"
+"C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\UE4Editor\Development\AdvancedSessions\Module.AdvancedSessions.gen.cpp.obj"
+"C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\UE4Editor\Development\AdvancedSessions\PCLaunch.rc.res"
+/OUT:"C:\Users\Nick\Documents\Unreal Projects\JoeCoop\Plugins\AdvancedSessions\AdvancedSessions\Intermediate\Build\Win64\UE4Editor\Development\AdvancedSessions\UE4Editor-AdvancedSessions-7638.lib"
