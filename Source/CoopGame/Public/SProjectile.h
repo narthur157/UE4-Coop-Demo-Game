@@ -39,9 +39,6 @@ public:
 protected:
 	AActor* DirectHitActor = nullptr;
 
-    UPROPERTY(VisibleAnywhere, Category = "Components")
-    USphereComponent* CollisionComp = nullptr;
-
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UProjectileMovementComponent* MovementComp = nullptr;
 

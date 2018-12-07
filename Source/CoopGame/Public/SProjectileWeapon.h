@@ -38,12 +38,16 @@ class COOPGAME_API ASProjectileWeapon : public ASWeapon
 {
 	GENERATED_BODY()
 
-public:
-	ASProjectileWeapon();
-
 protected:
+	/**
+	 * 3rd person Projectiles generally should not be spawned from the actual muzzle, rather
+	 * the camera, as this represents where the character is really aiming
+	 * This creates a jarring effect visually, so the easiest solution is a distracting
+	 * muzzle flash, in addition to spawning the projectile a bit ahead of the camera
+	 * TODO: Hide the projectile until it is past this distance instead of spawning it there
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeapon")
-	FVector ProjectileSpawnTranslate;
+	float ProjectileSpawnOffset = 100.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeapon")
 	TSubclassOf<ASProjectile> ProjectileClass;

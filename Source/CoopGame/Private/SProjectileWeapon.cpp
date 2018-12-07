@@ -1,16 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "SProjectileWeapon.h"
 #include "SProjectile.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "Engine/World.h"   
 #include "Components/SkeletalMeshComponent.h"
-
-ASProjectileWeapon::ASProjectileWeapon()
-{
-	ProjectileSpawnTranslate = FVector(100.0f, 0, 0);
-}
+#include "DrawDebugHelpers.h"
 
 void ASProjectileWeapon::Fire()
 {
@@ -24,7 +18,6 @@ void ASProjectileWeapon::Fire()
         return;
     }
 
-
     if (ProjectileClass && GetOwner())
     {
         FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
@@ -33,7 +26,10 @@ void ASProjectileWeapon::Fire()
         FVector OutViewPointLocation;
         GetOwner()->GetActorEyesViewPoint(OutViewPointLocation, ProjectileSpawnRotation);
 
-		OutViewPointLocation += ProjectileSpawnRotation.Vector() * ProjectileSpawnTranslate;
+		OutViewPointLocation += ProjectileSpawnRotation.Vector() * ProjectileSpawnOffset;
+
+		// uncomment to debug projectile spawn
+		// DrawDebugSphere(GetWorld(), OutViewPointLocation, 5, 12, FColor::Red, false, 5.0f);
 
         FActorSpawnParameters SpawnParams;
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
