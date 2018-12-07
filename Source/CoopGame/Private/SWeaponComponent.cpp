@@ -7,6 +7,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "SCharacter.h"
 #include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
 
 USWeaponComponent::USWeaponComponent()
 {
@@ -76,6 +77,11 @@ void USWeaponComponent::EquipWeapon(ASWeapon* Weapon)
 	Weapon->OnReload.BindLambda([&]() {
 		MulticastReloadAnim();
 	});
+
+	if (Weapon->WeaponActivatedSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), Weapon->WeaponActivatedSound, Weapon->GetActorLocation());
+	}
 
     if (GetOwnerRole() < ROLE_Authority)
     {
