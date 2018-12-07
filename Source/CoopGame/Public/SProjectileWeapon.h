@@ -47,7 +47,7 @@ protected:
 	 * TODO: Hide the projectile until it is past this distance instead of spawning it there
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeapon")
-	float ProjectileSpawnOffset = 100.0f;
+	float ProjectileSpawnOffset = 250.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeapon")
 	TSubclassOf<ASProjectile> ProjectileClass;

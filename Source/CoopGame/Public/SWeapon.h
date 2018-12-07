@@ -62,7 +62,12 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     virtual void StopFire();
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	USoundCue* WeaponActivatedSound = nullptr;
 protected:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	USoundCue* ReloadSound = nullptr;
 
     // Weapon Data
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
