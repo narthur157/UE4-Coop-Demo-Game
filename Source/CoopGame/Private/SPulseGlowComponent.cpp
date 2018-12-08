@@ -1,4 +1,8 @@
 #include "SPulseGlowComponent.h"
+#include "Components/MeshComponent.h"
+#include "TimerManager.h"
+#include "Engine/World.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 USPulseGlowComponent::USPulseGlowComponent()
 {
@@ -23,9 +27,12 @@ void USPulseGlowComponent::BeginPulsing(float Intensity /*= 0.0f*/, FColor Color
 
 	SetParams(MatInst, Intensity, Color, Frequency);
 	
-	FTimerHandle Handle;
+	FTimerHandle Handle = FTimerHandle();
 
-	GetWorld()->GetTimerManager().SetTimer(Handle, this, &USPulseGlowComponent::StopPulsing, Duration, false);
+	if (Duration >= 0)
+	{
+		GetWorld()->GetTimerManager().SetTimer(Handle, this, &USPulseGlowComponent::StopPulsing, Duration, false);
+	}
 
 	FPulseData NewPulse = FPulseData(Handle, Intensity, Color, Frequency, Duration);
 
@@ -49,6 +56,11 @@ void USPulseGlowComponent::SetParams(UMaterialInstanceDynamic* MatInstance, floa
 void USPulseGlowComponent::StopPulsing()
 {
 	ActivePulses.RemoveAll([&](FPulseData MyPulse) {
+		if (!MyPulse.Timer.IsValid())
+		{
+			return false;
+		}
+
 		return GetWorld()->GetTimerManager().GetTimerRemaining(MyPulse.Timer) <= 0.0f;
 	});
 
