@@ -152,3 +152,28 @@ void ASHitscanWeapon::PlayImpactEffect(EPhysicalSurface SurfaceType, FVector Imp
     }
 }
 
+void ASHitscanWeapon::ApplyRecoil()
+{
+
+    if (GetWorld()->TimeSeconds >= RecoilResetTime)
+    {
+        CurrentRecoilPitchConsqecModifier = 0.0f;
+        CurrentRecoilYawConsqecModifier = 0.0f;
+    }
+
+    APawn* OwningPawn = Cast<APawn>(GetOwner());
+    if (OwningPawn)
+    {
+        APlayerController* PC = Cast<APlayerController>(OwningPawn->GetController());
+        if (PC)
+        {
+            CurrentRecoilPitchConsqecModifier += RecoilScalarPitchConsecutiveShotModifier;
+            CurrentRecoilYawConsqecModifier += RecoilScalarYawConsecutiveShotModifier;
+            
+            PC->AddYawInput(RecoilScalarYaw + CurrentRecoilYawConsqecModifier);
+            PC->AddPitchInput(RecoilScalarPitch + CurrentRecoilPitchConsqecModifier);
+
+            RecoilResetTime = GetWorld()->TimeSeconds + RecoilResetDelay;
+        }
+    }
+}
