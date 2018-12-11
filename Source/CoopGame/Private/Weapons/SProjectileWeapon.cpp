@@ -41,3 +41,8 @@ void ASProjectileWeapon::Fire()
         NewProjectile->Launch();
     }
 }
+
+void ASProjectileWeapon::SpawnProjectile(TSubclassOf<ASProjectile> Projectile)
+{
+
+}
