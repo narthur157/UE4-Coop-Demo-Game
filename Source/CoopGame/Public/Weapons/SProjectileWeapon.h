@@ -56,4 +56,7 @@ protected:
     FProjectileWeaponData ProjectileWeaponConfigData;
 
     virtual void Fire() override;
+
+    void SpawnProjectile(TSubclassOf<ASProjectile> Projectile);
+
 };
