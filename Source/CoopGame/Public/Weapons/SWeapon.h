@@ -80,7 +80,7 @@ public:
     UPROPERTY(Replicated, BlueprintReadOnly, Category = "Weapon")
     bool bIsReloading;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponFiringData")
     float TimeToReload = 1.5f;
 
     /** Should be overridden if a particuar weapon requires any special cases to be true in order for it to begin firing */
@@ -131,66 +131,65 @@ protected:
     USkeletalMeshComponent* MeshComp = nullptr;
 
     /** If the weapon has less than this amount in its clip, HasAmmoRequiredToFire will fail */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponFiringData")
     int32 AmmoRequiredToFire = 1;
 
     /** The ammo type which this weapon uses */
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringData")
     EAmmoType AmmoType = EAmmoType::NONE;
 
     /** The damage type that this weapon causes */
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringData")
     TSubclassOf<UDamageType> DamageType;
 
+    /** The cooldown period between firing events */
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringData")
+    float TimeBetweenShots = 0.5f;
+
+    /** The maximum amount of ammo carried in a clip */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponFiringData")
+    uint8 ClipSize = 20;
+
     /** Sound played during reload */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponEffectData")
 	USoundCue* ReloadSound = nullptr;
 
     /** Specifies the socket on @MeshComp where things like muzzlle flashes should play */
-    UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+    UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "WeaponEffectData")
     FName MuzzleSocketName = "MuzzleSocket";
 
     /** Effect to be played on fire at @MuzzleSocketName's location */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponEffectData")
     UParticleSystem* MuzzleEffect = nullptr;
 
     /** The sound a weapon makes when fired */
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponEffectData")
     USoundCue* FireSound = nullptr;
 
     /** The image used to represent this weapon */
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponEffectData")
     UTexture2D* WeaponIcon = nullptr;
 
-    /** The cooldown period between firing events */
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	float TimeBetweenShots = 0.5f;
+    /** Widget reference displayed when this weapon hits something */
+    USHitIndicatorWidget* HitIndicatorWidget = nullptr;
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponEffectData")
+    TSubclassOf<USHitIndicatorWidget> HitIndicatorWidgetClass;   
 
-    /** The maximum amount of ammo carried in a clip */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	uint8 ClipSize = 20;
+    /** Instance variables */
 
     /** The current amount of ammo in our clip, if this number is less than AmmoRequiredToFire, HasAmmoRequiredToFire will fail */
     UPROPERTY(Replicated)
     uint8 AmmoInClip = ClipSize;
 
-    /** Widget reference displayed when this weapon hits something */
-	USHitIndicatorWidget* HitIndicatorWidget = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	TSubclassOf<USHitIndicatorWidget> HitIndicatorWidgetClass;
-
-    /** Instance variables */
-
     /** Timer used repeat firing events (eg when mouse is held down) */
     FTimerHandle TimerHandle_TimeBetweenShots;
 
     /** The last time this weapon has fired */
-    UPROPERTY(BlueprintReadWrite, Category = "Weapon")
+    UPROPERTY(BlueprintReadWrite, Category = "WeaponInstanceVariabes")
     float LastFireTime = -9999999;
 
     /** The timer tracking how much time is remaining for a successful reload operation */
 	FTimerHandle TimerHandle_ReloadTimer;
 
-    
 
 };
