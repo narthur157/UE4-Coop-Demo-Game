@@ -35,6 +35,7 @@ ASCharacter::ASCharacter()
 
     ZoomedFOV = 65.0;
     ZoomInterpSpeed = 20.0f;
+    
 }
 
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -80,7 +81,10 @@ void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
 	DefaultFOV = CameraComp->FieldOfView;
+    DefaultCameraPosition = CameraComp->RelativeLocation;
+
 	UMaterialInstanceDynamic* MatInstance = GetMesh()->CreateDynamicMaterialInstance(0, GetMesh()->GetMaterial(0));
 
 	if (MatInstance)
@@ -107,9 +111,14 @@ void ASCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+
+    FVector TargetCameraPosition = bWantsToZoom ? ZoomedCameraPosition : DefaultCameraPosition;
+    FVector NewPosition = FMath::VInterpTo(CameraComp->RelativeLocation, TargetCameraPosition, DeltaTime, ZoomInterpSpeed);
+    CameraComp->SetRelativeLocation(NewPosition, false);
+
+
     float TargetFOV = bWantsToZoom ? ZoomedFOV : DefaultFOV;
     float NewFOV = FMath::FInterpTo(CameraComp->FieldOfView, TargetFOV, DeltaTime, ZoomInterpSpeed);
-
     CameraComp->SetFieldOfView(NewFOV);
 }
 

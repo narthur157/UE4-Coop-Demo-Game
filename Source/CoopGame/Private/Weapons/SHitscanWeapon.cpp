@@ -38,13 +38,12 @@ void ASHitscanWeapon::Tick(float DeltaTime)
         APlayerController* PC = Cast<APlayerController>(OwningPawn->GetController());
         if (PC && GetWorld()->TimeSeconds < RecoilResetTime)
         {
-            float NewPitch = FMath::FInterpTo(0, CurrentPitchOffset, DeltaTime, 1);
-            float NewYaw = FMath::FInterpTo(0, CurrentYawOffset, DeltaTime, 1);
+            float NewPitch = FMath::FInterpTo(0, CurrentPitchOffset, DeltaTime, .15);
+            float NewYaw = FMath::FInterpTo(0, CurrentYawOffset, DeltaTime, .15);
             PC->AddYawInput(NewYaw);
             PC->AddPitchInput(NewPitch);
         }
     }
-
 }
 
 
