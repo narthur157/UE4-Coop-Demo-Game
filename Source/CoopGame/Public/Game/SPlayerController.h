@@ -64,9 +64,6 @@ public:
 
     void SetPawn(APawn* InPawn) override;
 
-    void AddRecoilInputYaw(float RecoilYawAmount);
-    void AddRecoilInputPitch(float RecoilPitchAmount);
-
 protected:
    
 };

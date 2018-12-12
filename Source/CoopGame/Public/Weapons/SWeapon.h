@@ -24,7 +24,7 @@ class USoundCue;
 class UTexture2D;
 class UImage;
 class USHitIndicatorWidget;
-
+class UAnimMontage;
 
 UENUM(BlueprintType)
 enum class EAmmoType : uint8

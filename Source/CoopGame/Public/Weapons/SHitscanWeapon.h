@@ -89,7 +89,6 @@ protected:
     /** The time at which the current Consecutive Shot Modifiers are no longer valid and should be ignored */
     float RecoilResetTime = 0.0f;
 
-
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponEffectData")
     UParticleSystem* DefaultImpactEffect = nullptr;
 
