@@ -9,8 +9,16 @@
 ASPlayerController::ASPlayerController()
     : APlayerController()
 {
-  
+    SetActorTickEnabled(true);
+    PrimaryActorTick.bCanEverTick = true;
 }
+
+void ASPlayerController::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+}
+
 
 void ASPlayerController::BeginPlay()
 {
@@ -91,4 +99,3 @@ void ASPlayerController::SetPawn(APawn* InPawn)
     OnPawnChanged.Broadcast(InPawn);
     OnPawnChange();
 }
-

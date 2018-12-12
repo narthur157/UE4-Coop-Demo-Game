@@ -2,6 +2,7 @@
 #include "DrawDebugHelpers.h"
 #include "Particles/ParticleSystem.h"
 #include "CoopGame.h"
+#include "SPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
@@ -9,6 +10,43 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "DamageDealer.h"
+
+
+ASHitscanWeapon::ASHitscanWeapon()
+    : ASWeapon()
+{
+    SetActorTickEnabled(true);
+    PrimaryActorTick.bStartWithTickEnabled = true;
+    PrimaryActorTick.bCanEverTick = true;
+}
+
+void ASHitscanWeapon::BeginPlay()
+{
+    Super::BeginPlay();
+}
+
+void ASHitscanWeapon::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    APawn* OwningPawn = Cast<APawn>(GetOwner());
+    if (OwningPawn)
+    {
+        // Why in the heavens is this done here you may ask?
+        // 1.) You can'y addyawinput in PC tick!
+        // 2.) You don't need to cast to a specific player controller to get this to work
+        APlayerController* PC = Cast<APlayerController>(OwningPawn->GetController());
+        if (PC && GetWorld()->TimeSeconds < RecoilResetTime)
+        {
+            float NewPitch = FMath::FInterpTo(0, CurrentPitchOffset, DeltaTime, 1);
+            float NewYaw = FMath::FInterpTo(0, CurrentYawOffset, DeltaTime, 1);
+            PC->AddYawInput(NewYaw);
+            PC->AddPitchInput(NewPitch);
+        }
+    }
+
+}
+
 
 void ASHitscanWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -164,14 +202,15 @@ void ASHitscanWeapon::ApplyRecoil()
     APawn* OwningPawn = Cast<APawn>(GetOwner());
     if (OwningPawn)
     {
-        APlayerController* PC = Cast<APlayerController>(OwningPawn->GetController());
+        // Need to cast to our playercontroller to add some BS
+        ASPlayerController* PC = Cast<ASPlayerController>(OwningPawn->GetController());
         if (PC)
         {
             CurrentRecoilPitchConsqecModifier += RecoilScalarPitchConsecutiveShotModifier;
             CurrentRecoilYawConsqecModifier += RecoilScalarYawConsecutiveShotModifier;
             
-            PC->AddYawInput(RecoilScalarYaw + CurrentRecoilYawConsqecModifier);
-            PC->AddPitchInput(RecoilScalarPitch + CurrentRecoilPitchConsqecModifier);
+            CurrentYawOffset = RecoilScalarYaw + CurrentRecoilYawConsqecModifier;
+            CurrentPitchOffset = RecoilScalarPitch + CurrentRecoilPitchConsqecModifier;
 
             RecoilResetTime = GetWorld()->TimeSeconds + RecoilResetDelay;
         }

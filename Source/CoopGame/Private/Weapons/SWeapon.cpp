@@ -15,7 +15,6 @@ ASWeapon::ASWeapon()
     MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComponent"));
     RootComponent = MeshComp;
     SetReplicates(true);
-
     NetUpdateFrequency = 66.0f;
     MinNetUpdateFrequency = 33.0f;
 }
@@ -30,6 +29,8 @@ void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 
 void ASWeapon::BeginPlay()
 {
+    Super::BeginPlay();
+
     APawn* MyPawn = Cast<APawn>(GetOwner());
 
     AmmoInClip = ClipSize;
