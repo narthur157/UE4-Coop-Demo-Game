@@ -45,6 +45,11 @@ class COOPGAME_API ASHitscanWeapon : public ASWeapon
 {
 	GENERATED_BODY()
 	
+public:
+
+    ASHitscanWeapon();
+    virtual void BeginPlay() override;
+    virtual void Tick(float DeltaTime) override;
 
 protected:
     
@@ -58,27 +63,32 @@ protected:
     float BulletSpread = 0.0f;
 
     /** How much we should orient the camera's pitch during an ApplyRecoil application */
-    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringData")
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringRecoilData")
     float RecoilScalarPitch = 1.0f;
 
     /** How much we should orient the camera's yaw during an ApplyRecoil application */
-    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringData")
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringRecoilData")
     float RecoilScalarYaw = 1.0f;
 
     /** How much pitch recoil is added after each consecutive shot */
-    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringData")
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringRecoilData")
     float RecoilScalarPitchConsecutiveShotModifier = 0.0f;
     float CurrentRecoilPitchConsqecModifier = 0.0f;
 
     /** How much yaw recoil is added after each consecutive shot  */
-    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringData")
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringRecoilData")
     float RecoilScalarYawConsecutiveShotModifier = 0.0f;
     float CurrentRecoilYawConsqecModifier = 0.0f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringData")
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringRecoilData")
     float RecoilResetDelay = 0.0f;
 
+    float CurrentYawOffset = 0.0f;
+    float CurrentPitchOffset = 0.0f;
+
+    /** The time at which the current Consecutive Shot Modifiers are no longer valid and should be ignored */
     float RecoilResetTime = 0.0f;
+
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponEffectData")
     UParticleSystem* DefaultImpactEffect = nullptr;

@@ -44,10 +44,17 @@ protected:
       
     UUserWidget* MenuWidget = nullptr;
 
+
+    float CurrentRecoilYawOffset = 0.0f;
+    float CurrentRecoilPitchOffset = 0.0f;
+
+    float RecoilResetTime = 0.0f;
+
 public:
     virtual void BeginPlay() override;
     ASPlayerController();
     virtual void SetupInputComponent() override;
+    virtual void Tick(float DeltaTime) override;
 
     UFUNCTION(BlueprintCallable, Category = "GameOver")
     void RecieveGameOver(ASTeam* WinningTeam);
@@ -56,6 +63,9 @@ public:
     void OnRecieveGameOver(ASTeam* WinningTeam);
 
     void SetPawn(APawn* InPawn) override;
+
+    void AddRecoilInputYaw(float RecoilYawAmount);
+    void AddRecoilInputPitch(float RecoilPitchAmount);
 
 protected:
    
