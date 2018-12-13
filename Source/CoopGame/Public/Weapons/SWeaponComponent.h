@@ -1,0 +1,130 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
+#include "SWeaponComponent.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReload);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponChange);
+
+class USWeaponWidget;
+class ASWeapon;
+class UImage;
+class UTexture2D;
+enum class EAmmoType : uint8;
+
+USTRUCT(BlueprintType)
+struct FWeaponAmmoInventoryItem
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+    EAmmoType AmmoType;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+    UTexture2D* AmmoImage;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+    int32 CurrentStackSize = 20;
+
+};
+
+UCLASS(ClassGroup=(COOP), meta=(BlueprintSpawnableComponent))
+class COOPGAME_API USWeaponComponent : public UActorComponent
+{
+	GENERATED_BODY()
+
+public:	
+	// Sets default values for this component's properties
+	USWeaponComponent();
+
+	UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
+	FOnReload OnReload;
+
+	UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
+	FOnWeaponChange  OnWeaponChange;
+	
+	// WeaponComp manages this, because there are things outside the weapon's control
+	// which cause it to not be allowed to fire - like switching weapons
+	UPROPERTY(VisibleAnywhere, Replicated, Category = "Weapon")
+	bool bCanFire = true;
+
+	USWeaponWidget* WeaponWidget = nullptr;
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    USWeaponWidget* DrawWeaponWidget(APlayerController* OwningController, int32 NumberWeaponSlots);
+
+    UFUNCTION(BlueprintPure, Category = "WeaponData")
+    ASWeapon* GetCurrentWeapon() { return CurrentWeapon; }
+
+    UFUNCTION(BlueprintPure, Category = "WeaponData")
+    TArray<ASWeapon*> GetWeaponInventory() { return WeaponInventory; }
+
+    UFUNCTION(BlueprintPure, Category = "WeaponData")
+    TArray<FWeaponAmmoInventoryItem> GetAmmoInventory() { return AmmoInventory; }
+
+    UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
+    void StartFire();
+
+    UFUNCTION(BlueprintCallable, Category = "PlayerWeapon")
+    void StopFire();
+
+    void ChangeWeapon();
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
+    UPROPERTY(VisibleDefaultsOnly, Category = "Player")
+    FName WeaponSocket = "WeaponSocket";
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    TArray<TSubclassOf<ASWeapon>> DefaultWeapons;
+
+    UPROPERTY(ReplicatedUsing = OnRep_WeaponInventory)
+    TArray<ASWeapon*> WeaponInventory;
+
+	// Delay before the weapon is swapped, this should match the animation
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Weapon")
+	float ChangeWeaponDelay = 0.17f;
+
+    UPROPERTY(EditDefaultsOnly, Replicated, Category = "Weapon")
+    TArray<FWeaponAmmoInventoryItem> AmmoInventory;
+
+    UPROPERTY(BlueprintReadonly, ReplicatedUsing = OnRep_CurrentWeapon)
+    ASWeapon* CurrentWeapon;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    TSubclassOf<USWeaponWidget> WeaponsWidgetClass = nullptr;
+
+    /** [Server] **/
+    void SpawnDefaultWeaponInventory();
+
+    /** [Server] **/
+    void EquipWeapon(ASWeapon* Weapon);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSetCanFire(bool bCan);
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerEquipWeapon(ASWeapon* Weapon);
+
+    UFUNCTION()
+    void SetCurrentWeapon(ASWeapon* NewWeapon);
+
+    UFUNCTION()
+    void OnRep_CurrentWeapon();
+
+    UFUNCTION()
+    void OnRep_WeaponInventory();
+
+private:
+	UFUNCTION(Server, Unreliable, WithValidation)
+	void ServerChangeWeaponAnim();
+
+	UFUNCTION(NetMulticast, Unreliable, WithValidation)
+	void MulticastChangeWeaponAnim();
+
+	UFUNCTION(NetMulticast, Unreliable, WithValidation)
+	void MulticastReloadAnim();
+};

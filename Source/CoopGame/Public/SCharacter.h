@@ -104,6 +104,11 @@ protected:
     UTeamComponent* TeamComp = nullptr;
 
     UPROPERTY(EditDefaultsOnly, Category = "Player")
+    FVector ZoomedCameraPosition;
+
+    FVector DefaultCameraPosition;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Player")
     float ZoomedFOV;
 
     UPROPERTY(EditDefaultsOnly, Category = "Player", meta = (ClampMin = 0.0, ClampMax = 100))
