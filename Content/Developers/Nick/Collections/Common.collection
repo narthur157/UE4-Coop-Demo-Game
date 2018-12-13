@@ -5,3 +5,4 @@ ParentGuid:00000000-0000-0000-0000-000000000000
 
 /Game/Blueprints/Characters/ShooterCharacters/AI_Humanoid.AI_Humanoid
 /Game/Blueprints/Characters/ShooterCharacters/ShooterCharacter.ShooterCharacter
+/Game/Blueprints/Weapons/Weapons/BP_Rifle.BP_Rifle
