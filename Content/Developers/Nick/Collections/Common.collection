@@ -3,3 +3,5 @@ Type:Static
 Guid:68AF5A8A-4FEB-A364-692C-27B8DF1C0938
 ParentGuid:00000000-0000-0000-0000-000000000000
 
+/Game/Blueprints/Characters/ShooterCharacters/AI_Humanoid.AI_Humanoid
+/Game/Blueprints/Characters/ShooterCharacters/ShooterCharacter.ShooterCharacter
