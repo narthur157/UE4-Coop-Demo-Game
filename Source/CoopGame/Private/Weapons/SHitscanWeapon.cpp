@@ -3,6 +3,7 @@
 #include "Particles/ParticleSystem.h"
 #include "CoopGame.h"
 #include "SPlayerController.h"
+#include "Engine/Public/TimerManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
@@ -36,12 +37,59 @@ void ASHitscanWeapon::Tick(float DeltaTime)
         // 1.) You can'y addyawinput in PC tick!
         // 2.) You don't need to cast to a specific player controller to get this to work
         APlayerController* PC = Cast<APlayerController>(OwningPawn->GetController());
-        if (PC && GetWorld()->TimeSeconds < RecoilResetTime)
+
+        if (PC)
         {
-            float NewPitch = FMath::FInterpTo(0, CurrentPitchOffset, DeltaTime, .15);
-            float NewYaw = FMath::FInterpTo(0, CurrentYawOffset, DeltaTime, .15);
-            PC->AddYawInput(NewYaw);
-            PC->AddPitchInput(NewPitch);
+            // Get the amount that the mouse has moved this frame, scale it by the input scale
+            float MouseInputX;
+            float MouseInputY;
+            PC->GetInputMouseDelta(MouseInputX, MouseInputY);
+            MouseInputX *= PC->InputYawScale;
+            MouseInputY *= PC->InputPitchScale;
+
+            if (GetWorldTimerManager().IsTimerActive(TH_RecoilReset))
+            {
+                // Interp to the recoil position
+                float PitchOffsetThisFrame = FMath::FInterpTo(0, DesiredPitchOffset, DeltaTime, 20.0);
+                float YawOffsetThisFrame = FMath::FInterpTo(0, DesiredYawOffset, DeltaTime, 20.0);
+
+                // Move the camera
+                PC->AddPitchInput(PitchOffsetThisFrame);
+                PC->AddYawInput(YawOffsetThisFrame);
+
+                // Since the interp does not happen instantly, there may be cases where we never actually reach the full desired offset
+                // thus we must keep track of how far we did get
+                CurrentPitchOffset += PitchOffsetThisFrame;
+                CurrentYawOffset += YawOffsetThisFrame;
+
+                // Subtract the amount which the mouse moved this frame from the offset, but do not keep track of movement over or under the offset value
+                // (ex. If the recoil is tracking top right, and the player moved his mouse top right, do not track that as our current offset, rather keep the offset as it was)
+                // This prevents large camera swings after firing is over
+                CurrentPitchOffset = CurrentPitchOffset < 0.0f ? FMath::Clamp(CurrentPitchOffset + MouseInputY, CurrentPitchOffset, 0.0f) : FMath::Clamp(CurrentPitchOffset +  MouseInputY, 0.0f, CurrentPitchOffset);
+                CurrentYawOffset = CurrentYawOffset < 0.0f ? FMath::Clamp(CurrentYawOffset + MouseInputX, CurrentYawOffset, 0.0f) : FMath::Clamp(CurrentYawOffset + MouseInputX, 0.0f, CurrentYawOffset);
+            }
+            else if (!FMath::IsNearlyZero(CurrentYawOffset, 0.01f) || !FMath::IsNearlyZero(CurrentPitchOffset, 0.01f))
+            {
+                // If the player moves his mouse, abort resetting the recoil
+                if (MouseInputX != 0.0f || MouseInputY != 0.0f)
+                {
+                    CurrentPitchOffset = 0.0f;
+                    CurrentYawOffset = 0.0f;
+                    return;
+                }
+
+                // Same as above interps, but in reverse in order to bring the camera back to the shot origin
+                float PitchOffsetThisFrame = FMath::FInterpTo(0, -CurrentPitchOffset, DeltaTime, 25.0);
+                float YawOffsetThisFrame = FMath::FInterpTo(0, -CurrentYawOffset, DeltaTime, 25.0);
+
+                // Move the camera
+                PC->AddPitchInput(PitchOffsetThisFrame);
+                PC->AddYawInput(YawOffsetThisFrame);
+
+                // Add (since we negated the CurrentPitch/YawOffsets in our interps) the amount we interped to the CurrentPitch/Yaw values
+                CurrentPitchOffset += PitchOffsetThisFrame;
+                CurrentYawOffset += YawOffsetThisFrame;
+            }
         }
     }
 }
@@ -191,13 +239,6 @@ void ASHitscanWeapon::PlayImpactEffect(EPhysicalSurface SurfaceType, FVector Imp
 
 void ASHitscanWeapon::ApplyRecoil()
 {
-
-    if (GetWorld()->TimeSeconds >= RecoilResetTime)
-    {
-        CurrentRecoilPitchConsqecModifier = 0.0f;
-        CurrentRecoilYawConsqecModifier = 0.0f;
-    }
-
     APawn* OwningPawn = Cast<APawn>(GetOwner());
     if (OwningPawn)
     {
@@ -205,13 +246,32 @@ void ASHitscanWeapon::ApplyRecoil()
         ASPlayerController* PC = Cast<ASPlayerController>(OwningPawn->GetController());
         if (PC)
         {
-            CurrentRecoilPitchConsqecModifier += RecoilScalarPitchConsecutiveShotModifier;
-            CurrentRecoilYawConsqecModifier += RecoilScalarYawConsecutiveShotModifier;
-            
-            CurrentYawOffset = RecoilScalarYaw + CurrentRecoilYawConsqecModifier;
-            CurrentPitchOffset = RecoilScalarPitch + CurrentRecoilPitchConsqecModifier;
+            if (GetWorldTimerManager().IsTimerActive(TH_RecoilReset))
+            {
+                CurrentRecoilPitchConsqecModifier += RecoilScalarPitchConsecutiveShotModifier;
+                CurrentRecoilYawConsqecModifier += RecoilScalarYawConsecutiveShotModifier;
+            }
+            else
+            {
+                CurrentRecoilPitchConsqecModifier = RecoilScalarPitch;
+                CurrentRecoilYawConsqecModifier = RecoilScalarYaw;
+            }
 
-            RecoilResetTime = GetWorld()->TimeSeconds + RecoilResetDelay;
+
+            DesiredYawOffset = CurrentRecoilYawConsqecModifier;
+            DesiredPitchOffset = CurrentRecoilPitchConsqecModifier;
+
+          
+            GetWorldTimerManager().SetTimer(TH_RecoilReset, this, &ASHitscanWeapon::RecoilExpired, RecoilResetDelay, false);
         }
     }
+}
+
+void ASHitscanWeapon::RecoilExpired()
+{
+    CurrentRecoilPitchConsqecModifier = 0.0f;
+    CurrentRecoilYawConsqecModifier = 0.0f;
+    DesiredPitchOffset = 0.0f;
+    DesiredYawOffset = 0.0f;
+
 }
