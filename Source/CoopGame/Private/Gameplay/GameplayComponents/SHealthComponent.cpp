@@ -86,7 +86,7 @@ void USHealthComponent::HandleTakeDamage(AActor * DamagedActor, float Damage, co
     }
 
 }
-
+// Run on owning client here i guess to displlay damage numbers?
 
 void USHealthComponent::BroadcastRelevantDamageEvents(AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor* DamageInstigatorActor, AActor * DamageCauser)
 {

@@ -83,11 +83,18 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringRecoilData")
     float RecoilResetDelay = 0.0f;
 
+    float DesiredYawOffset = 0.0f;
+    float DesiredPitchOffset = 0.0f;
+
     float CurrentYawOffset = 0.0f;
     float CurrentPitchOffset = 0.0f;
 
+
     /** The time at which the current Consecutive Shot Modifiers are no longer valid and should be ignored */
-    float RecoilResetTime = 0.0f;
+    FTimerHandle TH_RecoilReset;
+
+    UFUNCTION()
+    void RecoilExpired();
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponEffectData")
     UParticleSystem* DefaultImpactEffect = nullptr;
