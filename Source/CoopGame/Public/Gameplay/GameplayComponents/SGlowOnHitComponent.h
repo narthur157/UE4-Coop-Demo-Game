@@ -41,7 +41,6 @@ protected:
 	UFUNCTION()
 	void OnHealthChanged(USHealthComponent * ChangedHealthComp, float Health, float HealthDelta, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser);
 
-	static void FlashGlow(UMaterialInstanceDynamic* MatInst, float TimeSeconds, FColor GlowColor, float Intensity = 0.0f);
-public:	
-	
+	UFUNCTION(BlueprintCallable, Category = "GlowComp")
+	void FlashGlow(float TimeSeconds = 0.1f, FColor GlowColor = FColor::White, float Intensity = 0.0f);
 };

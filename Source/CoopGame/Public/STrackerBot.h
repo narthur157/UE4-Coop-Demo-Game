@@ -75,6 +75,7 @@ protected:
     
     UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
     USoundCue* SelfDestructTickSound = nullptr;
+
     UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
     USoundCue* ExplodeSound = nullptr;
     UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
@@ -141,6 +142,9 @@ protected:
     float OnKillPoints = 0.0f;
 
 public:	
+	UFUNCTION(BlueprintImplementableEvent, Category = "TrackerBot")
+	void SelfDestructTicked(float TimeTillDestruct);
+
 	virtual void IncreaseMovespeed(float PercentIncrease);
 
 	virtual void Tick(float DeltaTime) override;
