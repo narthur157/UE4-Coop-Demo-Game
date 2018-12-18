@@ -180,6 +180,11 @@ void ASTrackerBot::SelfDestruct()
 
 void ASTrackerBot::IncreaseMovespeed(float PercentIncrease)
 {
+	if (DebugTrackerBot)
+	{
+		UE_LOG(TrackerBot, Log, TEXT("Speed increased %f"), PercentIncrease);
+
+	}
 	MovementForce = OriginalMovementForce + OriginalMovementForce * PercentIncrease;
 	MaxSpeed = OriginalMaxSpeed + OriginalMaxSpeed * PercentIncrease;
 }
@@ -273,6 +278,9 @@ void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComp
         OnRep_ExplodeTime();
     }
 
+	// Somewhat of a hack, point is to just make the bot flash when the trigger occurs
+	SelfDestructTicked(3.0f);
+
     UGameplayStatics::SpawnSoundAttached(TriggeredSound, RootComponent);
     bTriggered = true;
 }
@@ -284,8 +292,11 @@ void ASTrackerBot::RefreshPath()
 
 void ASTrackerBot::SelfDestructTick()
 {
+
     UGameplayStatics::SpawnSoundAttached(SelfDestructTickSound, RootComponent);
     float TimeRemainingUntilDestruction = ExplodeTime - GetWorld()->TimeSeconds;
+	SelfDestructTicked(TimeRemainingUntilDestruction);
+
     GetWorldTimerManager().SetTimer(SelfDestructionTickTimer, this, &ASTrackerBot::SelfDestructTick, TimeRemainingUntilDestruction/4, false);
 }
 
