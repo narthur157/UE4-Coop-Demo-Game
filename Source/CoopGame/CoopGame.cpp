@@ -5,7 +5,7 @@
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, CoopGame, "CoopGame" );
 
-
+DEFINE_LOG_CATEGORY(TrackerBot);
 DEFINE_LOG_CATEGORY(CATSpawning);
 DEFINE_LOG_CATEGORY(CATGeneralActions);
 DEFINE_LOG_CATEGORY(CATDamage);

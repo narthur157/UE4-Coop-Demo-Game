@@ -19,6 +19,7 @@
 #define NULLSTRING FString(TEXT("<<Unknown>>"));
 
 // Logs
+DECLARE_LOG_CATEGORY_EXTERN(TrackerBot, All, All);
 DECLARE_LOG_CATEGORY_EXTERN(CATSpawning, All, All);
 DECLARE_LOG_CATEGORY_EXTERN(CATNetLog, All, All)
 DECLARE_LOG_CATEGORY_EXTERN(CATGeneralActions, All, All);
