@@ -4,7 +4,6 @@
 #include "STeam.h"
 #include "Net/UnrealNetwork.h"
 
-
 // Sets default values for this component's properties
 UTeamComponent::UTeamComponent()
 {
@@ -28,7 +27,7 @@ void UTeamComponent::BeginPlay()
 
 uint8 UTeamComponent::GetTeamID() const
 {
-    return Team ? Team->GetTeamID() : 255;
+    return Team ? Team->GetTeamID() : INVALID_TEAM_NUM;
 }
 
 void UTeamComponent::SetTeam(ASTeam* NewTeam) 
@@ -58,6 +57,23 @@ bool UTeamComponent::IsActorFriendly(AActor* ActorOne, AActor* ActorTwo)
     }
     return false;
 
+}
+
+bool UTeamComponent::IsActorTeamValid(AActor* AnActor)
+{
+	UTeamComponent* TeamComp = AnActor->FindComponentByClass<UTeamComponent>();
+
+	if (!(TeamComp))
+	{
+		return false;
+	}
+
+	return TeamComp->GetTeamID() != INVALID_TEAM_NUM;
+}
+
+bool UTeamComponent::AreActorTeamsValid(AActor* ActorOne, AActor* ActorTwo)
+{
+	return IsActorTeamValid(ActorOne) && IsActorTeamValid(ActorTwo);
 }
 
 void UTeamComponent::OnRep_TeamChanged()
