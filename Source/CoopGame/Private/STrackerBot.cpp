@@ -15,7 +15,6 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "TimerManager.h"
 #include "Game/Modes/SGameState.h"
-#include "Engine/Engine.h"
 #include "Net/UnrealNetwork.h"
 
 static int32 DebugTrackerBot = 0;
@@ -46,15 +45,6 @@ ASTrackerBot::ASTrackerBot()
     ProximityExplosionRadius->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 }
 
-void ASTrackerBot::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-    DOREPLIFETIME(ASTrackerBot, bExploded);
-    DOREPLIFETIME(ASTrackerBot, ExplodeTime);
-    DOREPLIFETIME(ASTrackerBot, bSelfDestructionAttached);
-}
-
 // Called when the game starts or when spawned
 void ASTrackerBot::BeginPlay()
 {
@@ -72,6 +62,25 @@ void ASTrackerBot::BeginPlay()
     {
         MatInstance = MeshComp->CreateAndSetMaterialInstanceDynamicFromMaterial(0, MeshComp->GetMaterial(0));
     }
+}
+
+void ASTrackerBot::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (!bSelfDestructionAttached && !bExploded && Role == ROLE_Authority)
+	{
+		MoveTowardsTarget(DeltaTime);
+	}
+}
+
+void ASTrackerBot::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASTrackerBot, bExploded);
+	DOREPLIFETIME(ASTrackerBot, ExplodeTime);
+	DOREPLIFETIME(ASTrackerBot, bSelfDestructionAttached);
 }
 
 AActor* ASTrackerBot::FindBestTarget()
@@ -106,7 +115,7 @@ AActor* ASTrackerBot::FindBestTarget()
 
 	if (DebugTrackerBot && BestTarget)
 	{
-		UE_LOG(TrackerBot, Error, TEXT("Tracker bot found best target %s"), *BestTarget->GetName());
+		UE_LOG(TrackerBot, Log, TEXT("Tracker bot found best target %s"), *BestTarget->GetName());
 	}
 
 	return BestTarget;
@@ -115,13 +124,11 @@ AActor* ASTrackerBot::FindBestTarget()
 FVector ASTrackerBot::GetNextPathPoint()
 {
     GetWorldTimerManager().ClearTimer(TimerHandle_RefreshPath);
-    GetWorldTimerManager().SetTimer(TimerHandle_RefreshPath, this, &ASTrackerBot::RefreshPath, RefreshInterval, false);
 
 	AActor* BestTarget = FindBestTarget();
 
 	if (!BestTarget)
 	{
-		UE_LOG(TrackerBot, Error, TEXT("TrackerBot failed to find path"));
 		return GetActorLocation();
 	}
 
@@ -140,8 +147,11 @@ FVector ASTrackerBot::GetNextPathPoint()
 	{
 		return BestTarget->GetActorLocation();
 	}
+}
 
-    return GetActorLocation();
+void ASTrackerBot::RefreshPath()
+{
+	NextPathPoint = GetNextPathPoint();
 }
 
 void ASTrackerBot::OnTakeDamage(USHealthComponent * ChangedHealthComp, float Health, float HealthDelta, 
@@ -189,15 +199,6 @@ void ASTrackerBot::IncreaseMovespeed(float PercentIncrease)
 	MaxSpeed = OriginalMaxSpeed + OriginalMaxSpeed * PercentIncrease;
 }
 
-void ASTrackerBot::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-    if (!bSelfDestructionAttached && !bExploded && Role == ROLE_Authority)
-    {
-        MoveTowardsTarget(DeltaTime);
-    }
-}
 
 void ASTrackerBot::MoveTowardsTarget(float DeltaTime)
 {
@@ -240,6 +241,7 @@ void ASTrackerBot::MoveTowardsTarget(float DeltaTime)
 	if (SpeedTowardsTarget <= MaxSpeed)
 	{
 		FVector ResultForce = (TargetLookAtDirection * MaxSpeed) - GetVelocity();
+		ResultForce.Z = 0; // no flying
 		ResultForce.Normalize();
 		ResultForce *= MovementForce * (DeltaTime * 100);
 
@@ -283,11 +285,6 @@ void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComp
 
     UGameplayStatics::SpawnSoundAttached(TriggeredSound, RootComponent);
     bTriggered = true;
-}
-
-void ASTrackerBot::RefreshPath()
-{
-   NextPathPoint = GetNextPathPoint();
 }
 
 void ASTrackerBot::SelfDestructTick()
