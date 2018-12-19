@@ -44,6 +44,7 @@ void USWeaponComponent::SpawnDefaultWeaponInventory()
         FActorSpawnParameters SpawnParams;
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
         SpawnParams.Owner = GetOwner();
+        SpawnParams.Instigator = Cast<APawn>(GetOwner());
 
         for (int i = 0; i < DefaultWeapons.Num(); i++)
         {

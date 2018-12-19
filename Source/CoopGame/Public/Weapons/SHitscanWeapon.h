@@ -123,7 +123,7 @@ protected:
 
     /** Fires off a hitscan shot, optionally doing damage and draining ammo*/
     UFUNCTION(BlueprintCallable, Category = "Weapon")
-    void PerformHitScan(bool bDoDamage, bool bConsumeAmmo);
+    void PerformHitScan(bool bDoDamage, FHitResult &OutHitResult);
 
     /** Functionality performed after a hit is recorded */
     void OnTraceHit(FHitResult Hit, FVector ShotDirection, bool bDoDamage);

@@ -48,7 +48,6 @@ public:
     // this class, rather than being public
     virtual void OnHit(AActor* HitActor, bool bSkipCheck = false);
 
-
     /** Sound played when weapon is swapped/otherwise becomes active */
     // Should really make a getter/setter for this
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
@@ -83,7 +82,7 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponFiringData")
     float TimeToReload = 1.5f;
 
-    /** Should be overridden if a particuar weapon requires any special cases to be true in order for it to begin firing */
+    /** Should be overridden if a particular weapon requires any special cases to be true in order for it to begin firing */
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     bool CanFire();
 
@@ -124,6 +123,9 @@ protected:
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerCancelReload();
 
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ConsumeAmmo(int32 AmmoToConsume);
+
 
     /** General Weapon Data */
     
@@ -145,6 +147,9 @@ protected:
     /** The cooldown period between firing events */
     UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringData")
     float TimeBetweenShots = 0.5f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringData")
+    int32 AmmoConsumedPerFire = 1;
 
     /** The maximum amount of ammo carried in a clip */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponFiringData")
