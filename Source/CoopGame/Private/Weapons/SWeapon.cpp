@@ -69,8 +69,19 @@ void ASWeapon::Fire()
     {
         ServerFire();
     }
+
     OnFire();
+
+    ConsumeAmmo(AmmoConsumedPerFire);
+
 }
+
+void ASWeapon::ConsumeAmmo_Implementation(int32 AmmoToConsume)
+{
+    AmmoInClip -= AmmoToConsume;
+}
+
+bool ASWeapon::ConsumeAmmo_Validate(int32 AmmoToConsume) { return true; }
 
 void ASWeapon::ServerFire_Implementation()
 {

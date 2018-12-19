@@ -38,12 +38,23 @@ void ASProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(ASProjectile, ExplosionStatus);
+    DOREPLIFETIME(ASProjectile, bIsServerProjectile);
 }
 
-void ASProjectile::Initialize(const FProjectileWeaponData & Data)
+void ASProjectile::Initialize(const FProjectileWeaponData &Data, bool bIsServer)
 {
     WeaponData = Data;
+    bIsServerProjectile = bIsServer;
     bWasInitialized = true;
+}
+
+void ASProjectile::OnRep_bIsServerProjectile()
+{
+    if (bIsServerProjectile && GetInstigatorController() )
+    {
+        SetActorHiddenInGame(true);
+        SetActorEnableCollision(false);
+    }
 }
 
 void ASProjectile::Launch()
@@ -65,10 +76,8 @@ void ASProjectile::OnProjectileExpire()
 {
     ExplosionStatus.bExploded = true;
 
-	if (Role == ROLE_Authority)
-	{
-		OnRep_Exploded();
-	}
+	OnRep_Exploded();
+	
 }
 
 void ASProjectile::OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVector NormalImpulse, const FHitResult & Hit)
@@ -166,5 +175,9 @@ void ASProjectile::Explode()
 
 void ASProjectile::OnRep_Exploded()
 {
+    if (bIsServerProjectile && GetInstigatorController())
+    {
+        return;
+    }
     Explode();
 }

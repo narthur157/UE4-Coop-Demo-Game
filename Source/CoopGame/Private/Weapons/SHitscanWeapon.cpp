@@ -104,7 +104,7 @@ void ASHitscanWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 }
 
 
-void ASHitscanWeapon::PerformHitScan(bool bDoDamage, bool bConsumeAmmo)
+void ASHitscanWeapon::PerformHitScan(bool bDoDamage, FHitResult &OutHitResult)
 {
     AActor* Owner = GetOwner();
     if (Owner)
@@ -144,12 +144,9 @@ void ASHitscanWeapon::PerformHitScan(bool bDoDamage, bool bConsumeAmmo)
         OnRep_HitScanTrace();
 
         LastFireTime = GetWorld()->TimeSeconds;
+        OutHitResult = OutHit;
     }
 
-    if (bConsumeAmmo)
-    {
-        AmmoInClip--;
-    }
 }
 
 void ASHitscanWeapon::OnTraceHit(FHitResult Hit, FVector ShotDirection, bool bDoDamage)

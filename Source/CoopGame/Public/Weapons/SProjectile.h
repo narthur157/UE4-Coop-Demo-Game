@@ -39,6 +39,12 @@ public:
 protected:
 	AActor* DirectHitActor = nullptr;
 
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_bIsServerProjectile, Category = "Weapon")
+    bool bIsServerProjectile = false;
+
+    UFUNCTION()
+    void OnRep_bIsServerProjectile();
+
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UProjectileMovementComponent* MovementComp = nullptr;
 
@@ -88,5 +94,5 @@ public:
 	UFUNCTION()
     virtual void Launch();
 	
-    virtual void Initialize(const FProjectileWeaponData& Data);
+    virtual void Initialize(const FProjectileWeaponData& Data, bool bIsServer);
 };
