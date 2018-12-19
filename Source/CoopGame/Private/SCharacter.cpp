@@ -33,9 +33,6 @@ ASCharacter::ASCharacter()
 	SetReplicates(true);
     GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
-    ZoomedFOV = 65.0;
-    ZoomInterpSpeed = 20.0f;
-    
 }
 
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -142,39 +139,8 @@ void ASCharacter::EndCrouch()
     UnCrouch();
 }
 
-void ASCharacter::BeginZoom()
-{
-    bWantsToZoom = true;
 
-	if (Role == ROLE_AutonomousProxy)
-	{
-		ServerSetZoom(bWantsToZoom);
-	}
-}
 
-void ASCharacter::EndZoom()
-{
-    bWantsToZoom = false;
-
-	if (Role == ROLE_AutonomousProxy)
-	{
-		ServerSetZoom(bWantsToZoom);
-	}
-}
-
-// TODO: Server functions so this works in multiplayer
-void ASCharacter::BeginSprint()
-{
-   // bWantsToSprint = true;
-    //GetCharacterMovement()->MaxWalkSpeed += SprintSpeed;
-
-}
-
-void ASCharacter::EndSprint()
-{
-    //bWantsToSprint = false;
-    //GetCharacterMovement()->MaxWalkSpeed -= SprintSpeed;
-}
 
 FVector ASCharacter::GetSize()
 {
@@ -249,31 +215,118 @@ void ASCharacter::OnHealthChanged(USHealthComponent * ChangedHealthComp, float H
 
         // Die
         GetMovementComponent()->StopMovementImmediately();
-		
-		APlayerController* PC = Cast<APlayerController>(GetController());
 
-		if (PC)
-		{
-			PC->PlayerState->bIsSpectator = true;
-			PC->ChangeState(NAME_Spectating);
-			PC->ClientGotoState(NAME_Spectating);
-		}
+        APlayerController* PC = Cast<APlayerController>(GetController());
 
-		GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
+        if (PC)
+        {
+            PC->PlayerState->bIsSpectator = true;
+            PC->ChangeState(NAME_Spectating);
+            PC->ClientGotoState(NAME_Spectating);
+        }
+
+        GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
         GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         DetachFromControllerPendingDestroy();
-		PrimaryActorTick.bCanEverTick = false;
+        PrimaryActorTick.bCanEverTick = false;
         SetLifeSpan(3.0f);
     }
 }
 
-void ASCharacter::ServerSetZoom_Implementation(bool bZoom)
+/** This is empty for now, but the hook remains in case something like stuns appear */
+bool ASCharacter::CanSprint()
 {
-	bWantsToZoom = bZoom;
+    return true;
 }
 
-bool ASCharacter::ServerSetZoom_Validate(bool bZoom)
+void ASCharacter::BeginSprint()
 {
-	return true;
+    if (bWantsToZoom)
+    {
+        EndZoom();
+    }
+
+    if (!HasAuthority())
+    {
+        ServerSetSprint(true);
+    }
+
+    bWantsToSprint = true;
+    GetCharacterMovement()->MaxWalkSpeed += SprintSpeedModifier;
 }
+
+void ASCharacter::EndSprint()
+{
+    if (!bWantsToSprint) { return; }
+
+    if (!HasAuthority())
+    {
+        ServerSetSprint(false);
+    }
+
+    bWantsToSprint = false;
+    GetCharacterMovement()->MaxWalkSpeed += -SprintSpeedModifier;
+}
+
+void ASCharacter::ServerSetSprint_Implementation(bool bSprint)
+{
+    if (bSprint && CanSprint())
+    {
+        BeginSprint();
+    }
+    else
+    {
+        EndSprint();
+    }
+}
+bool ASCharacter::ServerSetSprint_Validate(bool bSprint) { return true; }
+
+/** This is empty for now, but the hook remains in case something like stuns appear */
+bool ASCharacter::CanZoom()
+{
+    return true;
+}
+
+void ASCharacter::BeginZoom()
+{
+    if (bWantsToSprint)
+    {
+        EndSprint();
+    }
+
+    if (!HasAuthority())
+    {
+        ServerSetZoom(true);
+    }
+
+    bWantsToZoom = true;
+    GetCharacterMovement()->MaxWalkSpeed += ZoomedMovespeedPenalty;
+}
+
+void ASCharacter::EndZoom()
+{
+    if (!bWantsToZoom) { return; }
+
+    if (!HasAuthority())
+    {
+        ServerSetZoom(false);
+    }
+
+    bWantsToZoom = false;
+    GetCharacterMovement()->MaxWalkSpeed += -ZoomedMovespeedPenalty;
+}
+
+void ASCharacter::ServerSetZoom_Implementation(bool bZoom)
+{
+    if (bZoom && CanZoom())
+    {
+        BeginZoom();
+    }
+    else
+    {
+        EndZoom();
+    }
+}
+
+bool ASCharacter::ServerSetZoom_Validate(bool bZoom) { return true; }
 
