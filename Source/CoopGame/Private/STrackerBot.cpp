@@ -124,6 +124,7 @@ AActor* ASTrackerBot::FindBestTarget()
 FVector ASTrackerBot::GetNextPathPoint()
 {
     GetWorldTimerManager().ClearTimer(TimerHandle_RefreshPath);
+	GetWorldTimerManager().SetTimer(TimerHandle_RefreshPath, this, &ASTrackerBot::RefreshPath, RefreshInterval, false);
 
 	AActor* BestTarget = FindBestTarget();
 
@@ -313,6 +314,7 @@ void ASTrackerBot::OnRep_TrackerBotAttached()
 
 void ASTrackerBot::OnRep_Exploded()
 {
+	Exploded();
     TRACE("%s self destructed, time: %f", *GetName(), GetWorld()->TimeSeconds)
     UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation());
     UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
@@ -345,7 +347,7 @@ bool ASTrackerBot::AttachBotToActor(APawn* OtherPawn)
 		if (!ActorHasTrackerBot)
 		{
 			// TODO: Add function on actor (maybe even an interface) to add other actors like this one to sockets 
-			// As of right now multiple trigger bots can attach to the back slod and that's bad
+			// As of right now multiple trigger bots can attach to the back slot and that's bad
 			OnRep_TrackerBotAttached();
 			AttachToComponent(OtherMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Back");
 			bSelfDestructionAttached = true;
