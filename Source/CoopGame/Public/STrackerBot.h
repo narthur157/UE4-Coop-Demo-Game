@@ -143,6 +143,9 @@ protected:
 
 public:	
 	UFUNCTION(BlueprintImplementableEvent, Category = "TrackerBot")
+	void Exploded();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "TrackerBot")
 	void SelfDestructTicked(float TimeTillDestruct);
 
 	virtual void IncreaseMovespeed(float PercentIncrease);
