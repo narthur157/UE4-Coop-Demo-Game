@@ -50,7 +50,7 @@ void ASProjectile::Initialize(const FProjectileWeaponData &Data, bool bIsServer)
 
 void ASProjectile::OnRep_bIsServerProjectile()
 {
-    if (bIsServerProjectile && GetInstigatorController() )
+    if (bIsServerProjectile && !HasAuthority())
     {
         SetActorHiddenInGame(true);
         SetActorEnableCollision(false);
@@ -61,7 +61,7 @@ void ASProjectile::Launch()
 {
     if (!bWasInitialized)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Projectile fired despite not being Initialized. Please Initialze projectile. Undefined behavior incoming."))
+        UE_LOG(LogTemp, Error, TEXT("Projectile fired despite not being Initialized. Please Initialze projectile. Undefined behavior incoming."))
     }
 
     OnActorHit.AddDynamic(this, &ASProjectile::OnProjectileHit);
@@ -148,7 +148,6 @@ void ASProjectile::Explode()
 
 	DirectHit();
 
-    // TODO: Find a way to remove this, calculate ignored actors in projectileweapondata?
     TArray<AActor*> IgnoredActors = { this, GetOwner(), Instigator };
     if (Role == ROLE_Authority)
     {
@@ -175,7 +174,7 @@ void ASProjectile::Explode()
 
 void ASProjectile::OnRep_Exploded()
 {
-    if (bIsServerProjectile && GetInstigatorController())
+    if (bIsServerProjectile && !HasAuthority())
     {
         return;
     }

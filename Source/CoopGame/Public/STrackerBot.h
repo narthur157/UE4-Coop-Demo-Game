@@ -60,6 +60,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
 	float MaxSpeed = 1000;
 
+	// For ISPawn IncreaseSpeed interface method
+	float OriginalMovementForce = MovementForce;
+	float OriginalMaxSpeed = MaxSpeed;
+
 	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
     bool bUseVelocityChange = false;
 
@@ -71,6 +75,7 @@ protected:
     
     UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
     USoundCue* SelfDestructTickSound = nullptr;
+
     UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
     USoundCue* ExplodeSound = nullptr;
     UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
@@ -81,6 +86,8 @@ protected:
 	// If true, bot will teleport on to player's back once in range
 	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
 	bool bBotAttachesToPlayer = false;
+
+	AActor* FindBestTarget();
 
     FVector GetNextPathPoint();
     FVector NextPathPoint;
@@ -135,6 +142,14 @@ protected:
     float OnKillPoints = 0.0f;
 
 public:	
+	UFUNCTION(BlueprintImplementableEvent, Category = "TrackerBot")
+	void Exploded();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "TrackerBot")
+	void SelfDestructTicked(float TimeTillDestruct);
+
+	virtual void IncreaseMovespeed(float PercentIncrease);
+
 	virtual void Tick(float DeltaTime) override;
 
     // IDamageDealer

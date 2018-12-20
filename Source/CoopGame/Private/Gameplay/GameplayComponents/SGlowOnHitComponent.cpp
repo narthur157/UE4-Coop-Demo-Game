@@ -28,6 +28,14 @@ void USGlowOnHitComponent::BeginPlay()
 
 void USGlowOnHitComponent::OnHealthChanged(USHealthComponent * ChangedHealthComp, float Health, float HealthDelta, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
+
+	FColor GlowColor = HealthDelta > 0 ? HitGlowColor : HealGlowColor;
+
+	FlashGlow(GetWorld()->TimeSeconds, GlowColor, 5.0f);
+}
+
+void USGlowOnHitComponent::FlashGlow(float TimeSeconds, FColor GlowColor, float Intensity /*= 0.0f*/)
+{
 	AActor* MyOwner = GetOwner();
 
 	if (!ensureAlwaysMsgf(MyOwner, TEXT("GlowOnHitComponent requires owner to be set"))) { return; }
@@ -43,13 +51,6 @@ void USGlowOnHitComponent::OnHealthChanged(USHealthComponent * ChangedHealthComp
 		return;
 	}
 
-	FColor GlowColor = HealthDelta > 0 ? HitGlowColor : HealGlowColor;
-
-	USGlowOnHitComponent::FlashGlow(MatInst, GetWorld()->TimeSeconds, GlowColor, 5.0f);
-}
-
-void USGlowOnHitComponent::FlashGlow(UMaterialInstanceDynamic* MatInst, float TimeSeconds, FColor GlowColor, float Intensity /*= 0.0f*/)
-{
 	MatInst->SetVectorParameterValue("HitGlowColor", GlowColor);
 	MatInst->SetScalarParameterValue("HitEmissiveIntensity", Intensity);
 	MatInst->SetScalarParameterValue("LastTimeDamageTaken", TimeSeconds);
