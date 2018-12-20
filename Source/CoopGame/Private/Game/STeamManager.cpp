@@ -86,6 +86,12 @@ void ASTeamManager::AddActorToTeam(AActor* Actor, uint8 TeamToAddTo)
     TeamComponent->SetTeam(Team);
 }
 
+void ASTeamManager::AddActorAndPlayerToTeam(AActor* Actor, AController* NewTeamMember, uint8 TeamToAddTo)
+{
+	AddPlayerToTeam(NewTeamMember, TeamToAddTo);
+	AddActorToTeam(Actor, TeamToAddTo);
+}
+
 ASTeam* ASTeamManager::GetTeam(uint8 TeamIndex)
 {
     for (ASTeam* Team : Teams)
