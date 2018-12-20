@@ -15,16 +15,14 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "TimerManager.h"
 #include "Game/Modes/SGameState.h"
-#include "Engine/Engine.h"
 #include "Net/UnrealNetwork.h"
 
-static int32 DebugTrackerBotNavigation = 0;
-FAutoConsoleVariableRef CVARDebugTrackerBotNavigation(
-	TEXT("COOP.TrackerBotNavigation"),
-	DebugTrackerBotNavigation,
-	TEXT("Draws debug objects for tracker bot navigation"),
+static int32 DebugTrackerBot = 0;
+FAutoConsoleVariableRef CVARDebugTrackerBot(
+	TEXT("COOP.DebugTrackerBot"),
+	DebugTrackerBot,
+	TEXT("Draws debug objects for tracker bot and enable verbose logs"),
 	ECVF_Cheat);
-
 
 ASTrackerBot::ASTrackerBot()
 {
@@ -47,15 +45,6 @@ ASTrackerBot::ASTrackerBot()
     ProximityExplosionRadius->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 }
 
-void ASTrackerBot::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-    DOREPLIFETIME(ASTrackerBot, bExploded);
-    DOREPLIFETIME(ASTrackerBot, ExplodeTime);
-    DOREPLIFETIME(ASTrackerBot, bSelfDestructionAttached);
-}
-
 // Called when the game starts or when spawned
 void ASTrackerBot::BeginPlay()
 {
@@ -75,11 +64,27 @@ void ASTrackerBot::BeginPlay()
     }
 }
 
-FVector ASTrackerBot::GetNextPathPoint()
+void ASTrackerBot::Tick(float DeltaTime)
 {
-    GetWorldTimerManager().ClearTimer(TimerHandle_RefreshPath);
-    GetWorldTimerManager().SetTimer(TimerHandle_RefreshPath, this, &ASTrackerBot::RefreshPath, RefreshInterval, false);
+	Super::Tick(DeltaTime);
 
+	if (!bSelfDestructionAttached && !bExploded && Role == ROLE_Authority)
+	{
+		MoveTowardsTarget(DeltaTime);
+	}
+}
+
+void ASTrackerBot::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASTrackerBot, bExploded);
+	DOREPLIFETIME(ASTrackerBot, ExplodeTime);
+	DOREPLIFETIME(ASTrackerBot, bSelfDestructionAttached);
+}
+
+AActor* ASTrackerBot::FindBestTarget()
+{
     AActor* BestTarget = nullptr;
     float NearestTargetDistance = FLT_MAX;
 
@@ -87,15 +92,15 @@ FVector ASTrackerBot::GetNextPathPoint()
     {
         APawn* TestPawn = It->Get();
         
-		if (!TestPawn || TestPawn == this || UTeamComponent::IsActorFriendly(this, TestPawn))
+		if (!TestPawn || TestPawn == this || 
+			!UTeamComponent::AreActorTeamsValid(this, TestPawn) || UTeamComponent::IsActorFriendly(this, TestPawn))
         {
             continue;
         }
 
+        USHealthComponent* PawnHealthComp = TestPawn->FindComponentByClass<USHealthComponent>();
 
-        USHealthComponent* HealthComp = TestPawn->FindComponentByClass<USHealthComponent>();
-
-		if (HealthComp && HealthComp->GetHealth() > 0)
+		if (PawnHealthComp && PawnHealthComp->GetHealth() > 0)
         {
             // Target is still alive, check and store nearest target if this target is closer than the previous nearest
             float Distance = (TestPawn->GetActorLocation() - GetActorLocation()).Size();
@@ -108,28 +113,46 @@ FVector ASTrackerBot::GetNextPathPoint()
         }
     }
 
-    if (BestTarget)
-    {
-        UNavigationPath* NavPath = UNavigationSystemV1::FindPathToActorSynchronously(GetWorld(), GetActorLocation(), BestTarget);
+	if (DebugTrackerBot && BestTarget)
+	{
+		UE_LOG(TrackerBot, Log, TEXT("Tracker bot found best target %s"), *BestTarget->GetName());
+	}
 
-        if (NavPath && NavPath->PathPoints.Num() > 0)
-        {
-			if (DebugTrackerBotNavigation)
-			{
-				DrawDebugSphere(GetWorld(), NavPath->PathPoints[1], 100, 12, FColor::Red, true, 5.0f, 0, 1);
-			}
+	return BestTarget;
+}
 
-            return NavPath->PathPoints[1];
-        }
-		else
+FVector ASTrackerBot::GetNextPathPoint()
+{
+    GetWorldTimerManager().ClearTimer(TimerHandle_RefreshPath);
+	GetWorldTimerManager().SetTimer(TimerHandle_RefreshPath, this, &ASTrackerBot::RefreshPath, RefreshInterval, false);
+
+	AActor* BestTarget = FindBestTarget();
+
+	if (!BestTarget)
+	{
+		return GetActorLocation();
+	}
+
+	UNavigationPath* NavPath = UNavigationSystemV1::FindPathToActorSynchronously(GetWorld(), GetActorLocation(), BestTarget);
+
+	if (NavPath && NavPath->PathPoints.Num() > 0)
+	{
+		if (DebugTrackerBot)
 		{
-			return BestTarget->GetActorLocation();
+			DrawDebugSphere(GetWorld(), NavPath->PathPoints[1], 100, 12, FColor::Red, true, 5.0f, 0, 1);
 		}
-    }
 
-	UE_LOG(LogTemp, Error, TEXT("TrackerBot failed to find path"));
+		return NavPath->PathPoints[1];
+	}
+	else
+	{
+		return BestTarget->GetActorLocation();
+	}
+}
 
-    return GetActorLocation();
+void ASTrackerBot::RefreshPath()
+{
+	NextPathPoint = GetNextPathPoint();
 }
 
 void ASTrackerBot::OnTakeDamage(USHealthComponent * ChangedHealthComp, float Health, float HealthDelta, 
@@ -166,15 +189,17 @@ void ASTrackerBot::SelfDestruct()
 	MeshComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 }
 
-void ASTrackerBot::Tick(float DeltaTime)
+void ASTrackerBot::IncreaseMovespeed(float PercentIncrease)
 {
-	Super::Tick(DeltaTime);
+	if (DebugTrackerBot)
+	{
+		UE_LOG(TrackerBot, Log, TEXT("Speed increased %f"), PercentIncrease);
 
-    if (!bSelfDestructionAttached && !bExploded && Role == ROLE_Authority)
-    {
-        MoveTowardsTarget(DeltaTime);
-    }
+	}
+	MovementForce = OriginalMovementForce + OriginalMovementForce * PercentIncrease;
+	MaxSpeed = OriginalMaxSpeed + OriginalMaxSpeed * PercentIncrease;
 }
+
 
 void ASTrackerBot::MoveTowardsTarget(float DeltaTime)
 {
@@ -185,62 +210,92 @@ void ASTrackerBot::MoveTowardsTarget(float DeltaTime)
         NextPathPoint = GetNextPathPoint();
     }
 
-	FVector ForceDirection = NextPathPoint - GetActorLocation();
-	ForceDirection.Normalize();
+	if (DebugTrackerBot)
+	{
+		DrawDebugSphere(GetWorld(), NextPathPoint, 100, 12, FColor::Yellow, true, 5.0f);
+	}
 
-	float ActualMoveSpeed = GetVelocity().Size();
-	FVector MoveDirection = GetVelocity();
-	MoveDirection.Normalize();
+	FVector TargetLookAtDirection = NextPathPoint - GetActorLocation();
+	TargetLookAtDirection.Normalize();
 
-	float SpeedTowardsTarget = (((ForceDirection + MoveDirection) / 2) * ActualMoveSpeed).Size();
+	FVector ActualMoveDirection = GetVelocity();
+	float ActualMoveSpeed = ActualMoveDirection.Size();
+	ActualMoveDirection.Normalize();
+
+	float SpeedTowardsTarget = (((TargetLookAtDirection+ ActualMoveDirection) / 2) * ActualMoveSpeed).Size();
+	
+	if (DebugTrackerBot)
+	{
+		float ArrowLengthScale = 1;
+		FVector ALoc = GetActorLocation();
+		FVector TargetArrowEnd = ALoc + (TargetLookAtDirection * (MaxSpeed / ArrowLengthScale));
+		FVector ActualMovementArrowEnd = ALoc + (GetVelocity() / ArrowLengthScale);
+		DrawDebugDirectionalArrow(GetWorld(), ALoc, ActualMovementArrowEnd, 50, FColor::Green);
+		DrawDebugDirectionalArrow(GetWorld(), ALoc, TargetArrowEnd, 50, FColor::Yellow);
+		
+		FVector CorrectionVector = (TargetLookAtDirection * MaxSpeed) - GetVelocity();
+		CorrectionVector.Normalize();
+
+		DrawDebugDirectionalArrow(GetWorld(), ActualMovementArrowEnd, ActualMovementArrowEnd +  (CorrectionVector * MaxSpeed / ArrowLengthScale), 50, FColor::Blue);
+	}
 
 	if (SpeedTowardsTarget <= MaxSpeed)
 	{
-		ForceDirection *= MovementForce * (DeltaTime * 100);
-		MeshComp->AddForce(ForceDirection, NAME_None, bUseVelocityChange);
+		FVector ResultForce = (TargetLookAtDirection * MaxSpeed) - GetVelocity();
+		ResultForce.Z = 0; // no flying
+		ResultForce.Normalize();
+		ResultForce *= MovementForce * (DeltaTime * 100);
+
+		MeshComp->AddForce(ResultForce, NAME_None, bUseVelocityChange);
 	}
 }
 
 void ASTrackerBot::OnProximityRadiusOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	if (bExploded || bTriggered)
+    APawn* OtherActorPawn = Cast<APawn>(OtherActor);
+
+	if (bExploded || bTriggered || !OtherActorPawn || OtherActorPawn == this)
 	{
 		return;
 	}
 
-    APawn* OtherActorPawn = Cast<APawn>(OtherActor);
-    if (OtherActorPawn && OtherActorPawn != this && !UTeamComponent::IsActorFriendly(OtherActorPawn, this))
+	// IsActorFriendly does check team validity, but it returns unfriendly if invalid
+	// Dont explode for invalid teams
+	if (!UTeamComponent::AreActorTeamsValid(this, OtherActor) || 
+		UTeamComponent::IsActorFriendly(this, OtherActor))
+	{
+		return;
+	}
+
+	UE_LOG(TrackerBot, Warning, TEXT("Triggered by %s"), *OtherActor->GetName());
+    
+    if (Role == ROLE_Authority)
     {
-		USHealthComponent* OtherHealth = OtherActor->FindComponentByClass<USHealthComponent>();
-
-        if (Role == ROLE_Authority)
-        {
-			if (bBotAttachesToPlayer)
-			{
-				AttachBotToActor(OtherActorPawn);
-			}
+		if (bBotAttachesToPlayer)
+		{
+			AttachBotToActor(OtherActorPawn);
+		}
             
-            GetWorldTimerManager().SetTimer(SelfDestructCountdownTimer, this, &ASTrackerBot::SelfDestruct, SelfDestructTime, false);
-            ExplodeTime = GetWorld()->TimeSeconds + SelfDestructTime;
-            OnRep_ExplodeTime();
-        }
-
-        UGameplayStatics::SpawnSoundAttached(TriggeredSound, RootComponent);
-        bTriggered = true;
+        GetWorldTimerManager().SetTimer(SelfDestructCountdownTimer, this, &ASTrackerBot::SelfDestruct, SelfDestructTime, false);
+        ExplodeTime = GetWorld()->TimeSeconds + SelfDestructTime;
+        OnRep_ExplodeTime();
     }
-}
 
-void ASTrackerBot::RefreshPath()
-{
-   NextPathPoint = GetNextPathPoint();
+	// Somewhat of a hack, point is to just make the bot flash when the trigger occurs
+	SelfDestructTicked(3.0f);
+
+    UGameplayStatics::SpawnSoundAttached(TriggeredSound, RootComponent);
+    bTriggered = true;
 }
 
 void ASTrackerBot::SelfDestructTick()
 {
+
     UGameplayStatics::SpawnSoundAttached(SelfDestructTickSound, RootComponent);
     float TimeRemainingUntilDestruction = ExplodeTime - GetWorld()->TimeSeconds;
-    GetWorldTimerManager().SetTimer(SelfDestructionTickTimer, this, &ASTrackerBot::SelfDestructTick, TimeRemainingUntilDestruction/4, false);
+	SelfDestructTicked(TimeRemainingUntilDestruction);
 
+    GetWorldTimerManager().SetTimer(SelfDestructionTickTimer, this, &ASTrackerBot::SelfDestructTick, TimeRemainingUntilDestruction/4, false);
 }
 
 void ASTrackerBot::OnRep_ExplodeTime()
@@ -259,6 +314,7 @@ void ASTrackerBot::OnRep_TrackerBotAttached()
 
 void ASTrackerBot::OnRep_Exploded()
 {
+	Exploded();
     TRACE("%s self destructed, time: %f", *GetName(), GetWorld()->TimeSeconds)
     UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation());
     UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
@@ -291,7 +347,7 @@ bool ASTrackerBot::AttachBotToActor(APawn* OtherPawn)
 		if (!ActorHasTrackerBot)
 		{
 			// TODO: Add function on actor (maybe even an interface) to add other actors like this one to sockets 
-			// As of right now multiple trigger bots can attach to the back slod and that's bad
+			// As of right now multiple trigger bots can attach to the back slot and that's bad
 			OnRep_TrackerBotAttached();
 			AttachToComponent(OtherMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Back");
 			bSelfDestructionAttached = true;

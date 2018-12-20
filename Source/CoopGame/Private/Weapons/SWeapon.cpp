@@ -72,13 +72,18 @@ void ASWeapon::Fire()
 
     OnFire();
 
-    ConsumeAmmo(AmmoConsumedPerFire);
-
+    if (HasAuthority())
+    {
+        ConsumeAmmo(AmmoConsumedPerFire);
+    }
 }
 
 void ASWeapon::ConsumeAmmo_Implementation(int32 AmmoToConsume)
 {
-    AmmoInClip -= AmmoToConsume;
+    if (HasAuthority())
+    {
+        AmmoInClip -= AmmoToConsume;
+    }
 }
 
 bool ASWeapon::ConsumeAmmo_Validate(int32 AmmoToConsume) { return true; }

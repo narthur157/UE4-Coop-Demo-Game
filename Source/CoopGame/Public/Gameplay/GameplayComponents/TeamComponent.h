@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "TeamComponent.generated.h"
 
+#define INVALID_TEAM_NUM 255
+
 class ASTeam;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTeamComponentOnTeamChanged, AActor*, Actor, ASTeam*, NewTeam);
@@ -45,5 +47,9 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Team")
     static bool IsActorFriendly(AActor* ActorOne, AActor* ActorTwo);
-	
+
+	static bool IsActorTeamValid(AActor* AnActor);
+
+	// consider extending this to work for N actors
+	static bool AreActorTeamsValid(AActor* ActorOne, AActor* ActorTwo);
 };

@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project SettinGameStateCache.
-
 #include "SHordeGameMode.h"
 #include "CoopGame.h"
 #include "SPlayerState.h"
@@ -10,12 +8,10 @@
 #include "Gameplay/GameplayActors/SAffix.h"
 #include "SHordeGameState.h"
 
-
 ASHordeGameMode::ASHordeGameMode()
 {
     GameStateClass = ASHordeGameState::StaticClass();
     PlayerStateClass = ASPlayerState::StaticClass();
-    
 }
 
 void ASHordeGameMode::StartPlay()
@@ -27,13 +23,14 @@ void ASHordeGameMode::StartPlay()
 
     GameStateCache->GetTeamManager()->CreateTeam(PlayerTeamNumber);
     GameStateCache->PlayerTeam = GameStateCache->GetTeamManager()->GetTeam(PlayerTeamNumber);
-    GameStateCache->GetTeamManager()->CreateTeam(HordeTeamNumber);
+    
+	GameStateCache->GetTeamManager()->CreateTeam(HordeTeamNumber);
     GameStateCache->HordeTeam = GameStateCache->GetTeamManager()->GetTeam(HordeTeamNumber);
-    GameStateCache->OnRep_HordeTeam();
+    
+	GameStateCache->OnRep_HordeTeam();
     
     PrepareForNextWave();
 }
-
 
 void ASHordeGameMode::StartWave()
 {

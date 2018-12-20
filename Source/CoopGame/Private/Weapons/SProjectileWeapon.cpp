@@ -28,7 +28,7 @@ void ASProjectileWeapon::SpawnPredictedProjectile(TSubclassOf<ASProjectile> Proj
         SpawnParams.Owner = this;
         ASProjectile* NewProjectile = GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, OutViewPointLocation, ProjectileSpawnRotation, SpawnParams);
 
-        NewProjectile->Initialize(ProjectileWeaponConfigData, HasAuthority());
+        NewProjectile->Initialize(ProjectileWeaponConfigData, (HasAuthority() && GetInstigator()->IsPlayerControlled()));
         NewProjectile->Launch();
     }
 }
