@@ -21,10 +21,6 @@ ASHitscanWeapon::ASHitscanWeapon()
     PrimaryActorTick.bCanEverTick = true;
 }
 
-void ASHitscanWeapon::BeginPlay()
-{
-    Super::BeginPlay();
-}
 
 void ASHitscanWeapon::Tick(float DeltaTime)
 {
@@ -104,7 +100,7 @@ void ASHitscanWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 }
 
 
-void ASHitscanWeapon::PerformHitScan(bool bDoDamage, bool bConsumeAmmo)
+void ASHitscanWeapon::PerformHitScan(bool bDoDamage, FHitResult &OutHitResult)
 {
     AActor* Owner = GetOwner();
     if (Owner)
@@ -144,12 +140,9 @@ void ASHitscanWeapon::PerformHitScan(bool bDoDamage, bool bConsumeAmmo)
         OnRep_HitScanTrace();
 
         LastFireTime = GetWorld()->TimeSeconds;
+        OutHitResult = OutHit;
     }
 
-    if (bConsumeAmmo)
-    {
-        AmmoInClip--;
-    }
 }
 
 void ASHitscanWeapon::OnTraceHit(FHitResult Hit, FVector ShotDirection, bool bDoDamage)
@@ -197,8 +190,6 @@ void ASHitscanWeapon::DrawTracerEffect(const FVector &TraceEndPoint)
     FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
     if (MuzzleEffect)
     {
-		// TODO: This should work
-		// UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
 		FVector ShotDirection = TraceEndPoint - MuzzleLocation;
 		ShotDirection.Normalize();
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleEffect, MuzzleLocation, ShotDirection.Rotation());
@@ -273,5 +264,5 @@ void ASHitscanWeapon::RecoilExpired()
     CurrentRecoilYawConsqecModifier = 0.0f;
     DesiredPitchOffset = 0.0f;
     DesiredYawOffset = 0.0f;
-
 }
+

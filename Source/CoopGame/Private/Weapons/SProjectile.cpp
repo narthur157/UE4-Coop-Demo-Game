@@ -38,19 +38,30 @@ void ASProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(ASProjectile, ExplosionStatus);
+    DOREPLIFETIME(ASProjectile, bIsServerProjectile);
 }
 
-void ASProjectile::Initialize(const FProjectileWeaponData & Data)
+void ASProjectile::Initialize(const FProjectileWeaponData &Data, bool bIsServer)
 {
     WeaponData = Data;
+    bIsServerProjectile = bIsServer;
     bWasInitialized = true;
+}
+
+void ASProjectile::OnRep_bIsServerProjectile()
+{
+    if (bIsServerProjectile && !HasAuthority() && GetInstigator()->IsLocallyControlled())
+    {
+        SetActorHiddenInGame(true);
+        SetActorEnableCollision(false);
+    }
 }
 
 void ASProjectile::Launch()
 {
     if (!bWasInitialized)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Projectile fired despite not being Initialized. Please Initialze projectile. Undefined behavior incoming."))
+        UE_LOG(LogTemp, Error, TEXT("Projectile fired despite not being Initialized. Please Initialze projectile. Undefined behavior incoming."))
     }
 
     OnActorHit.AddDynamic(this, &ASProjectile::OnProjectileHit);
@@ -65,10 +76,8 @@ void ASProjectile::OnProjectileExpire()
 {
     ExplosionStatus.bExploded = true;
 
-	if (Role == ROLE_Authority)
-	{
-		OnRep_Exploded();
-	}
+	OnRep_Exploded();
+	
 }
 
 void ASProjectile::OnProjectileHit(AActor * SelfActor, AActor * OtherActor, FVector NormalImpulse, const FHitResult & Hit)
@@ -139,7 +148,6 @@ void ASProjectile::Explode()
 
 	DirectHit();
 
-    // TODO: Find a way to remove this, calculate ignored actors in projectileweapondata?
     TArray<AActor*> IgnoredActors = { this, GetOwner(), Instigator };
     if (Role == ROLE_Authority)
     {
@@ -166,5 +174,9 @@ void ASProjectile::Explode()
 
 void ASProjectile::OnRep_Exploded()
 {
+    if (bIsServerProjectile && !HasAuthority())
+    {
+        return;
+    }
     Explode();
 }

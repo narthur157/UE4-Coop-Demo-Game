@@ -26,7 +26,6 @@ struct FProjectileWeaponData
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeaponData")
 	float ProjectileRadius = 0.0f;
 
-
     bool DoesExpire()
     {
         return ProjectileLifeTime > 0 ? true : false;
@@ -55,8 +54,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "ProjectileWeapon")
     FProjectileWeaponData ProjectileWeaponConfigData;
 
-    virtual void Fire() override;
-
-    void SpawnProjectile(TSubclassOf<ASProjectile> Projectile);
+    UFUNCTION(BlueprintCallable, Category = "ProjectileWeapon")
+    void SpawnPredictedProjectile(TSubclassOf<ASProjectile> Projectile, bool bDoDamage);
 
 };
