@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "SPlayerController.h"
 #include "Engine.h"
 #include "SGameState.h"
@@ -19,11 +17,9 @@ void ASPlayerController::Tick(float DeltaTime)
 
 }
 
-
 void ASPlayerController::BeginPlay()
 {
     Super::BeginPlay();
-
 
     if (GameEventWidgetClass && IsLocalController())
     {
@@ -51,6 +47,7 @@ void ASPlayerController::SetupInputComponent()
     Super::SetupInputComponent();
     ensure(InputComponent);
     InputComponent->BindAction("ToggleMenu", IE_Pressed, this, &ASPlayerController::ToggleMenu);
+	InputComponent->BindAction("Ready", IE_Pressed, this, &ASPlayerController::OnReadyForWaves);
 }
 
 void ASPlayerController::RecieveGameOver(ASTeam* WinningTeam)
@@ -92,6 +89,17 @@ void ASPlayerController::ToggleMenu()
         }
     }
 }
+
+void ASPlayerController::OnReadyForWaves_Implementation()
+{
+	OnPlayerReady.Broadcast(this);
+}
+
+bool ASPlayerController::OnReadyForWaves_Validate()
+{
+	return true;
+}
+
 
 void ASPlayerController::SetPawn(APawn* InPawn)
 {
