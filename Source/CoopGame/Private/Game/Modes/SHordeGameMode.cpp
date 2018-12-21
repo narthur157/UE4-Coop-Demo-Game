@@ -51,7 +51,6 @@ void ASHordeGameMode::SpawnBotTimerElapsed()
     NumberBotsToSpawn--;
     if (NumberBotsToSpawn <= 0)
     {
-        ApplyWaveAffixes();
         EndWave();
     }
 }

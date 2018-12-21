@@ -115,9 +115,9 @@ bool ASWeapon::CanFire()
     return false;
 }
 
-bool ASWeapon::HasAmmoRequiredToFire(bool bReloadIfFase)
+bool ASWeapon::HasAmmoRequiredToFire(bool bReloadIfFalse)
 {
-    if (AmmoInClip > AmmoRequiredToFire)
+    if (AmmoInClip >= AmmoRequiredToFire)
     {
         return true;
     }
