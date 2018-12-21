@@ -5,7 +5,6 @@
 #include "SWeaponWidget.h"
 #include "SWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "SCharacter.h"
 #include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -35,7 +34,7 @@ void USWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 void USWeaponComponent::SpawnDefaultWeaponInventory()
 {
     // We want the server to own these actors
-    if (GetOwnerRole() < ROLE_Authority)
+    if (!GetOwner()->HasAuthority())
     {
         return;
     }
@@ -44,6 +43,7 @@ void USWeaponComponent::SpawnDefaultWeaponInventory()
         FActorSpawnParameters SpawnParams;
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
         SpawnParams.Owner = GetOwner();
+        SpawnParams.Instigator = Cast<APawn>(GetOwner());
 
         for (int i = 0; i < DefaultWeapons.Num(); i++)
         {
@@ -73,17 +73,15 @@ void USWeaponComponent::EquipWeapon(ASWeapon* Weapon)
 		CurrentWeapon->SetActorHiddenInGame(true);
 	}
 
+
 	// Proxy our current weapon's reload delegate
 	Weapon->OnReload.BindLambda([&]() {
 		MulticastReloadAnim();
 	});
 
-	if (Weapon->WeaponActivatedSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), Weapon->WeaponActivatedSound, Weapon->GetActorLocation());
-	}
+    Weapon->WeaponActivated();
 
-    if (GetOwnerRole() < ROLE_Authority)
+    if (!GetOwner()->HasAuthority())
     {
         ServerEquipWeapon(Weapon);
         return;
@@ -91,6 +89,67 @@ void USWeaponComponent::EquipWeapon(ASWeapon* Weapon)
 
     SetCurrentWeapon(Weapon);
 }
+
+void USWeaponComponent::ServerChangeWeaponAnim_Implementation()
+{
+    MulticastChangeWeaponAnim();
+}
+
+bool USWeaponComponent::ServerChangeWeaponAnim_Validate() { return true; }
+
+
+
+void USWeaponComponent::ServerEquipWeapon_Implementation(ASWeapon* Weapon)
+{
+    EquipWeapon(Weapon);
+}
+
+bool USWeaponComponent::ServerEquipWeapon_Validate(ASWeapon* Weapon) { return true; }
+
+
+void USWeaponComponent::ChangeWeapon()
+{
+    if (WeaponInventory.Num() == 0)
+    {
+        UE_LOG(LogTemp, Log, TEXT("Failed: WeaponInventoryEmpty"));
+        return;
+    }
+
+    OnWeaponChange.Broadcast();
+    ServerChangeWeaponAnim();
+
+    bCanFire = false;
+    ServerSetCanFire(false);
+
+    FTimerHandle Handle;
+    GetWorld()->GetTimerManager().SetTimer(Handle, [&]() {
+        bCanFire = true;
+        ServerSetCanFire(true);
+
+        if (!CurrentWeapon)
+        {
+            UE_LOG(LogTemp, Log, TEXT("No Current Weapon, Equipping First"));
+            EquipWeapon(WeaponInventory[0]);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Log, TEXT("WeaponSwap Success"));
+            GetCurrentWeapon()->CancelReload();
+            StopFire();
+            int32 CurrentWeaponIndex = WeaponInventory.Find(CurrentWeapon);
+            if (CurrentWeaponIndex == WeaponInventory.Num() - 1)
+            {
+                EquipWeapon(WeaponInventory[0]);
+            }
+            else if (CurrentWeaponIndex != INDEX_NONE)
+            {
+                CurrentWeaponIndex++;
+                EquipWeapon(WeaponInventory[CurrentWeaponIndex]);
+            }
+        }
+    }, ChangeWeaponDelay, false);
+}
+
 
 void USWeaponComponent::ServerSetCanFire_Implementation(bool bCan)
 {
@@ -158,75 +217,7 @@ void USWeaponComponent::MulticastChangeWeaponAnim_Implementation()
 	OnWeaponChange.Broadcast();
 }
 
-bool USWeaponComponent::MulticastChangeWeaponAnim_Validate()
-{
-	return true;
-}
-
-void USWeaponComponent::ServerChangeWeaponAnim_Implementation()
-{
-	MulticastChangeWeaponAnim();
-}
-
-bool USWeaponComponent::ServerChangeWeaponAnim_Validate()
-{
-	return true;
-}
-
-void USWeaponComponent::ServerEquipWeapon_Implementation(ASWeapon* Weapon)
-{
-    EquipWeapon(Weapon);
-}
-
-bool USWeaponComponent::ServerEquipWeapon_Validate(ASWeapon* Weapon)
-{
-    return true;
-}
-
-void USWeaponComponent::ChangeWeapon()
-{
-    if (WeaponInventory.Num() == 0)
-    {
-        UE_LOG(LogTemp, Log, TEXT("Failed: WeaponInventoryEmpty"));
-        return;
-    }
-
-	ASCharacter* MyCharacter = Cast<ASCharacter>(GetOwner());
-
-	OnWeaponChange.Broadcast();
-	ServerChangeWeaponAnim();
-
-	bCanFire = false;
-	ServerSetCanFire(false);
-
-	FTimerHandle Handle;
-	GetWorld()->GetTimerManager().SetTimer(Handle, [&]() {
-		bCanFire = true;
-		ServerSetCanFire(true);
-
-		if (!CurrentWeapon)
-		{
-			UE_LOG(LogTemp, Log, TEXT("No Current Weapon, Equipping First"));
-			EquipWeapon(WeaponInventory[0]);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Log, TEXT("WeaponSwap Success"));
-			GetCurrentWeapon()->CancelReload();
-			StopFire();
-			int32 CurrentWeaponIndex = WeaponInventory.Find(CurrentWeapon);
-			if (CurrentWeaponIndex == WeaponInventory.Num() - 1)
-			{
-				EquipWeapon(WeaponInventory[0]);
-			}
-			else if (CurrentWeaponIndex != INDEX_NONE)
-			{
-				CurrentWeaponIndex++;
-				EquipWeapon(WeaponInventory[CurrentWeaponIndex]);
-			}
-		}
-	}, ChangeWeaponDelay, false);
-}
+bool USWeaponComponent::MulticastChangeWeaponAnim_Validate() { return true; }
 
 void USWeaponComponent::StartFire()
 {

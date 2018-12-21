@@ -117,6 +117,7 @@ void ASCharacter::Tick(float DeltaTime)
     float TargetFOV = bWantsToZoom ? ZoomedFOV : DefaultFOV;
     float NewFOV = FMath::FInterpTo(CameraComp->FieldOfView, TargetFOV, DeltaTime, ZoomInterpSpeed);
     CameraComp->SetFieldOfView(NewFOV);
+
 }
 
 void ASCharacter::MoveForward(float RelativeSpeed)
@@ -138,9 +139,6 @@ void ASCharacter::EndCrouch()
 {
     UnCrouch();
 }
-
-
-
 
 FVector ASCharacter::GetSize()
 {
