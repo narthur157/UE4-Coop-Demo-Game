@@ -29,7 +29,7 @@ void ASHordeGameMode::StartPlay()
     
 	GameStateCache->OnRep_HordeTeam();
     
-    PrepareForNextWave();
+    // PrepareForNextWave();
 }
 
 void ASHordeGameMode::StartWave()

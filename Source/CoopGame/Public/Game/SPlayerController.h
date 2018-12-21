@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -11,10 +9,8 @@ class ASTeam;
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerPawnChanged, APawn*, NewPawn);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerReadyForWaves, AController*, Controller);
 
-/**
- * 
- */
 UCLASS()
 class COOPGAME_API ASPlayerController : public APlayerController
 {
@@ -27,6 +23,9 @@ protected:
 
     UPROPERTY(BlueprintAssignable, Category = "PawnData")
     FOnPlayerPawnChanged OnPawnChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "PawnData")
+	FOnPlayerReadyForWaves OnPlayerReady;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget")
     TSubclassOf<UUserWidget> MenuWidgetClass = nullptr;
@@ -61,6 +60,9 @@ public:
 	
     UFUNCTION(BlueprintImplementableEvent, Category = "GameOver")
     void OnRecieveGameOver(ASTeam* WinningTeam);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void OnReadyForWaves();
 
     void SetPawn(APawn* InPawn) override;
 
