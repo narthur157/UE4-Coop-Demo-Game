@@ -55,6 +55,8 @@ void ASHordeGameState::AddAffix(ASAffix* AffixToAdd)
 
     CurrentlyAppliedAffixes.Add(AffixToAdd);
     NewAffix = AffixToAdd;
+    // To allow for listen servers to play events related to a new affix spawning
+    OnRep_NewAffix();
 }
 
 void ASHordeGameState::SetWaveState(EWaveState NewState)
