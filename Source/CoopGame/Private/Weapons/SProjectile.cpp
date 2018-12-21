@@ -50,7 +50,7 @@ void ASProjectile::Initialize(const FProjectileWeaponData &Data, bool bIsServer)
 
 void ASProjectile::OnRep_bIsServerProjectile()
 {
-    if (bIsServerProjectile && !HasAuthority())
+    if (bIsServerProjectile && !HasAuthority() && GetInstigator()->IsLocallyControlled())
     {
         SetActorHiddenInGame(true);
         SetActorEnableCollision(false);

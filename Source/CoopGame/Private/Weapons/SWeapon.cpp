@@ -3,7 +3,6 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "SHealthComponent.h"
-#include "UserWidget.h"
 #include "Gameplay/GameplayComponents/TeamComponent.h"
 #include "SHitIndicatorWidget.h"
 #include "TimerManager.h"
@@ -14,6 +13,7 @@ ASWeapon::ASWeapon()
 {
     MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComponent"));
     RootComponent = MeshComp;
+
     SetReplicates(true);
     NetUpdateFrequency = 66.0f;
     MinNetUpdateFrequency = 33.0f;
@@ -33,14 +33,24 @@ void ASWeapon::BeginPlay()
 
     APawn* MyPawn = Cast<APawn>(GetOwner());
 
-    AmmoInClip = ClipSize;
-
     // Potentially move to sweaponcomp so that each weapon can specify a different crosshair
     if (HitIndicatorWidgetClass && MyPawn && MyPawn->IsPlayerControlled())
     {
         HitIndicatorWidget = CreateWidget<USHitIndicatorWidget>(GetWorld(), HitIndicatorWidgetClass);
         HitIndicatorWidget->AddToViewport();
     }
+}
+
+void ASWeapon::WeaponActivated()
+{
+    UGameplayStatics::PlaySoundAtLocation(GetWorld(), WeaponActivatedSound, GetActorLocation());
+
+    OnWeaponActivated();
+}
+
+void ASWeapon::WeaponDeactivated()
+{
+    OnWeaponDeactivated();
 }
 
 void ASWeapon::StartFire()
@@ -78,26 +88,25 @@ void ASWeapon::Fire()
     }
 }
 
-void ASWeapon::ConsumeAmmo_Implementation(int32 AmmoToConsume)
+void ASWeapon::ConsumeAmmo_Implementation(float AmmoToConsume)
 {
     if (HasAuthority())
     {
         AmmoInClip -= AmmoToConsume;
     }
 }
-
-bool ASWeapon::ConsumeAmmo_Validate(int32 AmmoToConsume) { return true; }
+bool ASWeapon::ConsumeAmmo_Validate(float AmmoToConsume) { return true; }
 
 void ASWeapon::ServerFire_Implementation()
 {
     Fire();
 }
-
 bool ASWeapon::ServerFire_Validate() { return true; }
 
 
 bool ASWeapon::CanFire()
 {
+    // Reload the weapon if this check fails
     if (HasAmmoRequiredToFire(true))
     {
         return true;
@@ -135,25 +144,6 @@ void ASWeapon::Reload()
     ServerReload();
 }
 
-void ASWeapon::ServerCancelReload_Implementation()
-{
-    CancelReload();
-}
-
-bool ASWeapon::ServerCancelReload_Validate() { return true; }
-
-
-void ASWeapon::CancelReload()
-{
-    bIsReloading = false;
-    GetWorldTimerManager().ClearTimer(TimerHandle_ReloadTimer);
-
-    if (Role < ROLE_Authority)
-    {
-        ServerCancelReload();
-    }
-}
-
 void ASWeapon::ServerReload_Implementation()
 {
     bIsReloading = true;
@@ -161,15 +151,28 @@ void ASWeapon::ServerReload_Implementation()
     OnReload.ExecuteIfBound();
 
     GetWorldTimerManager().SetTimer(TimerHandle_ReloadTimer, [&]() {
-        AmmoInClip = ClipSize;
+        ConsumeAmmo(-(ClipSize - AmmoInClip));
         bIsReloading = false;
     }, TimeToReload, false);
 }
+bool ASWeapon::ServerReload_Validate() { return true; }
 
-bool ASWeapon::ServerReload_Validate()
+void ASWeapon::CancelReload()
 {
-    return true;
+    bIsReloading = false;
+    GetWorldTimerManager().ClearTimer(TimerHandle_ReloadTimer);
+
+    if (!HasAuthority())
+    {
+        ServerCancelReload();
+    }
 }
+
+void ASWeapon::ServerCancelReload_Implementation()
+{
+    CancelReload();
+}
+bool ASWeapon::ServerCancelReload_Validate() { return true; }
 
 /**
  * @param HitActor If this actor is on the other team the weapon hit will be broadcast
@@ -200,3 +203,4 @@ void ASWeapon::OnHit(AActor* HitActor, bool bSkipCheck)
         }
     }
 }
+

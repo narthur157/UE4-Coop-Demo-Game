@@ -21,10 +21,6 @@ ASHitscanWeapon::ASHitscanWeapon()
     PrimaryActorTick.bCanEverTick = true;
 }
 
-void ASHitscanWeapon::BeginPlay()
-{
-    Super::BeginPlay();
-}
 
 void ASHitscanWeapon::Tick(float DeltaTime)
 {
@@ -194,8 +190,6 @@ void ASHitscanWeapon::DrawTracerEffect(const FVector &TraceEndPoint)
     FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
     if (MuzzleEffect)
     {
-		// TODO: This should work
-		// UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
 		FVector ShotDirection = TraceEndPoint - MuzzleLocation;
 		ShotDirection.Normalize();
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleEffect, MuzzleLocation, ShotDirection.Rotation());
@@ -270,5 +264,5 @@ void ASHitscanWeapon::RecoilExpired()
     CurrentRecoilYawConsqecModifier = 0.0f;
     DesiredPitchOffset = 0.0f;
     DesiredYawOffset = 0.0f;
-
 }
+

@@ -48,7 +48,6 @@ class COOPGAME_API ASHitscanWeapon : public ASWeapon
 public:
 
     ASHitscanWeapon();
-    virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
 
 protected:
