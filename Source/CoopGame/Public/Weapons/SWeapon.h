@@ -105,7 +105,7 @@ public:
 protected:
 
     ///////////////////////////////////
-    /** Protected Weapon Actions */
+    /** Weapon Actions */
 
     /** Handles replication of firing, calls OnFire. Rather than overriding this, one should override OnFire */
     virtual void Fire();

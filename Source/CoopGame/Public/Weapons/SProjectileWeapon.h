@@ -55,6 +55,6 @@ protected:
     FProjectileWeaponData ProjectileWeaponConfigData;
 
     UFUNCTION(BlueprintCallable, Category = "ProjectileWeapon")
-    void SpawnPredictedProjectile(TSubclassOf<ASProjectile> Projectile, bool bDoDamage);
+    void SpawnProjectile(TSubclassOf<ASProjectile> Projectile, bool bAttemptPrediction, TArray<AActor*> IgnoredActors);
 
 };
