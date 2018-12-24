@@ -41,11 +41,13 @@ void ASProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
     DOREPLIFETIME(ASProjectile, bIsServerProjectile);
 }
 
-void ASProjectile::Initialize(const FProjectileWeaponData &Data, bool bIsServer)
+void ASProjectile::Initialize(const FProjectileWeaponData &Data, bool bIsServer, TArray<AActor*> ActorsToIgnore)
 {
     WeaponData = Data;
     bIsServerProjectile = bIsServer;
     bWasInitialized = true;
+    MeshComp->MoveIgnoreActors.Append(ActorsToIgnore);
+
 }
 
 void ASProjectile::OnRep_bIsServerProjectile()

@@ -94,5 +94,5 @@ public:
 	UFUNCTION()
     virtual void Launch();
 	
-    virtual void Initialize(const FProjectileWeaponData& Data, bool bIsServer);
+    virtual void Initialize(const FProjectileWeaponData& Data, bool bIsServer, TArray<AActor*> ActorsToIgnore);
 };
