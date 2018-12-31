@@ -28,8 +28,6 @@ void ASHordeGameMode::StartPlay()
     GameStateCache->HordeTeam = GameStateCache->GetTeamManager()->GetTeam(HordeTeamNumber);
     
 	GameStateCache->OnRep_HordeTeam();
-    
-    // PrepareForNextWave();
 }
 
 void ASHordeGameMode::StartWave()

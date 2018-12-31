@@ -1,11 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "SGameMode.h"
 #include "SHordeGameMode.generated.h"
-
 
 enum class EWaveState : uint8;
 class ASHordeGameState;

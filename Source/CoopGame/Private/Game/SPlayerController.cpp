@@ -14,7 +14,6 @@ ASPlayerController::ASPlayerController()
 void ASPlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-
 }
 
 void ASPlayerController::BeginPlay()
@@ -90,12 +89,22 @@ void ASPlayerController::ToggleMenu()
     }
 }
 
-void ASPlayerController::OnReadyForWaves_Implementation()
+void ASPlayerController::OnReadyForWaves()
 {
 	OnPlayerReady.Broadcast(this);
+
+	if (!HasAuthority())
+	{
+		ServerOnReadyForWaves();
+	}
 }
 
-bool ASPlayerController::OnReadyForWaves_Validate()
+void ASPlayerController::ServerOnReadyForWaves_Implementation()
+{
+	OnReadyForWaves();
+}
+
+bool ASPlayerController::ServerOnReadyForWaves_Validate()
 {
 	return true;
 }
