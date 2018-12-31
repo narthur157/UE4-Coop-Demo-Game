@@ -7,8 +7,10 @@
 #include "DrawDebugHelpers.h"
 
 
-void ASProjectileWeapon::SpawnPredictedProjectile(TSubclassOf<ASProjectile> Projectile,  bool bDoDamage)
+void ASProjectileWeapon::SpawnProjectile(TSubclassOf<ASProjectile> Projectile, bool bAttemptPrediction, TArray<AActor*> IgnoredActors)
 {
+    if (!bAttemptPrediction && !HasAuthority()) { return; }
+
     if (Projectile && GetOwner())
     {
         FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
@@ -28,7 +30,10 @@ void ASProjectileWeapon::SpawnPredictedProjectile(TSubclassOf<ASProjectile> Proj
         SpawnParams.Owner = this;
         ASProjectile* NewProjectile = GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, OutViewPointLocation, ProjectileSpawnRotation, SpawnParams);
 
-        NewProjectile->Initialize(ProjectileWeaponConfigData, (HasAuthority() && GetInstigator()->IsPlayerControlled()));
+        // This is a hack to hide server-spawned projectiles in a predicted environment
+        // Without this, the client who instigated the projectile will see two projectiles rather than one.
+        bool bHideFromClient = bAttemptPrediction && HasAuthority() && GetInstigator()->IsPlayerControlled();
+        NewProjectile->Initialize(ProjectileWeaponConfigData, bHideFromClient, IgnoredActors);
         NewProjectile->Launch();
     }
 }
