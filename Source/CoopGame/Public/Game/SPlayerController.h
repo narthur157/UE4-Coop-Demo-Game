@@ -61,8 +61,11 @@ public:
     UFUNCTION(BlueprintImplementableEvent, Category = "GameOver")
     void OnRecieveGameOver(ASTeam* WinningTeam);
 
-	UFUNCTION(Server, Reliable, WithValidation)
+	UFUNCTION()
 	void OnReadyForWaves();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerOnReadyForWaves();
 
     void SetPawn(APawn* InPawn) override;
 
