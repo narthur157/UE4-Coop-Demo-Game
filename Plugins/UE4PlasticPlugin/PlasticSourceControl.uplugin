@@ -1,0 +1,29 @@
+{
+	"FileVersion": 3,
+	"Version": 33,
+	"VersionName": "1.2.2",
+	"FriendlyName": "Plastic SCM",
+	"Description": "Plastic source control management",
+	"Category": "Source Control",
+	"CreatedBy": "SRombauts for Codice Software.",
+	"CreatedByURL": "http://srombauts.github.com",
+	"DocsURL": "https://www.plasticscm.com/documentation.html",
+	"MarketplaceURL": "",
+	"SupportURL": "https://www.plasticscm.com/support.html",
+	"EnabledByDefault": true,
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "PlasticSourceControl",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "XmlParser2",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
+	]
+}
