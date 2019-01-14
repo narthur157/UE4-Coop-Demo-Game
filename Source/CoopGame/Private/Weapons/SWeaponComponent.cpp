@@ -70,9 +70,14 @@ void USWeaponComponent::EquipWeapon(ASWeapon* Weapon)
 	if (CurrentWeapon)
 	{
 		CurrentWeapon->OnReload.Unbind();
+		CurrentWeapon->OnWeaponFire.Unbind();
 		CurrentWeapon->SetActorHiddenInGame(true);
 	}
 
+	Weapon->OnWeaponFire.BindLambda([&]() {
+		MulticastFireAnim();
+		UE_LOG(LogTemp, Error, TEXT("bound fire"));
+	});
 
 	// Proxy our current weapon's reload delegate
 	Weapon->OnReload.BindLambda([&]() {
@@ -196,6 +201,23 @@ void USWeaponComponent::OnRep_WeaponInventory()
 	}
 }
 
+
+bool USWeaponComponent::IsLocallyControlled()
+{
+	ACharacter* MyCharacter = Cast<ACharacter>(GetOwner());
+	return MyCharacter ? MyCharacter->IsLocallyControlled() : false;
+}
+
+void USWeaponComponent::MulticastFireAnim_Implementation()
+{
+
+	UE_LOG(LogTemp, Error, TEXT("onweaponfire"));
+	OnWeaponFire.Broadcast();
+}
+
+
+bool USWeaponComponent::MulticastFireAnim_Validate() { return true; }
+
 void USWeaponComponent::MulticastReloadAnim_Implementation()
 {
 	OnReload.Broadcast();
@@ -208,13 +230,10 @@ bool USWeaponComponent::MulticastReloadAnim_Validate()
 
 void USWeaponComponent::MulticastChangeWeaponAnim_Implementation()
 {
-	ACharacter* MyCharacter = Cast<ACharacter>(GetOwner());
-	if (MyCharacter->IsLocallyControlled())
+	if (!IsLocallyControlled())
 	{
-		return;
+		OnWeaponChange.Broadcast();
 	}
-
-	OnWeaponChange.Broadcast();
 }
 
 bool USWeaponComponent::MulticastChangeWeaponAnim_Validate() { return true; }

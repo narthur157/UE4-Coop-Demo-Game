@@ -8,10 +8,15 @@
 #include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
+#include "Animation/AnimMontage.h"
+#include "Animation/AnimInstance.h"
+#include "ConstructorHelpers.h"
 
 ASWeapon::ASWeapon()
 {
     MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComponent"));
+
     RootComponent = MeshComp;
 
     SetReplicates(true);
@@ -84,6 +89,7 @@ void ASWeapon::Fire()
 
     if (HasAuthority())
     {
+		OnWeaponFire.ExecuteIfBound();
         ConsumeAmmo(AmmoConsumedPerFire);
     }
 }

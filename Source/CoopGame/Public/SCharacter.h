@@ -57,7 +57,11 @@ public:
     virtual FVector GetSize();
 
     /** Gets the current bounty worth of this unit */
-    virtual float GetOnKillScore() override { return KillBounty; }
+	virtual float GetOnKillScore() override { return KillBounty; }
+
+	/** Whether or not this character wants to zoom in */
+	UPROPERTY(Replicated, BlueprintReadWrite, Category = "PlayerWeapon")
+	bool bWantsToZoom = false;
 
 protected:
 
@@ -132,10 +136,6 @@ protected:
     /** Whether the character has died or not */
     UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
     bool bDied = false;
-
-    /** Whether or not this character wants to zoom in */
-    UPROPERTY(Replicated, BlueprintReadWrite, Category = "PlayerWeapon")
-    bool bWantsToZoom = false;
 
 	// Override to set player glows, won't work if other team also has player controlled SCharacters
 	virtual void OnRep_PlayerState() override;

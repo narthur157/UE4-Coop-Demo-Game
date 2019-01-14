@@ -11,7 +11,9 @@ Weapon rework goals:
 */
 
 DECLARE_DELEGATE(FOnWeaponReload);
+DECLARE_DELEGATE(FOnWeaponFire);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponHit, AActor*, HitActor);
+
 
 class UDamageType;
 class UParticleSystem;
@@ -39,9 +41,16 @@ public:
 
     virtual void BeginPlay() override;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "WeaponEffectData")
+	UAnimMontage* HipFireAnimation;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "WeaponEffectData")
+	UAnimMontage* ADSFireAnimation;
+
     ///////////////////////////////////
     /** Event Delegates */
 	FOnWeaponReload OnReload;
+	FOnWeaponFire OnWeaponFire;
 
     UPROPERTY(BlueprintAssignable, Category = "Weapon")
     FOnWeaponHit OnWeaponHit;
@@ -106,6 +115,12 @@ protected:
 
     ///////////////////////////////////
     /** Weapon Actions */
+
+	/*UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UAnimMontage* HipFireAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UAnimMontage* ADSFireAnimation;*/
 
     /** Handles replication of firing, calls OnFire. Rather than overriding this, one should override OnFire */
     virtual void Fire();
@@ -180,7 +195,7 @@ protected:
     UParticleSystem* MuzzleEffect = nullptr;
 
     /** The sound a weapon makes when fired */
-    UPROPERTY(EditDefaultsOnly, Category = "WeaponEffectData")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponEffectData")
     USoundCue* FireSound = nullptr;
 
     /** The image used to represent this weapon */
