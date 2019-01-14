@@ -22,6 +22,7 @@ class UTexture2D;
 class UImage;
 class USHitIndicatorWidget;
 class UAnimMontage;
+class UBehaviorTree;
 
 UENUM(BlueprintType)
 enum class EAmmoType : uint8
@@ -130,6 +131,10 @@ protected:
     /** Blueprint hook for Fire */
     UFUNCTION(BlueprintImplementableEvent, Category = "Firing")
     void OnFire();
+	
+    /** Blueprint-based hook to allow AI to know how to use this weapon */
+    UFUNCTION(BlueprintNativeEvent, Category = "Firing")
+    void AIFire();
 
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerReload();
@@ -148,6 +153,11 @@ protected:
     /** Blueprint hook for WeaponDeactivated */
     UFUNCTION(BlueprintImplementableEvent, Category = "Weapon")
     void OnWeaponDeactivated();
+	
+    ///////////////////////////////////
+    /** General Weapon Data */
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringData")
+    UBehaviorTree* AIFiringBehavior = nullptr;
 
     ///////////////////////////////////
     /** General Weapon Data */

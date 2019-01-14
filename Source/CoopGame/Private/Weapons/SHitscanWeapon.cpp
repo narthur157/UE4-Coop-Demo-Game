@@ -102,15 +102,15 @@ void ASHitscanWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 void ASHitscanWeapon::PerformHitScan(bool bDoDamage, FHitResult &OutHitResult)
 {
-    AActor* MyOwner = GetOwner();
-    if (MyOwner)
+    AActor* Owner = GetOwner();
+    if (Owner)
     {
         FVector EyeLocation;
         FRotator EyeRotation;
-        MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
+        Owner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
 
         FCollisionQueryParams QueryParams;
-        QueryParams.AddIgnoredActor(MyOwner);
+        QueryParams.AddIgnoredActor(Owner);
         QueryParams.AddIgnoredActor(this);
         QueryParams.bTraceComplex = true;
         QueryParams.bReturnPhysicalMaterial = true;
@@ -139,7 +139,6 @@ void ASHitscanWeapon::PerformHitScan(bool bDoDamage, FHitResult &OutHitResult)
         // Need to call this in order to play the effects ourselves
         OnRep_HitScanTrace();
 
-        LastFireTime = GetWorld()->TimeSeconds;
         OutHitResult = OutHit;
     }
 

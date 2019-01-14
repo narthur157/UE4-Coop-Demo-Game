@@ -8,6 +8,9 @@
 #include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "Runtime/AIModule/Classes/AIController.h"
+#include "Runtime/AIModule/Classes/BehaviorTree/BehaviorTreeComponent.h"
+#include "Runtime/GameplayTags/Classes/GameplayTagContainer.h"
 #include "Kismet/GameplayStatics.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimInstance.h"
@@ -49,6 +52,21 @@ void ASWeapon::BeginPlay()
 void ASWeapon::WeaponActivated()
 {
     UGameplayStatics::PlaySoundAtLocation(GetWorld(), WeaponActivatedSound, GetActorLocation());
+	
+	// Set the firing behavior in the AI Controller. This tree should be ran whenever one wishes for the AI to fire.
+    // Allows for complex firing behavior
+    // In the future, I'd really like to have firing behavior encapsulated in a task like setting which is different for each weapon
+    // to remove dependency on the behavior tree
+    // However as it is right now, BT and non-BT custom-made tasks don't play well together
+    AAIController* AIController = Cast<AAIController>(GetInstigatorController());
+    if (AIController)
+    {
+        UBehaviorTreeComponent* AITree = Cast<UBehaviorTreeComponent>(AIController->GetBrainComponent());
+        if (AITree)
+        {
+            AITree->SetDynamicSubtree(FGameplayTag::RequestGameplayTag("SWeaponFiringLogic"), AIFiringBehavior);
+        }
+    }
 
     OnWeaponActivated();
 }
@@ -65,6 +83,7 @@ void ASWeapon::StartFire()
     // If this weapon has fired prior to us attempting to start fire
     float FirstDelay = FMath::Max(LastFireTime + TimeBetweenShots - GetWorld()->TimeSeconds, 0.0f);
 
+	// Timer used with lambda to avoid creation of a function which is seemingly in the same scope as StartFire()
 	GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShots, [&]()
 	{
         if (!CanFire())
@@ -85,13 +104,18 @@ void ASWeapon::Fire()
         ServerFire();
     }
 
-    OnFire();
+    OnFire();	
 
     if (HasAuthority())
     {
 		OnWeaponFire.ExecuteIfBound();
         ConsumeAmmo(AmmoConsumedPerFire);
     }
+}
+
+void ASWeapon::AIFire_Implementation()
+{
+    Fire();
 }
 
 void ASWeapon::ConsumeAmmo_Implementation(float AmmoToConsume)
