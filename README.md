@@ -15,4 +15,8 @@ While we put some thought towards aesthetics, our biggest concern was how the ga
 
 It's open-source (MIT) so feel free to grab useful bits of code or whatever
 
+We used Git for a while, then Plastic SCM, then Perforce. So..now we have a bit of experience with everything I guess.
+
+Can't guarantee the game will build right away if you decide to download it, but I encourage you to try. There's a built version in the releases tab, but it requires you to already have UE4 installed on your computer for it to work (4.20).
+
 ![game-image](https://media.discordapp.net/attachments/184871268607197185/566034573373341706/unknown.png)
