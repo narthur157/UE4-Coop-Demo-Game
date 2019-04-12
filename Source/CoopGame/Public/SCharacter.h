@@ -12,6 +12,7 @@ class USWeaponComponent;
 class UHealthComponent;
 class UTeamComponent;
 class UAnimMontage;
+class USoundBase;
 
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter, public IDamageDealer, public ISPawn
@@ -26,6 +27,9 @@ public:
 
     // Called to bind functionality to input
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void AddControllerPitchInput(float Val);
+	virtual void AddControllerYawInput(float Val);
 
     virtual FVector GetPawnViewLocation() const override;
 
@@ -57,9 +61,14 @@ public:
     virtual FVector GetSize();
 
     /** Gets the current bounty worth of this unit */
-    virtual float GetOnKillScore() override { return KillBounty; }
+	virtual float GetOnKillScore() override { return KillBounty; }
+
+	/** Whether or not this character wants to zoom in */
+	UPROPERTY(Replicated, BlueprintReadWrite, Category = "PlayerWeapon")
+	bool bWantsToZoom = false;
 
 protected:
+	float MouseSensitivity = 1.0f;
 
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
@@ -78,6 +87,9 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Team")
     UTeamComponent* TeamComp = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player")
+	USoundBase* PlayerDeathSound = nullptr;
 
     //////////////////////////////
     /** Gameplay Variables */
@@ -114,7 +126,7 @@ protected:
     float KillBounty = 20.0f;
 
     /** Default color of this character */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player", meta = (ExposeOnSpawn = true))
     FLinearColor BodyColor = FLinearColor(1.0f, 1.0f, 1.0f, 0);
 
     // IDamageDealer variables 
@@ -130,12 +142,11 @@ protected:
     bool bWantsToSprint = false;
 
     /** Whether the character has died or not */
-    UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
+    UPROPERTY(ReplicatedUsing=OnRep_bDied, BlueprintReadOnly, Category = "Player")
     bool bDied = false;
 
-    /** Whether or not this character wants to zoom in */
-    UPROPERTY(Replicated, BlueprintReadWrite, Category = "PlayerWeapon")
-    bool bWantsToZoom = false;
+	UFUNCTION()
+	void OnRep_bDied();
 
 	// Override to set player glows, won't work if other team also has player controlled SCharacters
 	virtual void OnRep_PlayerState() override;

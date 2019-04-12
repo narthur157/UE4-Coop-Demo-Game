@@ -31,7 +31,7 @@ void ASPowerupActor::MulticastDespawnPowerupEffect_Implementation()
 
 void ASPowerupActor::MulticastSpawnPowerupEffect_Implementation(AActor* MyActor)
 {
-	ActivePulseComp = Cast<USPulseGlowComponent>(MyActor->GetComponentByClass(USPulseGlowComponent::StaticClass()));
+	ActivePulseComp = MyActor->FindComponentByClass<USPulseGlowComponent>();
 	
 	if (ActivePulseComp)
 	{
@@ -73,7 +73,7 @@ void ASPowerupActor::OnRep_PowerupActive()
 	
 	if (PowerupSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PowerupSound, GetActorLocation());
+		UGameplayStatics::SpawnSound2D(GetWorld(), PowerupSound);
 	}
 
     OnPowerupStateChanged(bIsPowerupActive);

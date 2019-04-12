@@ -16,7 +16,8 @@ public class CoopGame : ModuleRules
             "AIModule",
             "NavigationSystem",
             "OnlineSubsystem",
-            "OnlineSubsystemUtils"
+            "OnlineSubsystemUtils",
+            "GameplayTags"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

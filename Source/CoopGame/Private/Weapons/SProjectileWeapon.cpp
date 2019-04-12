@@ -30,6 +30,8 @@ void ASProjectileWeapon::SpawnProjectile(TSubclassOf<ASProjectile> Projectile, b
         SpawnParams.Owner = this;
         ASProjectile* NewProjectile = GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, OutViewPointLocation, ProjectileSpawnRotation, SpawnParams);
 
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), FireSound, GetActorLocation());
+
         // This is a hack to hide server-spawned projectiles in a predicted environment
         // Without this, the client who instigated the projectile will see two projectiles rather than one.
         bool bHideFromClient = bAttemptPrediction && HasAuthority() && GetInstigator()->IsPlayerControlled();

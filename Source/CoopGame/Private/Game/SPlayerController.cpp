@@ -1,29 +1,36 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "SPlayerController.h"
 #include "Engine.h"
 #include "SGameState.h"
 #include "Blueprint/UserWidget.h"
 #include "SPlayerState.h"
+#include "Config.h"
 
 ASPlayerController::ASPlayerController()
     : APlayerController()
 {
     SetActorTickEnabled(true);
     PrimaryActorTick.bCanEverTick = true;
+
 }
 
 void ASPlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-
 }
 
+void ASPlayerController::SetMouseSensitivity()
+{
+	UConfig* Conf = UConfig::GetConfigSingleton();
+	float Sens = Conf->GetMouseSensitivity();
+	InputYawScale = Sens;
+	InputPitchScale = -Sens; // This is not a mistake - it will invert pitch without -
+}
 
 void ASPlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
+	SetMouseSensitivity();
 
     if (GameEventWidgetClass && IsLocalController())
     {
@@ -51,6 +58,7 @@ void ASPlayerController::SetupInputComponent()
     Super::SetupInputComponent();
     ensure(InputComponent);
     InputComponent->BindAction("ToggleMenu", IE_Pressed, this, &ASPlayerController::ToggleMenu);
+	InputComponent->BindAction("Ready", IE_Pressed, this, &ASPlayerController::OnReadyForWaves);
 }
 
 void ASPlayerController::RecieveGameOver(ASTeam* WinningTeam)
@@ -81,6 +89,7 @@ void ASPlayerController::ToggleMenu()
         if (MenuWidget->IsVisible())
         {
             MenuWidget->SetVisibility(ESlateVisibility::Hidden);
+			MenuWidget = nullptr;
             GEngine->GameViewport->Viewport->LockMouseToViewport(true);
             bShowMouseCursor = false;
         }
@@ -92,6 +101,27 @@ void ASPlayerController::ToggleMenu()
         }
     }
 }
+
+void ASPlayerController::OnReadyForWaves()
+{
+	OnPlayerReady.Broadcast(this);
+
+	if (!HasAuthority())
+	{
+		ServerOnReadyForWaves();
+	}
+}
+
+void ASPlayerController::ServerOnReadyForWaves_Implementation()
+{
+	OnReadyForWaves();
+}
+
+bool ASPlayerController::ServerOnReadyForWaves_Validate()
+{
+	return true;
+}
+
 
 void ASPlayerController::SetPawn(APawn* InPawn)
 {

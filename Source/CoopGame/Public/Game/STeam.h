@@ -16,11 +16,13 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FActorJoined, const ASTeam*, Team, 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FActorLeft, const ASTeam*, Team, const AActor*, Actor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTeamScoreChanged, const ASTeam*, Team, float, NewScore);
 
+
+
 /**
  * 
  */
 UCLASS()
-class COOPGAME_API ASTeam : public AActor
+class COOPGAME_API ASTeam : public AInfo
 {
 
     GENERATED_BODY()
@@ -29,7 +31,6 @@ public:
     ASTeam();
 
     /** Team Events */
-
     /** Broadcasted when an actor joins the team */
     UPROPERTY(BlueprintAssignable, Category = "Team")
     FActorJoined OnActorJoined;
@@ -52,7 +53,6 @@ public:
 
 
     /** Getters/Setters */
-
     UFUNCTION(BlueprintCallable, Category = "TeamStats")
     void AddScore(float ScoreDelta);
 

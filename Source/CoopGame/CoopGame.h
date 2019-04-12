@@ -13,7 +13,7 @@
 #define COLLISION_PROJECTILE        ECC_GameTraceChannel1
 #define COLLISION_WEAPON            ECC_GameTraceChannel2
 #define COLLISION_SENSOR            ECC_GameTraceChannel3
-
+#define COLLISION_HITSCAN_OVERLAP	ECC_GameTraceChannel4
 
 
 #define NULLSTRING FString(TEXT("<<Unknown>>"));

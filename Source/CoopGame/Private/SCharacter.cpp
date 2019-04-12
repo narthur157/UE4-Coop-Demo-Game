@@ -14,6 +14,7 @@
 #include "UnrealNames.h"
 #include "GameFramework/PlayerState.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Kismet/GameplayStatics.h"
 
 ASCharacter::ASCharacter()
 {
@@ -67,6 +68,16 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
     PlayerInputComponent->BindAction("WeaponSwap", IE_Pressed, this, &ASCharacter::ChangeWeapon);
 }
 
+void ASCharacter::AddControllerPitchInput(float Val)
+{
+	Super::AddControllerPitchInput(Val * MouseSensitivity);
+}
+
+void ASCharacter::AddControllerYawInput(float Val)
+{
+	Super::AddControllerYawInput(Val * MouseSensitivity);
+}
+
 void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -91,6 +102,14 @@ void ASCharacter::BeginPlay()
 	}
 
     HealthComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
+}
+
+void ASCharacter::OnRep_bDied()
+{
+	if (bDied && PlayerDeathSound)
+	{
+		UGameplayStatics::SpawnSound2D(GetWorld(), PlayerDeathSound, 1.2f);
+	}
 }
 
 void ASCharacter::OnRep_PlayerState()
@@ -209,6 +228,11 @@ void ASCharacter::OnHealthChanged(USHealthComponent * ChangedHealthComp, float H
     if (Health <= 0.0f && !bDied)
     {
         bDied = true;
+		if (HasAuthority())
+		{
+			OnRep_bDied();
+		}
+
         StopFire();
 
         // Die

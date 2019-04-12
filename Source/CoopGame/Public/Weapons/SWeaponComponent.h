@@ -6,6 +6,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReload);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponChange);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponCompFire);
 
 class USWeaponWidget;
 class ASWeapon;
@@ -40,6 +41,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
 	FOnReload OnReload;
+
+	UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
+	FOnWeaponCompFire OnWeaponFire;
 
 	UPROPERTY(BlueprintAssignable, Category = "PlayerWeapon")
 	FOnWeaponChange  OnWeaponChange;
@@ -78,7 +82,7 @@ protected:
     UPROPERTY(VisibleDefaultsOnly, Category = "Player")
     FName WeaponSocket = "WeaponSocket";
 
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (ExposeOnSpawn = true))
     TArray<TSubclassOf<ASWeapon>> DefaultWeapons;
 
     UPROPERTY(ReplicatedUsing = OnRep_WeaponInventory)
@@ -119,11 +123,16 @@ protected:
     void OnRep_WeaponInventory();
 
 private:
+	bool IsLocallyControlled();
+
 	UFUNCTION(Server, Unreliable, WithValidation)
 	void ServerChangeWeaponAnim();
 
 	UFUNCTION(NetMulticast, Unreliable, WithValidation)
 	void MulticastChangeWeaponAnim();
+
+	UFUNCTION(NetMulticast, Unreliable, WithValidation)
+	void MulticastFireAnim();
 
 	UFUNCTION(NetMulticast, Unreliable, WithValidation)
 	void MulticastReloadAnim();

@@ -1,10 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "SAffix.h"
 #include "TimerManager.h"
-
-
-
 
 ASAffix::ASAffix()
 {
@@ -33,5 +28,4 @@ void ASAffix::Disable()
     OnDisabled();
 
     GetWorldTimerManager().ClearTimer(TimerHandle_AffixTick);
-
 }

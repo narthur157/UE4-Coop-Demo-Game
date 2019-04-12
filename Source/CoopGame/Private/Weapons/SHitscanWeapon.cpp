@@ -139,7 +139,6 @@ void ASHitscanWeapon::PerformHitScan(bool bDoDamage, FHitResult &OutHitResult)
         // Need to call this in order to play the effects ourselves
         OnRep_HitScanTrace();
 
-        LastFireTime = GetWorld()->TimeSeconds;
         OutHitResult = OutHit;
     }
 

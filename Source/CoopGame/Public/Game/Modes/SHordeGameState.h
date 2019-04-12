@@ -44,6 +44,21 @@ class COOPGAME_API ASHordeGameState : public ASGameState
 	
 public:
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
+	USoundBase* WaitingToReadyMusic = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
+	USoundBase* CombatMusic = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
+	USoundBase* WaveCountoffSound = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HordeMode")
+	USoundBase* WaveStartedSound = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "HordeMode")
+	USoundBase* WaveEndedSound = nullptr;
+
     UPROPERTY(BlueprintAssignable, Category = "Affix")
     FAffixEvent OnNewAffix;
 
@@ -96,7 +111,6 @@ public:
     void OnRep_HordeTeam();
 
 protected:
-
     // Don't really want to have to do this honestly, however there is a race condition involving spawnning a new actor and
     // immediately RPCing it. The clients will not have the actor 
     UPROPERTY(ReplicatedUsing = OnRep_NewAffix)

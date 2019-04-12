@@ -43,12 +43,11 @@ protected:
 	 * the camera, as this represents where the character is really aiming
 	 * This creates a jarring effect visually, so the easiest solution is a distracting
 	 * muzzle flash, in addition to spawning the projectile a bit ahead of the camera
-	 * TODO: Hide the projectile until it is past this distance instead of spawning it there
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeapon")
 	float ProjectileSpawnOffset = 250.0f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeapon")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "ProjectileWeapon")
 	TSubclassOf<ASProjectile> ProjectileClass;
 
 	UPROPERTY(EditAnywhere, Category = "ProjectileWeapon")

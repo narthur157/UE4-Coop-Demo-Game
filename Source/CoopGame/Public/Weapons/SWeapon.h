@@ -11,7 +11,9 @@ Weapon rework goals:
 */
 
 DECLARE_DELEGATE(FOnWeaponReload);
+DECLARE_DELEGATE(FOnWeaponFire);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponHit, AActor*, HitActor);
+
 
 class UDamageType;
 class UParticleSystem;
@@ -20,6 +22,7 @@ class UTexture2D;
 class UImage;
 class USHitIndicatorWidget;
 class UAnimMontage;
+class UBehaviorTree;
 
 UENUM(BlueprintType)
 enum class EAmmoType : uint8
@@ -42,6 +45,7 @@ public:
     ///////////////////////////////////
     /** Event Delegates */
 	FOnWeaponReload OnReload;
+	FOnWeaponFire OnWeaponFire;
 
     UPROPERTY(BlueprintAssignable, Category = "Weapon")
     FOnWeaponHit OnWeaponHit;
@@ -107,6 +111,12 @@ protected:
     ///////////////////////////////////
     /** Weapon Actions */
 
+	/*UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UAnimMontage* HipFireAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UAnimMontage* ADSFireAnimation;*/
+
     /** Handles replication of firing, calls OnFire. Rather than overriding this, one should override OnFire */
     virtual void Fire();
     UFUNCTION(Server, Reliable, WithValidation)
@@ -115,6 +125,10 @@ protected:
     /** Blueprint hook for Fire */
     UFUNCTION(BlueprintImplementableEvent, Category = "Firing")
     void OnFire();
+	
+    /** Blueprint-based hook to allow AI to know how to use this weapon */
+    UFUNCTION(BlueprintNativeEvent, Category = "Firing")
+    void AIFire();
 
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerReload();
@@ -133,6 +147,11 @@ protected:
     /** Blueprint hook for WeaponDeactivated */
     UFUNCTION(BlueprintImplementableEvent, Category = "Weapon")
     void OnWeaponDeactivated();
+	
+    ///////////////////////////////////
+    /** General Weapon Data */
+    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringData")
+    UBehaviorTree* AIFiringBehavior = nullptr;
 
     ///////////////////////////////////
     /** General Weapon Data */
@@ -152,7 +171,7 @@ protected:
     TSubclassOf<UDamageType> DamageType;
 
     /** The cooldown period between firing events */
-    UPROPERTY(EditDefaultsOnly, Category = "WeaponFiringData")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponFiringData")
     float TimeBetweenShots = 0.5f;
 
     /** Ammount of ammo that is consumed when fire is successfully called */
@@ -180,7 +199,7 @@ protected:
     UParticleSystem* MuzzleEffect = nullptr;
 
     /** The sound a weapon makes when fired */
-    UPROPERTY(EditDefaultsOnly, Category = "WeaponEffectData")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WeaponEffectData")
     USoundCue* FireSound = nullptr;
 
     /** The image used to represent this weapon */

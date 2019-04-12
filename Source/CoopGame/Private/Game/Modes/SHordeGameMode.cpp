@@ -2,6 +2,7 @@
 #include "CoopGame.h"
 #include "SPlayerState.h"
 #include "STeamManager.h"
+#include "SFunctionLibrary.h"
 #include "STeam.h"
 #include "TeamComponent.h"
 #include "SPawn.h"
@@ -28,8 +29,6 @@ void ASHordeGameMode::StartPlay()
     GameStateCache->HordeTeam = GameStateCache->GetTeamManager()->GetTeam(HordeTeamNumber);
     
 	GameStateCache->OnRep_HordeTeam();
-    
-    PrepareForNextWave();
 }
 
 void ASHordeGameMode::StartWave()
@@ -65,7 +64,11 @@ void ASHordeGameMode::PrepareForNextWave()
     ensure(GameStateCache);
 
     RestartDeadPlayers();
-    SpawnRandomAffix();
+
+	if (ShouldSpawnRandomAffix())
+	{
+		SpawnRandomAffix();
+	}
 
     if (CurrentWaveCount == NumberWaves && NumberWaves > 0)
     {
@@ -133,11 +136,28 @@ void ASHordeGameMode::SetWaveState(EWaveState State)
    
 }
 
+void ASHordeGameMode::SpawnPickup(FVector SpawnLoc)
+{
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	GetWorld()->SpawnActor<AActor>(PickupToSpawnOnDeath, SpawnLoc, FRotator::ZeroRotator, SpawnParams);
+}
+
 // Called when a player has died, used in order to avoid using tick to check player/wave state
 void ASHordeGameMode::OnActorKilled_Implementation(AActor* KilledActor, AActor* KillerActor, AActor* DamageCauser)
 {
     Super::OnActorKilled_Implementation(KilledActor, KillerActor, DamageCauser);
    
+	if (PickupToSpawnOnDeath)
+	{
+		FVector FloorLoc;
+
+		if (USFunctionLibrary::FindFloor(GetWorld(), KilledActor->GetActorLocation(), FloorLoc))
+		{
+			SpawnPickup(FloorLoc + FVector(0.0f, 0.0f, PickupSpawnHeight));
+		}
+	}
+	
     // Update the involved players scores
     if (KilledActor != KillerActor)
     {
@@ -205,6 +225,13 @@ void ASHordeGameMode::ApplyWaveAffixesToActor(AActor* Actor)
     {
         Affix->ApplyToActor(Actor);
     }
+}
+
+// Could be overridden in BP to base off of a data table, the time of day, mic input..
+bool ASHordeGameMode::ShouldSpawnRandomAffix()
+{
+	
+	return CurrentWaveCount % 3 == 1;
 }
 
 ASAffix* ASHordeGameMode::SpawnRandomAffix()

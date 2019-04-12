@@ -122,8 +122,10 @@ void ASProjectile::DirectHit()
 	{
 		float DirectDamage = ApplyDamageModifier(WeaponData.ProjectileDamageDirectHit);
 
+		AController* InstigatorController = Instigator ? Instigator->GetController() : nullptr;
+
 		UGameplayStatics::ApplyDamage(DirectHitActor, DirectDamage,
-			Instigator->GetController(), GetOwner(), WeaponData.ProjectileDamageType);
+			InstigatorController, GetOwner(), WeaponData.ProjectileDamageType);
 	}
 }
 
@@ -153,12 +155,13 @@ void ASProjectile::Explode()
     TArray<AActor*> IgnoredActors = { this, GetOwner(), Instigator };
     if (Role == ROLE_Authority)
     {
-
         float ActualDamageRadial = ApplyDamageModifier(WeaponData.ProjectileDamage);
 		
+		AController* InstigatorController = Instigator ? Instigator->GetController() : nullptr;
+
 		bool HitSomething = UGameplayStatics::ApplyRadialDamage(GetWorld(), ActualDamageRadial,
 			GetActorLocation(), WeaponData.ProjectileRadius, WeaponData.ProjectileDamageType,
-			IgnoredActors, GetOwner(), Instigator->GetController(), true);
+			IgnoredActors, GetOwner(), InstigatorController, true);
 
 		ASWeapon* MyOwner = Cast<ASWeapon>(GetOwner());
 

@@ -1,11 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "SGameMode.h"
 #include "SHordeGameMode.generated.h"
-
 
 enum class EWaveState : uint8;
 class ASHordeGameState;
@@ -25,6 +22,14 @@ public:
     virtual void StartPlay() override;
 
 protected:
+	void SpawnPickup(FVector SpawnLoc);
+
+	// Height from ground
+	UPROPERTY(EditDefaultsOnly, Category = "HordeMode")
+	float PickupSpawnHeight = 50.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "HordeMode")
+	TSubclassOf<AActor> PickupToSpawnOnDeath = nullptr;
 
     UPROPERTY(BlueprintReadOnly, Category = "HordeMode")
     ASHordeGameState* GameStateCache = nullptr;
@@ -76,10 +81,14 @@ protected:
     void EndWave();
 
     /** Waits for the time designated by @TimeBetweenWaves to start the next wave */
+	UFUNCTION(BlueprintCallable, Category = "GameMode")
     void PrepareForNextWave();
 
     /** Changes the WaveState, calls upon SHordeGameState which then shows the change to clients . */
     void SetWaveState(EWaveState State);
+
+	UFUNCTION(BlueprintCallable, Category = "GameMode")
+	virtual bool ShouldSpawnRandomAffix();
 
     UFUNCTION(BlueprintCallable, Category ="GameMode")
     ASAffix* SpawnRandomAffix();

@@ -80,6 +80,7 @@ protected:
 
 public:	
 
+	UFUNCTION(BlueprintCallable)
     void ActivatePowerup(AActor* InstigatorActor);
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
