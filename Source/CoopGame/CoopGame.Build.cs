@@ -6,6 +6,8 @@ public class CoopGame : ModuleRules
 {
 	public CoopGame(ReadOnlyTargetRules Target) : base(Target)
 	{
+        bEnableExceptions = true;
+
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core",
@@ -17,7 +19,9 @@ public class CoopGame : ModuleRules
             "NavigationSystem",
             "OnlineSubsystem",
             "OnlineSubsystemUtils",
-            "GameplayTags"
+            "GameplayTags",
+			"GameLiftServerSDK",
+            "GameLiftClientSDK"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

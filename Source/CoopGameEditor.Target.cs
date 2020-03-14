@@ -3,11 +3,12 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class CoopGameEditorTarget : TargetRules
+[SupportedPlatforms(UnrealPlatformClass.Server)]
+public class CoopGameServerTarget : TargetRules
 {
-	public CoopGameEditorTarget(TargetInfo Target) : base(Target)
+	public CoopGameServerTarget(TargetInfo Target) : base(Target)
 	{
-		Type = TargetType.Editor;
+		Type = TargetType.Server;
 
 		ExtraModuleNames.AddRange( new string[] { "CoopGame" } );
 	}

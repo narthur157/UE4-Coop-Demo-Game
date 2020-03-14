@@ -361,7 +361,7 @@ void UAdvancedSessionsLibrary::GetUniqueNetID(APlayerController *PlayerControlle
 		return;
 	}
 
-	if (APlayerState* PlayerState = (PlayerController != NULL) ? PlayerController->PlayerState : NULL)
+	if (APlayerState* PlayerState = (PlayerController != NULL) ? PlayerController->GetPlayerState<APlayerState>() : NULL)
 	{
 		UniqueNetId.SetUniqueNetId(PlayerState->UniqueId.GetUniqueNetId());
 		if (!UniqueNetId.IsValid())
@@ -406,7 +406,7 @@ void UAdvancedSessionsLibrary::SetPlayerName(APlayerController *PlayerController
 		return;
 	}
 
-	if (APlayerState* PlayerState = (PlayerController != NULL) ? PlayerController->PlayerState : NULL)
+	if (APlayerState* PlayerState = (PlayerController != NULL) ? PlayerController->GetPlayerState<APlayerState>() : NULL)
 	{
 		PlayerState->SetPlayerName(PlayerName);
 		return;
@@ -425,7 +425,7 @@ void UAdvancedSessionsLibrary::GetPlayerName(APlayerController *PlayerController
 		return;
 	}
 
-	if (APlayerState* PlayerState = (PlayerController != NULL) ? PlayerController->PlayerState : NULL)
+	if (APlayerState* PlayerState = (PlayerController != NULL) ? PlayerController->GetPlayerState<APlayerState>() : NULL)
 	{
 		PlayerName = PlayerState->GetPlayerName();
 		return;
