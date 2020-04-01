@@ -87,7 +87,7 @@ class USteamRequestGroupOfficersCallbackProxy : public UOnlineBlueprintCallProxy
 
 private:
 
-#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX || PLATFORM_HTML5
 	void OnRequestGroupOfficerDetails( ClanOfficerListResponse_t *pResult, bool bIOFailure);
 	CCallResult<USteamRequestGroupOfficersCallbackProxy, ClanOfficerListResponse_t> m_callResultGroupOfficerRequestDetails;
 
